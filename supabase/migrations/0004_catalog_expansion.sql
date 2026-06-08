@@ -8,6 +8,18 @@
 -- Mirrors packages/config (categories.ts / cities.ts).
 -- ════════════════════════════════════════════════════════════════════════
 
+-- ── Countries (idempotent) ───────────────────────────────────────────────
+-- Seeded here because this migration's city rows reference them via FK and
+-- migrations run BEFORE seed.sql. seed.sql re-inserts the same rows as a no-op.
+insert into public.countries (id, name_ar, name_en, iso_code, phone_code, currency_code, timezone, sort_order) values
+  ('11111111-1111-4111-8111-000000000001','السعودية','Saudi Arabia','SA','+966','SAR','Asia/Riyadh',1),
+  ('11111111-1111-4111-8111-000000000002','الإمارات العربية المتحدة','United Arab Emirates','AE','+971','AED','Asia/Dubai',2),
+  ('11111111-1111-4111-8111-000000000003','قطر','Qatar','QA','+974','QAR','Asia/Qatar',3),
+  ('11111111-1111-4111-8111-000000000004','الكويت','Kuwait','KW','+965','KWD','Asia/Kuwait',4),
+  ('11111111-1111-4111-8111-000000000005','البحرين','Bahrain','BH','+973','BHD','Asia/Bahrain',5),
+  ('11111111-1111-4111-8111-000000000006','عُمان','Oman','OM','+968','OMR','Asia/Muscat',6)
+on conflict (id) do nothing;
+
 -- ── categories.parent_id ─────────────────────────────────────────────────
 alter table public.categories
   add column if not exists parent_id uuid references public.categories(id) on delete set null;
