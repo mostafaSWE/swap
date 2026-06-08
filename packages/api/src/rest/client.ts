@@ -163,6 +163,11 @@ export class SwapApiClient {
   sendMessage = (conversationId: string, input: SendMessageInput) =>
     this.request<Message>("POST", `/conversations/${conversationId}/messages`, input);
 
+  /* ── Saved listings ── */
+  saveListing = (listingId: string) => this.request<void>("POST", `/listings/${listingId}/save`);
+  unsaveListing = (listingId: string) => this.request<void>("DELETE", `/listings/${listingId}/save`);
+  savedListings = () => this.request<ListingWithRelations[]>("GET", "/me/saved");
+
   /* ── Reports ── */
   createReport = (input: CreateReportInput) => this.request<void>("POST", "/reports", input);
 

@@ -23,6 +23,10 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+// The app is database-first and auth-aware: pages read per-request data (DB +
+// session cookies via RLS), so render them on demand rather than at build time.
+export const dynamic = "force-dynamic";
+
 export default async function LocaleLayout({
   children,
   params: { locale },

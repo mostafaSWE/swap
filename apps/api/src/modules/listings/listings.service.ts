@@ -220,6 +220,23 @@ export class ListingsService {
     return { path, token: data.token, signedUrl: data.signedUrl };
   }
 
+  /* ── Saved listings ── */
+  async save(listingId: string, userId: string): Promise<void> {
+    const { error } = await this.db
+      .from("saved_listings")
+      .upsert({ user_id: userId, listing_id: listingId }, { onConflict: "user_id,listing_id" });
+    if (error) throw error;
+  }
+
+  async unsave(listingId: string, userId: string): Promise<void> {
+    const { error } = await this.db
+      .from("saved_listings")
+      .delete()
+      .eq("user_id", userId)
+      .eq("listing_id", listingId);
+    if (error) throw error;
+  }
+
   /** Register an uploaded image against a listing (re-checks the limit). */
   async addImage(listingId: string, ownerId: string, imageUrl: string): Promise<void> {
     await this.assertOwner(listingId, ownerId);

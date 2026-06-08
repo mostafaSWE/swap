@@ -38,6 +38,13 @@ export class ProfileController {
     return this.profiles.updateMe(userId, input);
   }
 
+  @Get("me/saved")
+  @ApiBearerAuth("supabase-jwt")
+  @UseGuards(AuthGuard)
+  saved(@CurrentUserId() userId: string) {
+    return this.profiles.savedListings(userId);
+  }
+
   @Get("users/:username")
   publicProfile(@Param("username") username: string) {
     return this.profiles.publicProfile(username);

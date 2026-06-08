@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import type { Profile, PublicProfile } from "@swap/types";
+import type { ListingWithRelations, Profile, PublicProfile } from "@swap/types";
 import type { UpdateProfileInput } from "@swap/validation";
 import { SupabaseService } from "../../common/supabase/supabase.service";
-import { PUBLIC_PROFILE_COLUMNS } from "../../common/db.constants";
+import { LISTING_SELECT, PUBLIC_PROFILE_COLUMNS } from "../../common/db.constants";
 
 @Injectable()
 export class ProfileService {
@@ -44,6 +44,19 @@ export class ProfileService {
     if (error) throw error;
     if (!data) throw new NotFoundException("User not found");
     return data;
+  }
+
+  /** Listings the user has saved (newest first). */
+  async savedListings(userId: string): Promise<ListingWithRelations[]> {
+    const { data, error } = await this.supabase.admin
+      .from("saved_listings")
+      .select(`created_at, listing:listings(${LISTING_SELECT})`)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? [])
+      .map((row) => (row as unknown as { listing: ListingWithRelations | null }).listing)
+      .filter((l): l is ListingWithRelations => Boolean(l));
   }
 
   async follow(followerId: string, followingId: string): Promise<void> {

@@ -70,8 +70,31 @@ supabase db execute -f supabase/migrations/0003_storage.sql
 supabase db execute -f supabase/seed.sql
 ```
 
-The seed is **idempotent** (safe to re-run). It creates 5 demo users — all with
-password **`Swap1234!`** (e.g. `ahmed@swap.demo` is an admin + verified).
+The seed is **idempotent** (safe to re-run). It creates **12 demo auth users**
+(via `auth.users` + a `crypt()`-hashed password, so they are login-ready) plus
+matching profiles, and **44 listings** with images, follows, saved listings,
+8 conversations + messages, reports, and verification requests.
+
+**Demo accounts — development only, password `Swap1234!`:**
+
+| Email | Role |
+|---|---|
+| `ahmed@swap.demo` | admin + verified |
+| `sara@swap.demo`, `fatima@swap.demo`, `noura@swap.demo`, `mariam@swap.demo`, `layla@swap.demo` | verified users |
+| `khalid / omar / yousef / salem / huda / tariq @swap.demo` | regular users |
+
+> ⚠️ These credentials are for local development. **Never** seed or use them in
+> production.
+
+### Demo-data flag
+
+The app is **database-first**. `NEXT_PUBLIC_USE_DEMO_DATA` controls a dev-only,
+in-memory demo dataset for the read pages:
+- `false` (default): always use the database.
+- `true`: render a small built-in demo set (for working on the UI with no DB).
+
+It is never a silent fallback — if a DB query fails, pages show an empty state,
+not fake data.
 
 > Generating fresh types after schema changes:
 > `supabase gen types typescript --project-id <ref> > packages/api/src/database.types.ts`
@@ -113,14 +136,28 @@ Mobile credentials (optional) come from `EXPO_PUBLIC_SUPABASE_URL` /
 |---|---|
 | `pnpm dev` | Run all apps via Turborepo |
 | `pnpm web` | Web app only |
+| `pnpm api` | Backend API only |
 | `pnpm mobile` | Expo dev server |
 | `pnpm build` | Build all |
 | `pnpm typecheck` | Type-check every workspace |
 
 ## Troubleshooting
 
-- **Web shows demo data / "login" everywhere** → env vars not loaded. Ensure
-  `apps/web/.env.local` exists and restart `pnpm web`.
-- **Auth works but listings are empty** → run `seed.sql`.
+- **Listings/admin pages are empty** → run the migrations **and** `seed.sql`, and
+  confirm `apps/web/.env.local` (and root `.env` for the API) hold the Supabase
+  URL + keys. Server logs print `[data] … failed` / `[admin] … failed` with the
+  Postgres error when a query fails.
+- **`pnpm web` shows the demo dataset** → `NEXT_PUBLIC_USE_DEMO_DATA=true`. Set it
+  to `false` (or remove it) and restart.
+- **RLS errors / "new row violates row-level security"** → you're writing through
+  the wrong path. Mutations should go through the **API** (service-role +
+  app-level authz). Direct-Supabase writes from the browser only work for the
+  owner under the policies in `0002_rls.sql`. Re-run `0002_rls.sql` if policies
+  are missing.
+- **Storage upload denied** → the object path must start with the uploader's
+  user id (`{auth.uid}/…`); see `0003_storage.sql`. Re-run it if buckets/policies
+  are missing.
+- **Admin pages redirect home** → your profile's `is_admin` is false. Log in as
+  `ahmed@swap.demo`, or set `is_admin=true` on your profile row.
 - **Metro can't resolve `@swap/*`** → re-run `pnpm install` (symlinks) and clear
   cache: `pnpm --filter @swap/mobile start -- -c`.

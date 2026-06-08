@@ -34,6 +34,12 @@ Storage, Realtime). See [database-schema.md](./database-schema.md) for the secur
 model. Validation rules live once in `@swap/validation` (zod) and are shared by the
 API and the forms.
 
+The app is **database-first**: every page and action reads/writes real
+Supabase/Postgres data (no hidden mock data). A built-in demo dataset is used by
+the read pages **only** when `NEXT_PUBLIC_USE_DEMO_DATA=true` (local dev without a
+DB). `supabase/seed.sql` populates realistic MVP data (12 users incl. admin,
+44 listings, conversations, follows, saved listings, reports, verifications).
+
 ## MVP scope (Phase 1 — this foundation)
 
 - Monorepo (web + **backend API** + mobile skeleton + shared packages)

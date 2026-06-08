@@ -75,6 +75,20 @@ Then connect Supabase and seed (see **[docs/setup-guide.md](docs/setup-guide.md)
 # run supabase/migrations/0001..0004 then supabase/seed.sql
 ```
 
+### Database-first
+
+The app reads and writes **real data from Supabase/Postgres** — there is no
+hidden mock data. `supabase/seed.sql` populates **12 demo users** (1 admin, 6
+verified, across the GCC), **44 listings** (with images, varied status/verified/
+featured), follows, saved listings, 8 conversations + messages, reports, and
+verification requests. A small built-in demo dataset renders the read pages only
+when `NEXT_PUBLIC_USE_DEMO_DATA=true` (local dev without a DB) — never as a
+silent fallback.
+
+**Demo accounts** (development only — password `Swap1234!`):
+`ahmed@swap.demo` (admin + verified), `sara@swap.demo` (verified), `khalid@swap.demo`,
+… `noura/yousef/mariam/salem/huda/tariq/layla@swap.demo`. **Never use these in production.**
+
 ## Environment variables
 
 See [`.env.example`](.env.example). Put real values in `apps/web/.env.local`:

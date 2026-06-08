@@ -7,12 +7,15 @@ import { AppShell } from "@/components/AppShell";
 import { ListingGallery } from "@/components/ListingGallery";
 import { SwapPair } from "@/components/SwapPair";
 import { ListingActions } from "@/components/ListingActions";
+import { SaveButton } from "@/components/SaveButton";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { VerifiedBadge, ItemVerifiedBadge } from "@/components/badges";
 import { SafetyDisclaimer } from "@/components/SafetyDisclaimer";
 import { ReportDialog } from "@/components/ReportDialog";
 import { Link } from "@/i18n/navigation";
 import { fetchListing } from "@/lib/data";
+import { getCurrentUser } from "@/lib/auth";
+import { fetchIsSaved } from "@/lib/saved";
 
 export default async function ListingDetailsPage({
   params: { locale, id },
@@ -26,6 +29,9 @@ export default async function ListingDetailsPage({
   const activeLocale = (await getLocale()) as Locale;
   const t = await getTranslations("listing");
   const tCond = await getTranslations("condition");
+
+  const user = await getCurrentUser();
+  const initialSaved = user ? await fetchIsSaved(user.id, listing.id) : false;
 
   return (
     <AppShell hideNav>
@@ -84,6 +90,8 @@ export default async function ListingDetailsPage({
         <SafetyDisclaimer />
 
         <ListingActions ownerId={listing.owner_id} listingId={listing.id} />
+
+        <SaveButton listingId={listing.id} initialSaved={initialSaved} />
 
         <div className="flex justify-center pt-2">
           <ReportDialog targetType="listing" targetId={listing.id} />

@@ -1,11 +1,11 @@
 /**
- * Admin-side data helpers. Read queries run as the (admin) user, so admin RLS
- * policies apply. When Supabase is unconfigured, returns demo-friendly values
- * so the dashboard skeleton renders in local dev.
+ * Admin-side data helpers. **Database-first** — queries run as the (admin) user
+ * server-side, so admin RLS policies apply. Demo numbers are returned only when
+ * NEXT_PUBLIC_USE_DEMO_DATA=true.
  */
-import type { Listing, Profile, Report, VerificationRequest } from "@swap/types";
+import type { Category, City, Country, Listing, Profile, Report, VerificationRequest } from "@swap/types";
 import { createClient } from "./supabase/server";
-import { isSupabaseConfigured } from "./env";
+import { isDemoMode } from "./env";
 
 export interface AdminMetrics {
   totalUsers: number;
@@ -26,81 +26,63 @@ async function count(table: string, build?: (q: any) => any): Promise<number> {
 }
 
 export async function fetchAdminMetrics(): Promise<AdminMetrics> {
-  if (!isSupabaseConfigured()) {
+  if (isDemoMode()) {
     return {
-      totalUsers: 5,
-      verifiedUsers: 3,
-      activeListings: 12,
-      hiddenListings: 0,
-      pendingReports: 2,
-      totalConversations: 3,
-      totalMessages: 6,
+      totalUsers: 12,
+      verifiedUsers: 5,
+      activeListings: 40,
+      hiddenListings: 3,
+      pendingReports: 3,
+      totalConversations: 8,
+      totalMessages: 24,
     };
   }
-  const [
-    totalUsers,
-    verifiedUsers,
-    activeListings,
-    hiddenListings,
-    pendingReports,
-    totalConversations,
-    totalMessages,
-  ] = await Promise.all([
-    count("profiles"),
-    count("profiles", (q) => q.eq("is_verified", true)),
-    count("listings", (q) => q.eq("status", "active")),
-    count("listings", (q) => q.eq("status", "hidden")),
-    count("reports", (q) => q.eq("status", "pending")),
-    count("conversations"),
-    count("messages"),
-  ]);
-  return {
-    totalUsers,
-    verifiedUsers,
-    activeListings,
-    hiddenListings,
-    pendingReports,
-    totalConversations,
-    totalMessages,
-  };
+  try {
+    const [
+      totalUsers,
+      verifiedUsers,
+      activeListings,
+      hiddenListings,
+      pendingReports,
+      totalConversations,
+      totalMessages,
+    ] = await Promise.all([
+      count("profiles"),
+      count("profiles", (q) => q.eq("is_verified", true)),
+      count("listings", (q) => q.eq("status", "active")),
+      count("listings", (q) => q.eq("status", "hidden")),
+      count("reports", (q) => q.eq("status", "pending")),
+      count("conversations"),
+      count("messages"),
+    ]);
+    return { totalUsers, verifiedUsers, activeListings, hiddenListings, pendingReports, totalConversations, totalMessages };
+  } catch (e) {
+    console.error("[admin] fetchAdminMetrics failed:", e);
+    return { totalUsers: 0, verifiedUsers: 0, activeListings: 0, hiddenListings: 0, pendingReports: 0, totalConversations: 0, totalMessages: 0 };
+  }
 }
 
-export async function fetchAdminUsers(): Promise<Profile[]> {
-  if (!isSupabaseConfigured()) return [];
-  const { data } = await createClient()
-    .from("profiles")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(100);
-  return data ?? [];
+async function fetchTable<T>(table: string, order = "created_at"): Promise<T[]> {
+  try {
+    const { data, error } = await createClient()
+      .from(table)
+      .select("*")
+      .order(order, { ascending: table === "categories" || table === "countries" || table === "cities" })
+      .limit(300);
+    if (error) throw error;
+    return (data ?? []) as T[];
+  } catch (e) {
+    console.error(`[admin] fetch ${table} failed:`, e);
+    return [];
+  }
 }
 
-export async function fetchAdminListings(): Promise<Listing[]> {
-  if (!isSupabaseConfigured()) return [];
-  const { data } = await createClient()
-    .from("listings")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(100);
-  return data ?? [];
-}
+export const fetchAdminUsers = () => fetchTable<Profile>("profiles");
+export const fetchAdminListings = () => fetchTable<Listing>("listings");
+export const fetchAdminReports = () => fetchTable<Report>("reports");
+export const fetchAdminVerifications = () => fetchTable<VerificationRequest>("verification_requests");
 
-export async function fetchAdminReports(): Promise<Report[]> {
-  if (!isSupabaseConfigured()) return [];
-  const { data } = await createClient()
-    .from("reports")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(100);
-  return data ?? [];
-}
-
-export async function fetchAdminVerifications(): Promise<VerificationRequest[]> {
-  if (!isSupabaseConfigured()) return [];
-  const { data } = await createClient()
-    .from("verification_requests")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(100);
-  return data ?? [];
-}
+/* Catalog tables — read from the DB so the admin sees actual DB state. */
+export const fetchAdminCategories = () => fetchTable<Category>("categories", "sort_order");
+export const fetchAdminCountries = () => fetchTable<Country>("countries", "sort_order");
+export const fetchAdminCities = () => fetchTable<City>("cities", "sort_order");

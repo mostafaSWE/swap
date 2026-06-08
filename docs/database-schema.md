@@ -98,6 +98,15 @@ API simply has a privileged, audited path for sensitive writes. The web client
 prefers the API when `NEXT_PUBLIC_API_URL` is set and falls back to Supabase
 otherwise.
 
+**Saved listings** follow the same pattern: `POST/DELETE /listings/:id/save` and
+`GET /me/saved` (backend), with `saveListing`/`unsaveListing`/`getSavedListings`
+in `@swap/api` for the direct-Supabase path. Saved-page reads run server-side
+(RLS: a user reads only their own `saved_listings`).
+
+The app is **database-first** — no page renders mock data when the DB is
+connected. The only demo path is the explicit `NEXT_PUBLIC_USE_DEMO_DATA=true`
+dev flag.
+
 ## Catalog (categories, countries, cities)
 
 - **Categories**: `0004_catalog_expansion.sql` adds `parent_id` and an inclusive

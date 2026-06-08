@@ -107,6 +107,22 @@ export class ListingsController {
     return this.listings.startConversation(id, userId, input.other_user_id);
   }
 
+  @Post(":id/save")
+  @HttpCode(204)
+  @ApiBearerAuth("supabase-jwt")
+  @UseGuards(AuthGuard)
+  save(@Param("id") id: string, @CurrentUserId() userId: string) {
+    return this.listings.save(id, userId);
+  }
+
+  @Delete(":id/save")
+  @HttpCode(204)
+  @ApiBearerAuth("supabase-jwt")
+  @UseGuards(AuthGuard)
+  unsave(@Param("id") id: string, @CurrentUserId() userId: string) {
+    return this.listings.unsave(id, userId);
+  }
+
   @Post(":id/images/sign")
   @ApiBearerAuth("supabase-jwt")
   @UseGuards(AuthGuard)

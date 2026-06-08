@@ -1,6 +1,20 @@
 # Swap — Roadmap
 
-## Phase 1.5 — Backend API + polish ✅ (this repo)
+## Phase 1.6 — Live database integration ✅ (this repo)
+
+- **Database-first**: removed the silent demo fallback; demo data is gated behind
+  `NEXT_PUBLIC_USE_DEMO_DATA` (dev only). Query errors now surface as empty states,
+  not fake data.
+- Admin overview, all admin tables (users, listings, reports, verifications,
+  **categories/countries/cities**) read live from the DB.
+- **Saved listings** wired end-to-end: backend endpoints (`POST/DELETE
+  /listings/:id/save`, `GET /me/saved`), `@swap/api` client methods + queries,
+  a `SaveButton`, and a DB-backed Saved page.
+- Expanded `supabase/seed.sql`: 12 login-ready demo users (1 admin, 6 verified),
+  44 listings across categories/GCC/statuses, follows, saved listings, 8
+  conversations + messages, reports, verification requests, admin-action log.
+
+## Phase 1.5 — Backend API + polish ✅
 
 - **NestJS backend API** (`/api/v1`) — auth/profile, listings (+ signed image
   upload), catalog, conversations/messages, follows, reports, verification, admin
