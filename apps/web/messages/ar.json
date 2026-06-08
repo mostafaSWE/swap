@@ -125,10 +125,14 @@
     "fieldCountry": "الدولة",
     "fieldCity": "المدينة",
     "fieldWanted": "ما الذي تريده بالمقابل؟",
+    "fieldLocation": "الموقع",
     "images": "الصور",
     "imagesHint": "حتى {max} صور في الباقة المجانية",
     "submit": "نشر الإعلان",
-    "success": "تم نشر الإعلان بنجاح"
+    "success": "تم نشر الإعلان بنجاح",
+    "step": "الخطوة {current} من {total}",
+    "swapPreview": "معاينة المبادلة",
+    "yourItem": "غرضك"
   },
   "auth": {
     "loginTitle": "تسجيل الدخول",

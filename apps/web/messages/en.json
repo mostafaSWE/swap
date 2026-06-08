@@ -125,10 +125,14 @@
     "fieldCountry": "Country",
     "fieldCity": "City",
     "fieldWanted": "What do you want in exchange?",
+    "fieldLocation": "Location",
     "images": "Images",
     "imagesHint": "Up to {max} images on the free plan",
     "submit": "Publish Listing",
-    "success": "Listing published successfully"
+    "success": "Listing published successfully",
+    "step": "Step {current} of {total}",
+    "swapPreview": "Swap preview",
+    "yourItem": "Your item"
   },
   "auth": {
     "loginTitle": "Login",
