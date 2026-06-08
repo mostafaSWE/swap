@@ -927,7 +927,7 @@ select
 from (
   select id, row_number() over (order by created_at) as n
   from public.listings
-  where id like '44444444-4444-4444-8444-%'
+  where id::text like '44444444-4444-4444-8444-%'
 ) l
 cross join generate_series(0, 1) as img
 on conflict (id) do nothing;
