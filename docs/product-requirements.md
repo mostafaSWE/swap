@@ -25,9 +25,18 @@ Examples: a pen ↔ a notebook, an air conditioner ↔ a washing machine, an iPh
 - Report abuse (listing / user / message / conversation)
 - Trust signals: **verified accounts** and **verified items**
 
+## Architecture (Phase 1.5)
+
+A dedicated **NestJS backend API** (`apps/api`, `/api/v1`) now owns business logic
+and sensitive writes; both the web app and the future mobile app consume it via the
+shared `@swap/api` REST client. Supabase remains the platform (Auth, Postgres + RLS,
+Storage, Realtime). See [database-schema.md](./database-schema.md) for the security
+model. Validation rules live once in `@swap/validation` (zod) and are shared by the
+API and the forms.
+
 ## MVP scope (Phase 1 — this foundation)
 
-- Monorepo (web + mobile skeleton + shared packages)
+- Monorepo (web + **backend API** + mobile skeleton + shared packages)
 - Arabic-first, RTL by default; full English (LTR) support via `next-intl`
 - GCC country/city support (SA, AE, QA, KW, BH, OM)
 - Supabase schema, RLS, storage buckets, seed data
@@ -48,8 +57,20 @@ advanced analytics. The codebase is prepared for these (fields + `TODO`s).
 
 Primary region: **GCC**. Each country stores `name_ar`, `name_en`, ISO code,
 phone code, **default currency** (for future premium pricing), timezone, and
-active status. Cities are seeded per country. The model supports adding more
-countries later (admin "Manage countries/cities" screens are scaffolded).
+active status. A **curated bilingual (ar/en) city set (~98 cities)** is seeded per
+country (see [database-schema.md](./database-schema.md) → Catalog). The model
+supports adding more countries/cities later via the admin catalog API.
+
+## Categories
+
+An **inclusive 26-category taxonomy** (Electronics, Mobiles & Tablets, Computers &
+Laptops, Gaming & Consoles, Home Appliances, Furniture, Home & Garden, Cars,
+Motorcycles, Auto Parts, Fashion, Watches & Jewelry, Baby & Kids, Toys & Games,
+Sports & Fitness, Books & Stationery, Tools & Equipment, Health & Beauty, Pets,
+Musical Instruments, Cameras & Photography, Home Materials, Office & Business,
+Collectibles & Antiques, Open to Any Exchange, Other) with Arabic + English names
+and **parent/child** support (example subcategories seeded). Admin-manageable via
+the catalog API.
 
 ## Language & localization
 

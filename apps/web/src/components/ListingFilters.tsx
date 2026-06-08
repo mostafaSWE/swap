@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { CATEGORIES, COUNTRIES, citiesByCountry } from "@swap/config";
+import { TOP_LEVEL_CATEGORIES, COUNTRIES, citiesByCountry } from "@swap/config";
 import { localizedName } from "@swap/ui";
 import type { Locale } from "@swap/types";
 import { usePathname, useRouter } from "@/i18n/navigation";
@@ -50,7 +50,7 @@ export function ListingFilters({ active }: { active: ActiveFilters }) {
         >
           {t("common.all")}
         </button>
-        {CATEGORIES.map((c) => (
+        {TOP_LEVEL_CATEGORIES.map((c) => (
           <button
             key={c.id}
             type="button"

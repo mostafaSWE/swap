@@ -3,7 +3,8 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
-      "@swap/types": ["../types/src/index.ts"]
+      "@swap/types": ["../types/src/index.ts"],
+      "@swap/validation": ["../validation/src/index.ts"]
     }
   },
   "include": ["src"]

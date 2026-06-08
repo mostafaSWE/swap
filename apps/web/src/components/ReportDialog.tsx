@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { createReport } from "@swap/api";
 import type { ReportTargetType } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
+import { getApi } from "@/lib/api";
 import { SelectInput, FormTextarea } from "./forms";
 import { CTAButton } from "./CTAButton";
 
@@ -36,13 +37,18 @@ export function ReportDialog({
         setState("error");
         return;
       }
-      await createReport(supabase, {
-        reporterId: user.id,
-        targetType,
-        targetId,
-        reason,
-        description,
-      });
+      const api = getApi();
+      if (api) {
+        await api.createReport({ target_type: targetType, target_id: targetId, reason, description });
+      } else {
+        await createReport(supabase, {
+          reporterId: user.id,
+          targetType,
+          targetId,
+          reason,
+          description,
+        });
+      }
       setState("done");
     } catch {
       setState("error");
@@ -61,8 +67,8 @@ export function ReportDialog({
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center">
-          <div className="w-full max-w-app rounded-t-card bg-white p-5 sm:rounded-card">
+        <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center">
+          <div className="animate-slide-up max-h-[85dvh] w-full max-w-app overflow-y-auto rounded-t-card bg-white p-5 sm:rounded-card">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold text-ink">{t("title")}</h2>
               <button type="button" onClick={() => setOpen(false)} aria-label="Close">

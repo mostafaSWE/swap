@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0",
-    "@swap/types": "workspace:*"
+    "@swap/types": "workspace:*",
+    "@swap/validation": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.6.3"

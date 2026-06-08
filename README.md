@@ -19,8 +19,23 @@ delivery — it only connects people and lets them agree on an exchange privatel
 | Web | Next.js 14 (App Router), TypeScript, Tailwind CSS |
 | i18n | next-intl (`/ar`, `/en`, default `ar`) |
 | Mobile | Expo (React Native) skeleton |
-| Backend | Supabase — Auth, Postgres, Storage, Realtime |
+| **Backend API** | **NestJS** (`/api/v1`) — business-logic layer for web + mobile, Swagger docs at `/api/docs` |
+| Platform | Supabase — Auth, Postgres, Storage, Realtime, RLS |
+| Validation | zod (shared `@swap/validation`, used by API DTOs + forms) |
 | Forms | react-hook-form + zod |
+
+### Architecture: backend API vs Supabase
+
+- **NestJS API (`apps/api`)** owns business logic and sensitive writes — create/update
+  listing, image-upload signing + free-limit enforcement, start conversation, send
+  message, follow, report, verification requests, and **all admin actions** (with an
+  `admin_actions` audit log). It authenticates the Supabase JWT (bearer) and uses the
+  service-role key with app-level authorization.
+- **Supabase** still handles Auth sessions, Postgres + RLS (protects any direct
+  browser reads), Storage, and Realtime (chat transport).
+- The shared **`@swap/api`** client (used by web **and** mobile) calls the backend for
+  mutations. If `NEXT_PUBLIC_API_URL` is unset, it falls back to direct Supabase so the
+  app still runs in local dev without the backend.
 
 ## Folder structure
 
@@ -28,14 +43,16 @@ delivery — it only connects people and lets them agree on an exchange privatel
 swap/
 ├─ apps/
 │  ├─ web/        Next.js web app (App Router, RTL-first, i18n)
+│  ├─ api/        NestJS backend API (/api/v1, Swagger at /api/docs)
 │  └─ mobile/     Expo React Native skeleton (shares packages)
 ├─ packages/
 │  ├─ types/      Shared domain + DB TypeScript types
-│  ├─ config/     Theme tokens, countries, cities, categories, constants
-│  ├─ api/        Typed Supabase client + query functions (web + mobile)
+│  ├─ config/     Theme tokens, countries, cities, categories, safety text
+│  ├─ validation/ Shared zod schemas (API DTOs + frontend forms)
+│  ├─ api/        Supabase client + queries AND the typed REST client (web + mobile)
 │  └─ ui/         Cross-platform-safe helpers (formatting, localized names)
 ├─ supabase/
-│  ├─ migrations/ 0001_schema · 0002_rls · 0003_storage
+│  ├─ migrations/ 0001_schema · 0002_rls · 0003_storage · 0004_catalog_expansion
 │  └─ seed.sql    GCC data + demo users/listings/chats/reports
 ├─ docs/          PRD · database-schema · setup-guide · roadmap
 ├─ .env.example
@@ -47,19 +64,15 @@ swap/
 ```bash
 pnpm install
 pnpm web          # http://localhost:3000  (renders with demo data out-of-the-box)
+pnpm api          # http://localhost:4000/api/v1  (Swagger: /api/docs)
+pnpm mobile       # Expo dev server
 ```
 
 Then connect Supabase and seed (see **[docs/setup-guide.md](docs/setup-guide.md)**):
 
 ```bash
-# apps/web/.env.local  ← from .env.example
-# run supabase/migrations/* then supabase/seed.sql
-```
-
-Mobile skeleton:
-
-```bash
-pnpm mobile
+# .env (root, used by API) and apps/web/.env.local  ← from .env.example
+# run supabase/migrations/0001..0004 then supabase/seed.sql
 ```
 
 ## Environment variables
@@ -67,10 +80,12 @@ pnpm mobile
 See [`.env.example`](.env.example). Put real values in `apps/web/.env.local`:
 
 ```
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1   # empty = direct-Supabase fallback
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+SUPABASE_SERVICE_ROLE_KEY=        # server/API only — never expose to the client
+API_PORT=4000
 ```
 
 Never commit real secrets.

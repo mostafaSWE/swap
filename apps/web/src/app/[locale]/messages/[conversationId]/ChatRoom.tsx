@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { sendMessage, subscribeToMessages } from "@swap/api";
 import type { Message, PublicProfile } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
+import { getApi } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { ChatBubble } from "@/components/ChatBubble";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
@@ -47,21 +48,28 @@ export function ChatRoom({
     setSending(true);
     setBody("");
     try {
-      await sendMessage(supabase.current, {
-        conversationId,
-        senderId: currentUserId,
-        body: text,
-      });
+      const api = getApi();
+      if (api) {
+        const msg = await api.sendMessage(conversationId, { body: text });
+        // Optimistically add (Realtime will also deliver; dedup by id).
+        setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+      } else {
+        await sendMessage(supabase.current, {
+          conversationId,
+          senderId: currentUserId,
+          body: text,
+        });
+      }
     } finally {
       setSending(false);
     }
   }
 
   return (
-    <div className="app-container flex min-h-dvh flex-col">
+    <div className="flex min-h-[calc(100dvh-61px)] flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-white px-4 py-3">
-        <Link href="/messages" aria-label="Back" className="text-ink">
+      <header className="sticky top-[61px] z-20 flex items-center gap-3 border-b border-line bg-white px-4 py-3">
+        <Link href="/messages" aria-label="Back" className="text-ink md:hidden">
           <ArrowRight className="h-5 w-5 rtl:rotate-180" aria-hidden />
         </Link>
         {otherUser ? (

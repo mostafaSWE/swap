@@ -28,9 +28,12 @@ export default async function ListingDetailsPage({
 
   return (
     <AppShell hideNav>
-      <div className="space-y-5 px-4 py-4 pb-10">
-        <ListingGallery images={listing.images} />
+      <div className="px-4 py-4 pb-10 md:grid md:grid-cols-2 md:gap-8 md:py-8">
+        <div className="md:sticky md:top-20 md:self-start">
+          <ListingGallery images={listing.images} />
+        </div>
 
+        <div className="space-y-5">
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-2">
             <h1 className="text-xl font-bold text-ink">{listing.title}</h1>
@@ -80,6 +83,7 @@ export default async function ListingDetailsPage({
 
         <div className="flex justify-center pt-2">
           <ReportDialog targetType="listing" targetId={listing.id} />
+        </div>
         </div>
       </div>
     </AppShell>

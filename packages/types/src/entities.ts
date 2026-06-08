@@ -43,6 +43,8 @@ export type City = {
 
 export type Category = {
   id: string;
+  /** Null for top-level categories; references another category for subcategories. */
+  parent_id: string | null;
   name_ar: string;
   name_en: string;
   slug: string;

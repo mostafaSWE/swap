@@ -5,4 +5,7 @@ packages:
 # unrs-resolver ships a postinstall build script (used by some eslint resolvers).
 # We don't need it built; explicitly disallow so `pnpm install` doesn't warn/fail.
 allowBuilds:
+  # These postinstall scripts are just funding/telemetry messages — not needed.
+  '@nestjs/core': false
+  '@scarf/scarf': false
   unrs-resolver: false

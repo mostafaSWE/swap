@@ -1,7 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getMessages } from "@swap/api";
 import type { Locale } from "@swap/types";
-import { AppShell } from "@/components/AppShell";
 import { EmptyState } from "@/components/primitives";
 import { CTAButton } from "@/components/CTAButton";
 import { requireUser } from "@/lib/auth";
@@ -19,11 +18,7 @@ export default async function ChatRoomPage({
 
   if (!isSupabaseConfigured()) {
     const tn = await getTranslations("nav");
-    return (
-      <AppShell hideNav>
-        <EmptyState title={tn("login")} action={<CTAButton href="/login">{tn("login")}</CTAButton>} />
-      </AppShell>
-    );
+    return <EmptyState title={tn("login")} action={<CTAButton href="/login">{tn("login")}</CTAButton>} />;
   }
 
   const user = await requireUser(locale);

@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale, Report } from "@swap/types";
 import { AdminTable, type Column } from "@/components/AdminTable";
 import { StatusBadge } from "@/components/badges";
+import { AdminActions } from "@/components/admin/AdminActions";
 import { fetchAdminReports } from "@/lib/admin";
 
 export default async function AdminReportsPage({ params: { locale } }: { params: { locale: Locale } }) {
@@ -14,6 +15,7 @@ export default async function AdminReportsPage({ params: { locale } }: { params:
     { key: "reason", header: "reason", render: (r) => r.reason },
     { key: "desc", header: "•", render: (r) => <span className="text-muted">{r.description ?? "—"}</span> },
     { key: "status", header: "•", render: (r) => <StatusBadge status={r.status} /> },
+    { key: "actions", header: "", render: (r) => <AdminActions kind="report" id={r.id} /> },
   ];
 
   return (

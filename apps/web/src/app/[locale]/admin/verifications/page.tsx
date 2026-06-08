@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale, VerificationRequest } from "@swap/types";
 import { AdminTable, type Column } from "@/components/AdminTable";
 import { StatusBadge } from "@/components/badges";
+import { AdminActions } from "@/components/admin/AdminActions";
 import { fetchAdminVerifications } from "@/lib/admin";
 
 export default async function AdminVerificationsPage({ params: { locale } }: { params: { locale: Locale } }) {
@@ -13,6 +14,7 @@ export default async function AdminVerificationsPage({ params: { locale } }: { p
     { key: "type", header: "type", render: (r) => r.type },
     { key: "notes", header: "•", render: (r) => <span className="text-muted">{r.notes ?? "—"}</span> },
     { key: "status", header: "•", render: (r) => <StatusBadge status={r.status} /> },
+    { key: "actions", header: "", render: (r) => <AdminActions kind="verification" id={r.id} /> },
   ];
 
   return (

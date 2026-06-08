@@ -1,6 +1,20 @@
 # Swap — Roadmap
 
-## Phase 1 — Base MVP foundation ✅ (this repo)
+## Phase 1.5 — Backend API + polish ✅ (this repo)
+
+- **NestJS backend API** (`/api/v1`) — auth/profile, listings (+ signed image
+  upload), catalog, conversations/messages, follows, reports, verification, admin
+  (with `admin_actions` audit log), safety; Swagger at `/api/docs`
+- Shared `@swap/validation` (zod) used by API DTOs + frontend forms
+- Shared `@swap/api` REST client (web + mobile) with Supabase fallback
+- Mutations routed through the API (create listing, follow, report, chat, verify,
+  admin actions); reads + Realtime stay on Supabase
+- Inclusive 26-category taxonomy (parent/child) + ~98 curated bilingual GCC cities
+- Desktop-responsive layouts (multi-column grids, two-column listing detail,
+  two-pane chat, two-column profile, full-width admin), subtle animations,
+  skeleton loaders
+
+## Phase 1 — Base MVP foundation ✅
 
 - Monorepo (pnpm + Turborepo): web, mobile skeleton, shared packages
 - Arabic-first RTL + English LTR (`next-intl`, `/ar` `/en`)

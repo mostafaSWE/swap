@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { followUser, getOrCreateConversation } from "@swap/api";
 import type { Locale } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
+import { getApi } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
 import { CTAButton } from "./CTAButton";
 
@@ -37,11 +38,16 @@ export function ListingActions({
         router.push("/login");
         return;
       }
-      const conversation = await getOrCreateConversation(supabase, {
-        currentUserId: user.id,
-        otherUserId: ownerId,
-        listingId,
-      });
+      // Prefer the backend API (business logic lives there); fall back to the
+      // Supabase RPC when the API isn't configured.
+      const api = getApi();
+      const conversation = api
+        ? await api.startConversation(listingId, { other_user_id: ownerId })
+        : await getOrCreateConversation(supabase, {
+            currentUserId: user.id,
+            otherUserId: ownerId,
+            listingId,
+          });
       router.push(`/messages/${conversation.id}`);
     } catch {
       router.push("/login");
@@ -60,7 +66,9 @@ export function ListingActions({
         router.push("/login");
         return;
       }
-      await followUser(supabase, user.id, ownerId);
+      const api = getApi();
+      if (api) await api.follow(ownerId);
+      else await followUser(supabase, user.id, ownerId);
       setFollowing(true);
     } catch {
       router.push("/login");

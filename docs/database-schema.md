@@ -17,7 +17,7 @@ the typed Supabase `Database` is in `packages/api/src/database.types.ts`.
 | `profiles` | 1:1 with `auth.users`; public + private profile fields, counters, flags |
 | `countries` | GCC countries; `name_ar/en`, ISO, phone code, currency, timezone |
 | `cities` | Cities per country |
-| `categories` | Listing categories (`name_ar/en`, slug, icon) |
+| `categories` | Listing categories (`name_ar/en`, slug, icon, **`parent_id`** for parent/child) |
 | `listings` | Exchange listings; condition, status, wanted item, verified/featured flags |
 | `listing_images` | Images per listing (free plan ≤ 4) |
 | `conversations` | Chat threads, optionally tied to a listing |
@@ -75,3 +75,36 @@ the typed Supabase `Database` is in `packages/api/src/database.types.ts`.
 
 > **TODO (Phase 2):** restrict `chat-images` READ to all conversation
 > participants (needs conversation id in the path + a join). Kept simple for MVP.
+
+## Backend API vs Supabase (security model)
+
+Phase 1 used RLS-only with direct browser → Supabase. Phase 1.5 adds a **NestJS
+API** (`apps/api`) as the business-logic layer:
+
+- **Direct browser → Supabase** is still used for **reads** (RLS protects them) and
+  **Realtime** chat subscriptions. RLS policies in `0002_rls.sql` remain the
+  backstop and are unchanged.
+- **Mutations + privileged workflows** go through the **API**, which:
+  - verifies the Supabase access token (`Authorization: Bearer …`) and loads the
+    caller's profile (rejecting suspended users),
+  - uses the **service-role** key (bypasses RLS) and enforces authorization in code
+    (ownership checks, `AdminGuard` for admin routes),
+  - validates every body against the shared **zod** schemas (`@swap/validation`),
+  - records admin mutations to `admin_actions`.
+
+This means there are **two valid paths** to the data; both are secured (RLS for
+direct reads, app-level authz for the API). No RLS policy needed to change — the
+API simply has a privileged, audited path for sensitive writes. The web client
+prefers the API when `NEXT_PUBLIC_API_URL` is set and falls back to Supabase
+otherwise.
+
+## Catalog (categories, countries, cities)
+
+- **Categories**: `0004_catalog_expansion.sql` adds `parent_id` and an inclusive
+  26-category taxonomy (+ example subcategories). Carried-over slugs keep their
+  original UUIDs so demo listings stay valid. Mirrors `packages/config/categories.ts`.
+- **Country/city data**: GCC countries + a **curated bilingual (ar/en)** city set
+  (~98 cities). No open package ships reliable Arabic names for all GCC cities, so
+  the dataset is curated by hand (English cross-checked against the
+  `country-state-city` npm dataset) in `packages/config/cities.ts` and seeded via
+  `0004`. Extend by appending there or via the admin "Manage cities" API.

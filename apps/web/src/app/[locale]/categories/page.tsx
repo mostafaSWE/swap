@@ -1,5 +1,5 @@
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
-import { CATEGORIES } from "@swap/config";
+import { TOP_LEVEL_CATEGORIES } from "@swap/config";
 import { localizedName } from "@swap/ui";
 import type { Locale } from "@swap/types";
 import { AppShell } from "@/components/AppShell";
@@ -15,8 +15,8 @@ export default async function CategoriesPage({ params: { locale } }: { params: {
     <AppShell>
       <div className="px-4 py-4">
         <h1 className="mb-4 text-xl font-bold text-ink">{t("categories")}</h1>
-        <div className="grid grid-cols-3 gap-3">
-          {CATEGORIES.map((cat) => (
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+          {TOP_LEVEL_CATEGORIES.map((cat) => (
             <Link
               key={cat.id}
               href={`/listings?category=${cat.slug}`}

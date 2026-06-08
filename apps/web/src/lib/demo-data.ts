@@ -68,7 +68,7 @@ const specs: Spec[] = [
   { n: 3, title: "طقم غرفة نوم", owner: "khalid", categorySlug: "furniture", countryIso: "AE", cityId: cid(9), condition: "used", wanted: "أثاث مجلس أو طاولة طعام", views: 77, featured: true },
   { n: 4, title: "مكيف سبليت", owner: "fatima", categorySlug: "home-appliances", countryIso: "QA", cityId: cid(16), condition: "used", wanted: "غسالة فل أوتوماتيك", views: 91, verifiedItem: true },
   { n: 5, title: "Dell XPS Laptop", owner: "omar", categorySlug: "electronics", countryIso: "KW", cityId: cid(20), condition: "used", wanted: "iPad Pro or gaming console", views: 64 },
-  { n: 6, title: "ساعة يد فاخرة", owner: "ahmed", categorySlug: "watches", countryIso: "SA", cityId: cid(1), condition: "new", wanted: "ساعة أخرى أو سماعات", views: 39 },
+  { n: 6, title: "ساعة يد فاخرة", owner: "ahmed", categorySlug: "watches-jewelry", countryIso: "SA", cityId: cid(1), condition: "new", wanted: "ساعة أخرى أو سماعات", views: 39 },
   { n: 7, title: "دراجة هوائية", owner: "sara", categorySlug: "sports", countryIso: "SA", cityId: cid(2), condition: "used", wanted: "دراجة كهربائية", views: 27 },
   { n: 8, title: "كنبة مجلس", owner: "khalid", categorySlug: "furniture", countryIso: "AE", cityId: cid(9), condition: "used", wanted: "طاولة طعام أو مكتب", views: 45 },
   { n: 9, title: "بلايستيشن 5", owner: "fatima", categorySlug: "electronics", countryIso: "QA", cityId: cid(16), condition: "used", wanted: "إكس بوكس أو لابتوب", views: 118, featured: true },

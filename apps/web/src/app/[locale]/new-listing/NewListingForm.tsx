@@ -7,6 +7,7 @@ import { CATEGORIES, FREE_PLAN_MAX_IMAGES, STORAGE_BUCKETS } from "@swap/config"
 import { localizedName } from "@swap/ui";
 import type { ListingCondition, Locale } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
+import { getApi } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
 import { FormInput, FormTextarea, SelectInput } from "@/components/forms";
 import { CountryCitySelector } from "@/components/CountryCitySelector";
@@ -56,48 +57,68 @@ export function NewListingForm() {
       return;
     }
 
-    // 1) Insert the listing.
-    const { data: listing, error: insertError } = await supabase
-      .from("listings")
-      .insert({
-        owner_id: user.id,
-        category_id: values.category_id,
-        country_id: countryId,
-        city_id: cityId,
-        title: values.title,
-        description: values.description,
-        condition: values.condition,
-        wanted_exchange: values.wanted_exchange,
-        status: "active",
-      })
-      .select("id")
-      .single();
+    const payload = {
+      category_id: values.category_id,
+      country_id: countryId,
+      city_id: cityId,
+      title: values.title,
+      description: values.description,
+      condition: values.condition,
+      wanted_exchange: values.wanted_exchange,
+    };
+    const images = files.slice(0, FREE_PLAN_MAX_IMAGES); // TODO (Phase 2): premium raises the limit.
+    const api = getApi();
 
-    if (insertError || !listing) {
+    let listingId: string;
+    try {
+      if (api) {
+        // 1) Create via backend (validates refs + enforces limits server-side).
+        const listing = await api.createListing(payload);
+        listingId = listing.id;
+        // 2) Signed upload per image, then register it.
+        for (const file of images) {
+          const { path, token } = await api.signListingImageUpload(listing.id, file.name);
+          const { error: upErr } = await supabase.storage
+            .from(STORAGE_BUCKETS.listingImages)
+            .uploadToSignedUrl(path, token, file);
+          if (upErr) continue;
+          const { data: pub } = supabase.storage.from(STORAGE_BUCKETS.listingImages).getPublicUrl(path);
+          await api.addListingImage(listing.id, pub.publicUrl);
+        }
+      } else {
+        // Fallback: direct Supabase (RLS-protected) when the API isn't configured.
+        const { data: listing, error: insertError } = await supabase
+          .from("listings")
+          .insert({ ...payload, owner_id: user.id, status: "active" })
+          .select("id")
+          .single();
+        if (insertError || !listing) {
+          setError(t("title"));
+          return;
+        }
+        listingId = listing.id;
+        for (let i = 0; i < images.length; i++) {
+          const file = images[i]!;
+          const ext = file.name.split(".").pop() ?? "jpg";
+          const path = `${user.id}/${listing.id}/${i}.${ext}`;
+          const { error: uploadError } = await supabase.storage
+            .from(STORAGE_BUCKETS.listingImages)
+            .upload(path, file, { upsert: true });
+          if (uploadError) continue;
+          const { data: pub } = supabase.storage.from(STORAGE_BUCKETS.listingImages).getPublicUrl(path);
+          await supabase.from("listing_images").insert({
+            listing_id: listing.id,
+            image_url: pub.publicUrl,
+            sort_order: i,
+          });
+        }
+      }
+    } catch {
       setError(t("title"));
       return;
     }
 
-    // 2) Upload images (free plan: max FREE_PLAN_MAX_IMAGES) and link them.
-    // TODO (Phase 2 — premium): raise the limit for paid plans.
-    const images = files.slice(0, FREE_PLAN_MAX_IMAGES);
-    for (let i = 0; i < images.length; i++) {
-      const file = images[i]!;
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${user.id}/${listing.id}/${i}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from(STORAGE_BUCKETS.listingImages)
-        .upload(path, file, { upsert: true });
-      if (uploadError) continue;
-      const { data: pub } = supabase.storage.from(STORAGE_BUCKETS.listingImages).getPublicUrl(path);
-      await supabase.from("listing_images").insert({
-        listing_id: listing.id,
-        image_url: pub.publicUrl,
-        sort_order: i,
-      });
-    }
-
-    router.push(`/listings/${listing.id}`);
+    router.push(`/listings/${listingId}`);
     router.refresh();
   }
 

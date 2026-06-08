@@ -7,6 +7,7 @@ import { updateProfile } from "@swap/api";
 import { LIMITS } from "@swap/config";
 import type { Profile } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
+import { getApi } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
 import { FormInput, FormTextarea } from "@/components/forms";
 import { CountryCitySelector } from "@/components/CountryCitySelector";
@@ -38,12 +39,10 @@ export function EditProfileForm({ profile }: { profile: Profile }) {
   });
 
   async function onSubmit(values: Values) {
-    const supabase = createClient();
-    await updateProfile(supabase, profile.id, {
-      ...values,
-      country_id: countryId || null,
-      city_id: cityId || null,
-    });
+    const patch = { ...values, country_id: countryId || null, city_id: cityId || null };
+    const api = getApi();
+    if (api) await api.updateMe(patch);
+    else await updateProfile(createClient(), profile.id, patch);
     setSaved(true);
     router.refresh();
   }

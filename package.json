@@ -10,6 +10,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "web": "pnpm --filter @swap/web dev",
+    "api": "pnpm --filter @swap/api-server dev",
     "mobile": "pnpm --filter @swap/mobile start",
     "clean": "turbo run clean && rimraf node_modules"
   },

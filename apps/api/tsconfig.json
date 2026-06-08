@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2021",
+    "lib": ["ES2021"],
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@swap/types": ["../../packages/types/src/index.ts"],
+      "@swap/config": ["../../packages/config/src/index.ts"],
+      "@swap/validation": ["../../packages/validation/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"],
+  "ts-node": {
+    "transpileOnly": false,
+    "require": ["tsconfig-paths/register"],
+    "// note": "Force the shared @swap/* packages (which declare type:module) to compile as CJS so this CommonJS NestJS app can require() them.",
+    "moduleTypes": {
+      "../../packages/**/*.ts": "cjs"
+    }
+  }
+}

@@ -1,8 +1,7 @@
 import { MessageCircle } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@swap/types";
-import { AppShell } from "@/components/AppShell";
-import { ConversationCard } from "@/components/ConversationCard";
+import { ConversationList } from "@/components/ConversationList";
 import { EmptyState } from "@/components/primitives";
 import { CTAButton } from "@/components/CTAButton";
 import { getCurrentUser } from "@/lib/auth";
@@ -18,32 +17,27 @@ export default async function MessagesPage({ params: { locale } }: { params: { l
 
   if (!user) {
     return (
-      <AppShell>
-        <EmptyState
-          icon={<MessageCircle className="h-10 w-10" />}
-          title={t("empty")}
-          action={<CTAButton href="/login">{tn("login")}</CTAButton>}
-        />
-      </AppShell>
+      <EmptyState
+        icon={<MessageCircle className="h-10 w-10" />}
+        title={t("empty")}
+        action={<CTAButton href="/login">{tn("login")}</CTAButton>}
+      />
     );
   }
 
   const conversations = await fetchConversations(user.id);
 
   return (
-    <AppShell>
-      <div className="py-2">
-        <h1 className="px-4 py-2 text-xl font-bold text-ink">{t("title")}</h1>
-        {conversations.length > 0 ? (
-          <div>
-            {conversations.map((c) => (
-              <ConversationCard key={c.id} conversation={c} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState icon={<MessageCircle className="h-10 w-10" />} title={t("empty")} />
-        )}
+    <>
+      {/* Mobile: full conversation list (the desktop sidebar is in the layout). */}
+      <div className="md:hidden">
+        <h1 className="px-4 py-3 text-xl font-bold text-ink">{t("title")}</h1>
+        <ConversationList conversations={conversations} />
       </div>
-    </AppShell>
+      {/* Desktop: prompt to pick a conversation. */}
+      <div className="hidden h-full items-center justify-center md:flex">
+        <EmptyState icon={<MessageCircle className="h-12 w-12" />} title={t("title")} description={t("empty")} />
+      </div>
+    </>
   );
 }

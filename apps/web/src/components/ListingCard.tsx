@@ -14,7 +14,7 @@ export function ListingCard({ listing }: { listing: ListingWithRelations }) {
   return (
     <Link
       href={`/listings/${listing.id}`}
-      className="card group block overflow-hidden transition-shadow hover:shadow-elevated"
+      className="card group block overflow-hidden transition-all hover:shadow-elevated md:hover:-translate-y-1"
     >
       <div className="relative aspect-square w-full bg-canvas">
         {cover ? (

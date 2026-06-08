@@ -1,5 +1,5 @@
 import { useLocale } from "next-intl";
-import { CATEGORIES } from "@swap/config";
+import { TOP_LEVEL_CATEGORIES } from "@swap/config";
 import { localizedName } from "@swap/ui";
 import type { Locale } from "@swap/types";
 import { Link } from "@/i18n/navigation";
@@ -11,7 +11,7 @@ export function CategoryCarousel() {
 
   return (
     <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
-      {CATEGORIES.map((cat) => (
+      {TOP_LEVEL_CATEGORIES.map((cat) => (
         <Link
           key={cat.id}
           href={`/listings?category=${cat.slug}`}

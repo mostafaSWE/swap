@@ -29,7 +29,7 @@ export function MobileBottomNav() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <nav className="sticky bottom-0 z-30 border-t border-line bg-white">
+    <nav className="sticky bottom-0 z-30 border-t border-line bg-white md:hidden">
       <ul className="mx-auto flex max-w-app items-center justify-around px-2 py-1.5">
         {TABS.map(({ href, icon: Icon, key, primary }) => {
           const active = isActive(href);
