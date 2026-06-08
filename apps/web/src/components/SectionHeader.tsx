@@ -1,25 +1,29 @@
 import { ChevronLeft } from "lucide-react";
-import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
-/** Section title with an optional "view all" link. RTL-aware chevron. */
+/**
+ * SectionHeader — section title + optional "view all" action. The chevron gets
+ * `.rtl-flip` so it points the correct way in both RTL and LTR.
+ */
 export function SectionHeader({
   title,
+  actionLabel,
   href,
-  viewAllLabel,
 }: {
   title: string;
+  actionLabel?: string;
   href?: string;
-  viewAllLabel?: string;
 }) {
-  const locale = useLocale();
   return (
     <div className="mb-3 flex items-center justify-between">
-      <h2 className="text-base font-bold text-ink">{title}</h2>
-      {href ? (
-        <Link href={href} className="flex items-center gap-0.5 text-sm font-semibold text-green">
-          {viewAllLabel}
-          <ChevronLeft className={locale === "ar" ? "h-4 w-4" : "h-4 w-4 rotate-180"} aria-hidden />
+      <h2 className="text-lg font-extrabold tracking-tight text-ink">{title}</h2>
+      {actionLabel && href ? (
+        <Link
+          href={href}
+          className="flex items-center gap-1 text-sm font-semibold text-green-dark hover:underline"
+        >
+          {actionLabel}
+          <ChevronLeft className="rtl-flip h-4 w-4 rotate-180" aria-hidden />
         </Link>
       ) : null}
     </div>

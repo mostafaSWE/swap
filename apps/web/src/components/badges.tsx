@@ -6,7 +6,7 @@ export function VerifiedBadge({ label, className }: { label?: string; className?
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-pill bg-green-light px-2 py-0.5 text-xs font-semibold text-green-dark",
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-pill bg-green-light px-2 py-0.5 text-[11px] font-bold text-green-dark",
         className,
       )}
     >
@@ -21,7 +21,7 @@ export function ItemVerifiedBadge({ label, className }: { label?: string; classN
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-pill bg-green px-2 py-0.5 text-xs font-semibold text-white",
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-pill bg-green px-2 py-0.5 text-[11px] font-bold text-white shadow-sm",
         className,
       )}
     >

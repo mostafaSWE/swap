@@ -108,3 +108,22 @@ body {
     animation: none;
   }
 }
+
+/* ── Redesign additions ── */
+
+/* RTL-aware icon flip: add `.rtl-flip` to arrows/chevrons that imply direction;
+   they mirror only under dir="rtl". */
+html[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* Make the skeleton shimmer travel the correct way in RTL. */
+html[dir="rtl"] .skeleton::after {
+  animation-direction: reverse;
+}
+
+/* Soft neutral background behind <img> so a slow/failed load shows a gray
+   surface instead of a broken-image glyph (covers avatars + artwork covers). */
+img {
+  background-color: #e5e7eb;
+}

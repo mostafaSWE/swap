@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Inbox, Loader2, ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Centered loading spinner. */
@@ -10,7 +10,7 @@ export function LoadingSpinner({ className }: { className?: string }) {
   );
 }
 
-/** Empty state with optional icon, title, description and action. */
+/** Empty state with a tinted icon tile, title, description and optional action. */
 export function EmptyState({
   icon,
   title,
@@ -23,11 +23,41 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 px-6 py-16 text-center">
-      {icon ? <div className="mb-2 text-muted">{icon}</div> : null}
-      <p className="font-semibold text-ink">{title}</p>
-      {description ? <p className="text-sm text-muted">{description}</p> : null}
-      {action ? <div className="mt-3">{action}</div> : null}
+    <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-canvas text-muted">
+        {icon ?? <Inbox className="h-7 w-7" aria-hidden />}
+      </span>
+      <p className="text-balance text-base font-bold text-ink">{title}</p>
+      {description ? <p className="max-w-xs text-pretty text-sm text-muted">{description}</p> : null}
+      {action ? <div className="mt-1">{action}</div> : null}
+    </div>
+  );
+}
+
+/** Error state with a retry action. */
+export function ErrorState({
+  title,
+  description,
+  onRetry,
+  retryLabel,
+}: {
+  title: string;
+  description?: string;
+  onRetry?: () => void;
+  retryLabel: string;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-danger">
+        <ShieldAlert className="h-7 w-7" aria-hidden />
+      </span>
+      <p className="text-base font-bold text-ink">{title}</p>
+      {description ? <p className="max-w-xs text-pretty text-sm text-muted">{description}</p> : null}
+      {onRetry ? (
+        <button type="button" onClick={onRetry} className="btn-primary mt-1 !py-2.5 text-sm">
+          {retryLabel}
+        </button>
+      ) : null}
     </div>
   );
 }

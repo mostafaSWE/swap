@@ -1,8 +1,12 @@
+"use client";
+
 import { Bell, Menu, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { Logo } from "./Logo";
+import { SearchBar } from "./SearchBar";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { cn } from "@/lib/utils";
 
 const DESKTOP_LINKS = [
   { href: "/", key: "home" },
@@ -11,33 +15,45 @@ const DESKTOP_LINKS = [
   { href: "/profile", key: "account" },
 ] as const;
 
-/** Sticky top app bar. Shows desktop nav links on md+, menu icon on mobile. */
+/**
+ * Sticky top app bar. Mobile: logo + menu + actions. md+: nav links + a real
+ * (functional) search field + Add CTA + language toggle.
+ */
 export function TopBar() {
   const t = useTranslations("nav");
+  const pathname = usePathname();
+
+  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-white/90 backdrop-blur">
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-3">
-          <button type="button" aria-label={t("menu")} className="text-ink md:hidden">
+    <header className="sticky top-0 z-30 border-b border-line bg-white/85 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+        <div className="flex items-center gap-4">
+          <button type="button" aria-label={t("menu")} className="text-navy md:hidden">
             <Menu className="h-6 w-6" aria-hidden />
           </button>
           <Link href="/" aria-label="Swap home">
             <Logo />
           </Link>
-
-          {/* Desktop nav */}
-          <nav className="ms-4 hidden items-center gap-1 md:flex">
+          <nav className="ms-2 hidden items-center gap-1 md:flex">
             {DESKTOP_LINKS.map((l) => (
               <Link
                 key={l.key}
                 href={l.href}
-                className="rounded-pill px-3 py-1.5 text-sm font-semibold text-muted transition-colors hover:bg-canvas hover:text-ink"
+                className={cn(
+                  "rounded-pill px-3.5 py-1.5 text-sm font-semibold transition-colors",
+                  isActive(l.href) ? "bg-canvas text-navy" : "text-muted hover:bg-canvas hover:text-navy",
+                )}
               >
                 {t(l.key)}
               </Link>
             ))}
           </nav>
+        </div>
+
+        {/* Desktop search (functional — routes to /listings?search=) */}
+        <div className="hidden max-w-md flex-1 md:block">
+          <SearchBar />
         </div>
 
         <div className="flex items-center gap-2">
@@ -47,9 +63,9 @@ export function TopBar() {
           </Link>
           <LanguageSwitcher />
           {/* TODO (Phase 2): real notifications system. */}
-          <button type="button" aria-label={t("notifications")} className="relative text-ink">
+          <button type="button" aria-label={t("notifications")} className="relative text-navy">
             <Bell className="h-6 w-6" aria-hidden />
-            <span className="absolute end-0 top-0 h-2 w-2 rounded-full bg-green" />
+            <span className="absolute end-0 top-0 h-2 w-2 rounded-full bg-green ring-2 ring-white" />
           </button>
         </div>
       </div>

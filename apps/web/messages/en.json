@@ -49,6 +49,15 @@
     "new": "New",
     "used": "Used"
   },
+  "swap": {
+    "gives": "Gives",
+    "wants": "Wants"
+  },
+  "states": {
+    "errorTitle": "Couldn't load content",
+    "errorBody": "Something unexpected happened. Check your connection and try again.",
+    "retry": "Try again"
+  },
   "sort": {
     "label": "Sort",
     "newest": "Newest",
@@ -67,12 +76,22 @@
   },
   "home": {
     "heroTitle": "Exchange what you have for what you need",
-    "heroSubtitle": "The GCC's first barter marketplace — no buying or selling.",
+    "heroSubtitle": "The GCC's first barter marketplace — no buying or selling. Exchange your items directly with others.",
+    "heroBadge": "The GCC's first barter market",
+    "exampleSwap": "An example swap",
     "cta": "Add New Listing",
     "categories": "Categories",
     "featured": "Featured Listings",
     "latest": "Latest Listings",
-    "verifiedListings": "Verified Listings"
+    "verifiedListings": "Verified Listings",
+    "stats": {
+      "itemsValue": "12,400+",
+      "itemsLabel": "items listed",
+      "countriesValue": "6 GCC",
+      "countriesLabel": "countries",
+      "swapsValue": "3,100+",
+      "swapsLabel": "swaps made"
+    }
   },
   "listing": {
     "details": "Listing Details",
@@ -150,7 +169,8 @@
     "you": "You",
     "block": "Block user",
     "reportConversation": "Report conversation",
-    "disclaimerBeforeChat": "Swap is only a communication platform. The agreement and item handover are the users' responsibility."
+    "disclaimerBeforeChat": "Swap is only a communication platform. The agreement and item handover are the users' responsibility.",
+    "reminder": "Reminder: the agreement and handover are your responsibility. Don't share sensitive data."
   },
   "report": {
     "title": "Report Issue",

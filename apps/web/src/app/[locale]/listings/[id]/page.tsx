@@ -5,6 +5,7 @@ import { localizedName } from "@swap/ui";
 import type { Locale } from "@swap/types";
 import { AppShell } from "@/components/AppShell";
 import { ListingGallery } from "@/components/ListingGallery";
+import { SwapPair } from "@/components/SwapPair";
 import { ListingActions } from "@/components/ListingActions";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { VerifiedBadge, ItemVerifiedBadge } from "@/components/badges";
@@ -72,9 +73,12 @@ export default async function ListingDetailsPage({
           <p className="whitespace-pre-wrap text-sm text-ink/80">{listing.description}</p>
         </section>
 
-        <section className="rounded-card bg-green-light p-3">
-          <h2 className="mb-1 font-bold text-green-dark">{t("wantedExchange")}</h2>
-          <p className="text-sm text-ink/80">{listing.wanted_exchange}</p>
+        <section className="rounded-card border border-line bg-white p-4 shadow-card">
+          <h2 className="mb-3 font-bold text-ink">{t("wantedExchange")}</h2>
+          <SwapPair listing={listing} size="lg" />
+          {listing.wanted_exchange ? (
+            <p className="mt-3 border-t border-line pt-3 text-sm text-ink/80">{listing.wanted_exchange}</p>
+          ) : null}
         </section>
 
         <SafetyDisclaimer />
