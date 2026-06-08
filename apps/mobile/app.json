@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Swap",
+    "slug": "swap",
+    "scheme": "swap",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "backgroundColor": "#0B1324",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.swap.app"
+    },
+    "android": {
+      "package": "com.swap.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B1324"
+      }
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
+    "extra": {
+      "supabaseUrl": "",
+      "supabaseAnonKey": ""
+    }
+  }
+}

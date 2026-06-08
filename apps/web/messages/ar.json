@@ -1,0 +1,208 @@
+{
+  "brand": {
+    "name": "Swap",
+    "slogan": "بدّل ما لديك بما تحتاجه"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "categories": "التصنيفات",
+    "add": "إضافة",
+    "addListing": "إضافة إعلان",
+    "messages": "المحادثات",
+    "account": "حسابي",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "saved": "المحفوظات",
+    "myListings": "إعلاناتي",
+    "settings": "الإعدادات",
+    "admin": "لوحة التحكم",
+    "menu": "القائمة",
+    "notifications": "الإشعارات"
+  },
+  "common": {
+    "search": "ابحث عن منتج...",
+    "searchAction": "بحث",
+    "country": "الدولة",
+    "city": "المدينة",
+    "category": "التصنيف",
+    "condition": "الحالة",
+    "all": "الكل",
+    "apply": "تطبيق",
+    "reset": "إعادة تعيين",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "send": "إرسال",
+    "next": "التالي",
+    "back": "رجوع",
+    "loading": "جارٍ التحميل...",
+    "selectCountry": "اختر الدولة",
+    "selectCity": "اختر المدينة",
+    "selectCategory": "اختر التصنيف",
+    "viewAll": "عرض الكل",
+    "optional": "اختياري",
+    "language": "اللغة",
+    "arabic": "العربية",
+    "english": "English"
+  },
+  "condition": {
+    "new": "جديد",
+    "used": "مستعمل"
+  },
+  "sort": {
+    "label": "ترتيب",
+    "newest": "الأحدث",
+    "most_viewed": "الأكثر مشاهدة"
+  },
+  "category": {
+    "electronics": "إلكترونيات",
+    "furniture": "أثاث",
+    "cars": "سيارات",
+    "home-appliances": "أجهزة منزلية",
+    "clothing": "ملابس",
+    "watches": "ساعات",
+    "toys": "ألعاب",
+    "sports": "معدات رياضية",
+    "other": "أخرى"
+  },
+  "home": {
+    "heroTitle": "بدّل ما لديك بما تحتاجه",
+    "heroSubtitle": "سوق المبادلة الأول في الخليج — بدون بيع أو شراء.",
+    "cta": "أضف إعلان جديد",
+    "categories": "التصنيفات",
+    "featured": "إعلانات مميزة",
+    "latest": "أحدث الإعلانات",
+    "verifiedListings": "إعلانات موثقة"
+  },
+  "listing": {
+    "details": "تفاصيل الإعلان",
+    "description": "الوصف",
+    "wantedExchange": "المطلوب للمبادلة",
+    "owner": "صاحب الإعلان",
+    "message": "مراسلة",
+    "interested": "مهتم بالتبادل",
+    "follow": "متابعة",
+    "following": "متابَع",
+    "report": "الإبلاغ عن مشكلة",
+    "views": "{count} مشاهدة",
+    "verifiedItem": "منتج موثق",
+    "verifiedAccount": "موثق",
+    "noImages": "لا توجد صور",
+    "postedIn": "{city}، {country}"
+  },
+  "listings": {
+    "title": "الإعلانات",
+    "resultsCount": "{count} نتيجة",
+    "empty": "لا توجد إعلانات مطابقة",
+    "filters": "الفلاتر",
+    "verifiedOnly": "حسابات موثقة فقط"
+  },
+  "newListing": {
+    "title": "أضف إعلان جديد",
+    "fieldTitle": "عنوان الإعلان",
+    "fieldDescription": "الوصف",
+    "fieldCondition": "الحالة",
+    "fieldCategory": "التصنيف",
+    "fieldCountry": "الدولة",
+    "fieldCity": "المدينة",
+    "fieldWanted": "ما الذي تريده بالمقابل؟",
+    "images": "الصور",
+    "imagesHint": "حتى {max} صور في الباقة المجانية",
+    "submit": "نشر الإعلان",
+    "success": "تم نشر الإعلان بنجاح"
+  },
+  "auth": {
+    "loginTitle": "تسجيل الدخول",
+    "registerTitle": "إنشاء حساب",
+    "fullName": "الاسم الكامل",
+    "username": "اسم المستخدم",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "password": "كلمة المرور",
+    "country": "الدولة",
+    "city": "المدينة",
+    "avatar": "صورة الملف الشخصي",
+    "loginButton": "دخول",
+    "registerButton": "إنشاء الحساب",
+    "noAccount": "ليس لديك حساب؟",
+    "haveAccount": "لديك حساب بالفعل؟",
+    "createOne": "أنشئ حسابًا",
+    "loginInstead": "سجّل الدخول",
+    "errorInvalid": "بيانات الدخول غير صحيحة",
+    "errorGeneric": "حدث خطأ، حاول مرة أخرى"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "edit": "تعديل الملف",
+    "followers": "متابِعون",
+    "following": "يتابع",
+    "listings": "إعلانات",
+    "bio": "نبذة",
+    "noBio": "لا توجد نبذة",
+    "memberSince": "عضو منذ {date}",
+    "noListings": "لا توجد إعلانات بعد"
+  },
+  "chat": {
+    "title": "المحادثات",
+    "empty": "لا توجد محادثات بعد",
+    "placeholder": "اكتب رسالة...",
+    "send": "إرسال",
+    "you": "أنت",
+    "block": "حظر المستخدم",
+    "reportConversation": "الإبلاغ عن المحادثة",
+    "disclaimerBeforeChat": "Swap وسيط للتواصل فقط. الاتفاق وتسليم المنتج مسؤولية الطرفين."
+  },
+  "report": {
+    "title": "الإبلاغ عن مشكلة",
+    "reason": "السبب",
+    "description": "تفاصيل إضافية",
+    "submit": "إرسال البلاغ",
+    "success": "تم استلام بلاغك، شكرًا لك",
+    "reasons": {
+      "spam": "محتوى مكرر/مزعج",
+      "inappropriate": "محتوى غير لائق",
+      "scam": "محاولة احتيال",
+      "other": "أخرى"
+    }
+  },
+  "safety": {
+    "title": "السلامة والمسؤولية",
+    "disclaimerTitle": "تنويه مهم",
+    "points": {
+      "noOwn": "Swap لا تملك المنتجات المعروضة.",
+      "noBuy": "Swap لا تشتري المنتجات.",
+      "noSell": "Swap لا تبيع المنتجات.",
+      "noGuarantee": "Swap لا تضمن إتمام عمليات التبادل.",
+      "noEscrow": "Swap لا تقدّم خدمة وساطة مالية أو ضمان.",
+      "noCondition": "Swap لا تضمن حالة المنتج إلا إذا تم توثيقه عبر خدمة توثيق المنتجات الرسمية.",
+      "userResponsibility": "الاتفاق النهائي وتسليم المنتج مسؤولية المستخدمين."
+    }
+  },
+  "terms": {
+    "title": "الشروط والأحكام",
+    "placeholder": "صفحة الشروط والأحكام قيد الإعداد."
+  },
+  "admin": {
+    "title": "لوحة التحكم",
+    "dashboard": "الرئيسية",
+    "users": "المستخدمون",
+    "listings": "الإعلانات",
+    "reports": "البلاغات",
+    "categories": "التصنيفات",
+    "countries": "الدول",
+    "cities": "المدن",
+    "verifications": "طلبات التوثيق",
+    "metrics": {
+      "totalUsers": "إجمالي المستخدمين",
+      "verifiedUsers": "حسابات موثقة",
+      "activeListings": "إعلانات نشطة",
+      "hiddenListings": "إعلانات مخفية",
+      "pendingReports": "بلاغات معلّقة",
+      "totalConversations": "إجمالي المحادثات",
+      "totalMessages": "إجمالي الرسائل"
+    }
+  },
+  "empty": {
+    "generic": "لا يوجد شيء هنا بعد"
+  }
+}

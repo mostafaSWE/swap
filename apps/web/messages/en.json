@@ -1,0 +1,208 @@
+{
+  "brand": {
+    "name": "Swap",
+    "slogan": "Exchange what you have for what you need"
+  },
+  "nav": {
+    "home": "Home",
+    "categories": "Categories",
+    "add": "Add",
+    "addListing": "Add Listing",
+    "messages": "Messages",
+    "account": "Account",
+    "login": "Login",
+    "register": "Create Account",
+    "logout": "Logout",
+    "saved": "Saved",
+    "myListings": "My Listings",
+    "settings": "Settings",
+    "admin": "Admin",
+    "menu": "Menu",
+    "notifications": "Notifications"
+  },
+  "common": {
+    "search": "Search for an item...",
+    "searchAction": "Search",
+    "country": "Country",
+    "city": "City",
+    "category": "Category",
+    "condition": "Condition",
+    "all": "All",
+    "apply": "Apply",
+    "reset": "Reset",
+    "cancel": "Cancel",
+    "save": "Save",
+    "send": "Send",
+    "next": "Next",
+    "back": "Back",
+    "loading": "Loading...",
+    "selectCountry": "Select country",
+    "selectCity": "Select city",
+    "selectCategory": "Select category",
+    "viewAll": "View all",
+    "optional": "optional",
+    "language": "Language",
+    "arabic": "العربية",
+    "english": "English"
+  },
+  "condition": {
+    "new": "New",
+    "used": "Used"
+  },
+  "sort": {
+    "label": "Sort",
+    "newest": "Newest",
+    "most_viewed": "Most viewed"
+  },
+  "category": {
+    "electronics": "Electronics",
+    "furniture": "Furniture",
+    "cars": "Cars",
+    "home-appliances": "Home appliances",
+    "clothing": "Clothing",
+    "watches": "Watches",
+    "toys": "Toys",
+    "sports": "Sports equipment",
+    "other": "Other"
+  },
+  "home": {
+    "heroTitle": "Exchange what you have for what you need",
+    "heroSubtitle": "The GCC's first barter marketplace — no buying or selling.",
+    "cta": "Add New Listing",
+    "categories": "Categories",
+    "featured": "Featured Listings",
+    "latest": "Latest Listings",
+    "verifiedListings": "Verified Listings"
+  },
+  "listing": {
+    "details": "Listing Details",
+    "description": "Description",
+    "wantedExchange": "Wanted in Exchange",
+    "owner": "Owner",
+    "message": "Message",
+    "interested": "Interested in Exchange",
+    "follow": "Follow",
+    "following": "Following",
+    "report": "Report Issue",
+    "views": "{count} views",
+    "verifiedItem": "Verified Item",
+    "verifiedAccount": "Verified",
+    "noImages": "No images",
+    "postedIn": "{city}, {country}"
+  },
+  "listings": {
+    "title": "Listings",
+    "resultsCount": "{count} results",
+    "empty": "No matching listings",
+    "filters": "Filters",
+    "verifiedOnly": "Verified accounts only"
+  },
+  "newListing": {
+    "title": "Add New Listing",
+    "fieldTitle": "Listing title",
+    "fieldDescription": "Description",
+    "fieldCondition": "Condition",
+    "fieldCategory": "Category",
+    "fieldCountry": "Country",
+    "fieldCity": "City",
+    "fieldWanted": "What do you want in exchange?",
+    "images": "Images",
+    "imagesHint": "Up to {max} images on the free plan",
+    "submit": "Publish Listing",
+    "success": "Listing published successfully"
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "registerTitle": "Create Account",
+    "fullName": "Full name",
+    "username": "Username",
+    "email": "Email",
+    "phone": "Phone number",
+    "password": "Password",
+    "country": "Country",
+    "city": "City",
+    "avatar": "Profile photo",
+    "loginButton": "Sign in",
+    "registerButton": "Create account",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "createOne": "Create one",
+    "loginInstead": "Sign in",
+    "errorInvalid": "Invalid login credentials",
+    "errorGeneric": "Something went wrong, please try again"
+  },
+  "profile": {
+    "title": "Profile",
+    "edit": "Edit Profile",
+    "followers": "Followers",
+    "following": "Following",
+    "listings": "Listings",
+    "bio": "Bio",
+    "noBio": "No bio yet",
+    "memberSince": "Member since {date}",
+    "noListings": "No listings yet"
+  },
+  "chat": {
+    "title": "Messages",
+    "empty": "No conversations yet",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "you": "You",
+    "block": "Block user",
+    "reportConversation": "Report conversation",
+    "disclaimerBeforeChat": "Swap is only a communication platform. The agreement and item handover are the users' responsibility."
+  },
+  "report": {
+    "title": "Report Issue",
+    "reason": "Reason",
+    "description": "Additional details",
+    "submit": "Submit report",
+    "success": "Your report was received, thank you",
+    "reasons": {
+      "spam": "Spam / duplicate",
+      "inappropriate": "Inappropriate content",
+      "scam": "Scam attempt",
+      "other": "Other"
+    }
+  },
+  "safety": {
+    "title": "Safety & Responsibility",
+    "disclaimerTitle": "Important notice",
+    "points": {
+      "noOwn": "Swap does not own the listed products.",
+      "noBuy": "Swap does not buy products.",
+      "noSell": "Swap does not sell products.",
+      "noGuarantee": "Swap does not guarantee that exchanges are completed.",
+      "noEscrow": "Swap does not provide escrow or financial mediation.",
+      "noCondition": "Swap does not guarantee product condition unless verified through the official verified-item service.",
+      "userResponsibility": "The final agreement and item handover are the responsibility of the users."
+    }
+  },
+  "terms": {
+    "title": "Terms & Conditions",
+    "placeholder": "The Terms & Conditions page is being prepared."
+  },
+  "admin": {
+    "title": "Admin",
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "listings": "Listings",
+    "reports": "Reports",
+    "categories": "Categories",
+    "countries": "Countries",
+    "cities": "Cities",
+    "verifications": "Verification Requests",
+    "metrics": {
+      "totalUsers": "Total users",
+      "verifiedUsers": "Verified users",
+      "activeListings": "Active listings",
+      "hiddenListings": "Hidden listings",
+      "pendingReports": "Pending reports",
+      "totalConversations": "Total conversations",
+      "totalMessages": "Total messages"
+    }
+  },
+  "empty": {
+    "generic": "Nothing here yet"
+  }
+}

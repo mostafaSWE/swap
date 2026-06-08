@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f5f7f8;
+  --foreground: #111827;
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The app is mobile-first: a centered phone-width column on larger screens. */
+@layer components {
+  .app-container {
+    @apply mx-auto w-full max-w-app bg-canvas min-h-dvh;
+  }
+
+  .card {
+    @apply rounded-card bg-white border border-line shadow-card;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-pill bg-green px-5 py-3
+      font-semibold text-white transition-colors hover:bg-green-dark
+      disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-pill border border-line
+      bg-white px-5 py-3 font-semibold text-ink transition-colors hover:bg-canvas;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-ink
+      placeholder:text-muted outline-none focus:border-green focus:ring-2 focus:ring-green/20;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-pill border border-line bg-white
+      px-3 py-1.5 text-sm text-ink whitespace-nowrap;
+  }
+}
+
+/* Hide scrollbars on horizontal carousels while keeping them scrollable. */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

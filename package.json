@@ -1,0 +1,24 @@
+{
+  "name": "swap",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Swap — a barter marketplace. Exchange what you have for what you need.",
+  "packageManager": "pnpm@11.2.2",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "web": "pnpm --filter @swap/web dev",
+    "mobile": "pnpm --filter @swap/mobile start",
+    "clean": "turbo run clean && rimraf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.6.3",
+    "rimraf": "^6.0.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
