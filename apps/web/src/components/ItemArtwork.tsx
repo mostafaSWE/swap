@@ -1,7 +1,16 @@
 import Image from "next/image";
-import type { ListingWithRelations } from "@swap/types";
 import { CategoryIcon } from "./CategoryIcon";
 import { cn } from "@/lib/utils";
+
+/**
+ * Minimal shape ItemArtwork reads. Accepts both `ListingWithRelations` (cards)
+ * and `ListingWithImages` (proposal offered items, which carry no category join).
+ */
+type ArtworkListing = {
+  title: string;
+  images?: { image_url: string }[] | null;
+  category?: { icon?: string | null } | null;
+};
 
 /**
  * ItemArtwork — renders a listing's cover image, or a brand-tinted placeholder
@@ -30,17 +39,19 @@ export function ItemArtwork({
   listing,
   className,
   sizes = "(max-width: 480px) 50vw, 240px",
+  priority = false,
 }: {
-  listing: ListingWithRelations;
+  listing: ArtworkListing;
   className?: string;
   sizes?: string;
+  priority?: boolean;
 }) {
   const cover = listing.images?.[0]?.image_url;
 
   if (cover) {
     return (
       <div className={cn("relative overflow-hidden bg-canvas", className)}>
-        <Image src={cover} alt={listing.title} fill sizes={sizes} className="object-cover" />
+        <Image src={cover} alt={listing.title} fill sizes={sizes} className="object-cover" priority={priority} />
       </div>
     );
   }

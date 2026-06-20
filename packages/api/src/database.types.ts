@@ -7,6 +7,7 @@
  */
 import type {
   AdminAction,
+  Block,
   Category,
   City,
   Conversation,
@@ -17,10 +18,14 @@ import type {
   ListingImage,
   ListingView,
   Message,
+  Notification,
   Profile,
+  Rating,
   Report,
   SavedListing,
-  VerificationRequest,
+  SwapConfirmation,
+  SwapProposal,
+  SwapProposalItem,
 } from "@swap/types";
 
 type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
@@ -44,11 +49,16 @@ export interface Database {
       conversations: Table<Conversation>;
       conversation_participants: Table<ConversationParticipant>;
       messages: Table<Message>;
+      swap_proposals: Table<SwapProposal>;
+      swap_proposal_items: Table<SwapProposalItem>;
+      swap_confirmations: Table<SwapConfirmation>;
+      ratings: Table<Rating>;
+      notifications: Table<Notification>;
       follows: Table<Follow>;
+      blocks: Table<Block>;
       reports: Table<Report>;
       saved_listings: Table<SavedListing>;
       listing_views: Table<ListingView>;
-      verification_requests: Table<VerificationRequest>;
       admin_actions: Table<AdminAction>;
     };
     Views: Record<string, never>;
@@ -60,6 +70,15 @@ export interface Database {
       is_admin: {
         Args: { uid: string };
         Returns: boolean;
+      };
+      /**
+       * Atomically record a deal-closing confirmation for one party and, once
+       * both parties have confirmed, complete the swap and increment each
+       * party's completed_swaps_count. Returns the resulting proposal status.
+       */
+      record_swap_confirmation: {
+        Args: { p_proposal_id: string; p_user_id: string; p_photo_path: string };
+        Returns: string;
       };
     };
     Enums: Record<string, never>;

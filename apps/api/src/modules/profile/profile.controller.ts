@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -45,6 +46,13 @@ export class ProfileController {
     return this.profiles.savedListings(userId);
   }
 
+  @Get("me/blocked")
+  @ApiBearerAuth("supabase-jwt")
+  @UseGuards(AuthGuard)
+  blocked(@CurrentUserId() userId: string) {
+    return this.profiles.blockedUsers(userId);
+  }
+
   @Get("users/:username")
   publicProfile(@Param("username") username: string) {
     return this.profiles.publicProfile(username);
@@ -54,7 +62,7 @@ export class ProfileController {
   @HttpCode(204)
   @ApiBearerAuth("supabase-jwt")
   @UseGuards(AuthGuard)
-  follow(@CurrentUserId() userId: string, @Param("id") targetId: string) {
+  follow(@CurrentUserId() userId: string, @Param("id", ParseUUIDPipe) targetId: string) {
     return this.profiles.follow(userId, targetId);
   }
 
@@ -62,7 +70,23 @@ export class ProfileController {
   @HttpCode(204)
   @ApiBearerAuth("supabase-jwt")
   @UseGuards(AuthGuard)
-  unfollow(@CurrentUserId() userId: string, @Param("id") targetId: string) {
+  unfollow(@CurrentUserId() userId: string, @Param("id", ParseUUIDPipe) targetId: string) {
     return this.profiles.unfollow(userId, targetId);
+  }
+
+  @Post("users/:id/block")
+  @HttpCode(204)
+  @ApiBearerAuth("supabase-jwt")
+  @UseGuards(AuthGuard)
+  block(@CurrentUserId() userId: string, @Param("id", ParseUUIDPipe) targetId: string) {
+    return this.profiles.block(userId, targetId);
+  }
+
+  @Delete("users/:id/block")
+  @HttpCode(204)
+  @ApiBearerAuth("supabase-jwt")
+  @UseGuards(AuthGuard)
+  unblock(@CurrentUserId() userId: string, @Param("id", ParseUUIDPipe) targetId: string) {
+    return this.profiles.unblock(userId, targetId);
   }
 }

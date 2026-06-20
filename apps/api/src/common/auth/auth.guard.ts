@@ -16,7 +16,7 @@ export interface AuthenticatedRequest extends Request {
 
 /**
  * Authenticates the request via the `Authorization: Bearer <supabase jwt>`
- * header, loads the user's profile, and rejects suspended users.
+ * header, loads the user's profile, and rejects banned or (actively) suspended users.
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -39,7 +39,13 @@ export class AuthGuard implements CanActivate {
       .maybeSingle();
 
     if (!profile) throw new UnauthorizedException("Profile not found");
-    if ((profile as Profile).is_suspended) {
+    const p = profile as Profile;
+    if (p.is_banned) {
+      throw new ForbiddenException("Account banned");
+    }
+    // A temporary suspension with a past `suspended_until` is treated as lifted
+    // (no DB write here — admins can also explicitly unsuspend).
+    if (p.is_suspended && (!p.suspended_until || new Date(p.suspended_until) > new Date())) {
       throw new ForbiddenException("Account suspended");
     }
 

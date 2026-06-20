@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { MailCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { COUNTRY_BY_ID } from "@swap/config";
 import type { Locale } from "@swap/types";
@@ -29,6 +30,7 @@ export function RegisterForm() {
   const [countryId, setCountryId] = useState("");
   const [cityId, setCityId] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
   const {
     register,
     handleSubmit,
@@ -41,11 +43,13 @@ export function RegisterForm() {
     // Phone is stored with the selected country's dial code.
     const dial = countryId ? COUNTRY_BY_ID[countryId]?.phone_code ?? "" : "";
     const phone = values.phone ? `${dial}${values.phone.replace(/^0+/, "")}` : null;
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
+        emailRedirectTo: `${base}/${locale}/onboarding`,
         data: {
           full_name: values.full_name,
           username: values.username,
@@ -59,7 +63,14 @@ export function RegisterForm() {
       return;
     }
 
-    // The handle_new_user trigger created the profile; add country/city.
+    // Email confirmation on → no session yet. Tell the user to check their inbox;
+    // country/city/avatar are collected on /onboarding after they confirm.
+    if (!data.session) {
+      setEmailSent(true);
+      return;
+    }
+
+    // Confirmation off → we have a session. Persist country/city, then onboard.
     if (data.user && (countryId || cityId)) {
       try {
         await updateProfile(supabase, data.user.id, {
@@ -67,18 +78,35 @@ export function RegisterForm() {
           city_id: cityId || null,
         });
       } catch {
-        /* non-fatal — user can complete this on profile edit */
+        /* non-fatal — user can complete this in onboarding */
       }
     }
 
-    router.push("/");
+    router.push("/onboarding");
     router.refresh();
+  }
+
+  if (emailSent) {
+    return (
+      <div className="app-container flex min-h-dvh flex-col justify-center px-6 py-10">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-swap-tint text-swap">
+            <MailCheck className="h-7 w-7" aria-hidden />
+          </span>
+          <h1 className="text-xl font-bold text-ink">{t("confirmEmailTitle")}</h1>
+          <p className="text-sm text-ink/80">{t("confirmEmailBody")}</p>
+          <Link href="/login" className="mt-2 font-semibold text-green">
+            {t("backToLogin")}
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="app-container flex min-h-dvh flex-col justify-center px-6 py-10">
       <div className="mb-6 flex flex-col items-center gap-2">
-        <Logo />
+        <Logo priority />
         <h1 className="text-2xl font-bold text-ink">{t("registerTitle")}</h1>
       </div>
 
@@ -101,7 +129,7 @@ export function RegisterForm() {
 
         <FormInput type="password" label={t("password")} autoComplete="new-password" error={errors.password && t("errorGeneric")} {...register("password", { required: true, minLength: 6 })} />
 
-        {error ? <p className="text-sm text-danger">{error}</p> : null}
+        {error ? <p role="alert" className="text-sm text-danger">{error}</p> : null}
 
         <CTAButton type="submit" disabled={isSubmitting}>
           {t("registerButton")}

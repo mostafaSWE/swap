@@ -1,7 +1,7 @@
 /** Skeleton placeholder grid shown while listings load. */
 export function ListingGridSkeleton({ count = 8 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div aria-hidden className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="overflow-hidden rounded-card border border-line bg-white">
           <div className="skeleton aspect-square w-full rounded-none" />

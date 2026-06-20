@@ -11,14 +11,17 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import {
   createListingSchema,
   createReportSchema,
   listingFiltersSchema,
+  reorderImagesSchema,
   startConversationSchema,
   updateListingSchema,
   type CreateListingInput,
   type ListingFiltersInput,
+  type ReorderImagesInput,
   type StartConversationInput,
   type UpdateListingInput,
 } from "@swap/validation";
@@ -84,7 +87,7 @@ export class ListingsController {
   }
 
   @Post(":id/report")
-  @HttpCode(204)
+  @HttpCode(202) // Accepted — queued for admin review (spec §3.8).
   @ApiBearerAuth("supabase-jwt")
   @UseGuards(AuthGuard)
   report(
@@ -124,6 +127,8 @@ export class ListingsController {
   }
 
   @Post(":id/images/sign")
+  // Upload signing is sensitive + abusable — tighter than the global default.
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiBearerAuth("supabase-jwt")
   @UseGuards(AuthGuard)
   signImage(
@@ -144,5 +149,29 @@ export class ListingsController {
     @Body(new ZodBody(addImageBodySchema)) input: { image_url: string },
   ) {
     return this.listings.addImage(id, userId, input.image_url);
+  }
+
+  @Patch(":id/images/order")
+  @HttpCode(204)
+  @ApiBearerAuth("supabase-jwt")
+  @UseGuards(AuthGuard)
+  reorderImages(
+    @Param("id") id: string,
+    @CurrentUserId() userId: string,
+    @Body(new ZodBody(reorderImagesSchema)) input: ReorderImagesInput,
+  ) {
+    return this.listings.reorderImages(id, userId, input.image_ids);
+  }
+
+  @Delete(":id/images/:imageId")
+  @HttpCode(204)
+  @ApiBearerAuth("supabase-jwt")
+  @UseGuards(AuthGuard)
+  removeImage(
+    @Param("id") id: string,
+    @Param("imageId") imageId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.listings.removeImage(id, userId, imageId);
   }
 }

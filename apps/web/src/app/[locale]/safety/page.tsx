@@ -9,8 +9,8 @@ export default async function SafetyPage({ params: { locale } }: { params: { loc
 
   return (
     <AppShell>
-      <div className="space-y-4 px-4 py-4">
-        <h1 className="text-xl font-bold text-ink">{t("title")}</h1>
+      <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-10 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-extrabold tracking-tight text-ink md:text-4xl">{t("title")}</h1>
         <SafetyDisclaimer />
       </div>
     </AppShell>

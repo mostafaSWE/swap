@@ -14,7 +14,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* The app is mobile-first: a centered phone-width column on larger screens. */
 @layer components {
   .app-container {
     @apply mx-auto w-full max-w-app bg-canvas min-h-dvh;
@@ -27,12 +26,14 @@ body {
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-pill bg-green px-5 py-3
       font-semibold text-white transition-all hover:bg-green-dark active:scale-[0.97]
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/40 focus-visible:ring-offset-2
       disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100;
   }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 rounded-pill border border-line
-      bg-white px-5 py-3 font-semibold text-ink transition-all hover:bg-canvas active:scale-[0.97];
+      bg-white px-5 py-3 font-semibold text-ink transition-all hover:bg-canvas active:scale-[0.97]
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/30 focus-visible:ring-offset-2;
   }
 
   .input-field {
@@ -81,6 +82,37 @@ body {
   animation: fade-in 0.2s ease-out;
 }
 
+/* Deal-closed celebration: the swap-circle motif pops in, with an expanding ring. */
+@keyframes swap-pop {
+  0% {
+    transform: scale(0.4) rotate(-90deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08) rotate(8deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+@keyframes swap-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+.animate-swap-pop {
+  animation: swap-pop 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.animate-swap-ring {
+  animation: swap-ring 1.1s ease-out infinite;
+}
+
 /* Skeleton shimmer for loading states. */
 .skeleton {
   @apply rounded-card bg-line/60;
@@ -104,6 +136,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-slide-up,
   .animate-fade-in,
+  .animate-swap-pop,
+  .animate-swap-ring,
   .skeleton::after {
     animation: none;
   }

@@ -67,5 +67,5 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 export function CategoryIcon({ icon, className }: { icon: string; className?: string }) {
   const Icon = ICON_MAP[icon] ?? ShoppingBag;
-  return <Icon className={className} aria-hidden />;
+  return <Icon className={className} aria-hidden strokeWidth={2} />;
 }

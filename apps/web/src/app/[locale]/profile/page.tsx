@@ -4,13 +4,13 @@ import type { Locale, PublicProfile } from "@swap/types";
 import { AppShell } from "@/components/AppShell";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { ListingGrid } from "@/components/ListingGrid";
+import { ReviewsList } from "@/components/ReviewsList";
 import { EmptyState } from "@/components/primitives";
 import { CTAButton } from "@/components/CTAButton";
 import { LogoutButton } from "@/components/LogoutButton";
-import { RequestVerification } from "@/components/RequestVerification";
 import { Link } from "@/i18n/navigation";
 import { getCurrentProfile } from "@/lib/auth";
-import { fetchUserListings } from "@/lib/data";
+import { fetchUserListings, fetchUserReviews } from "@/lib/data";
 
 export default async function ProfilePage({ params: { locale } }: { params: { locale: Locale } }) {
   setRequestLocale(locale);
@@ -32,7 +32,10 @@ export default async function ProfilePage({ params: { locale } }: { params: { lo
     );
   }
 
-  const listings = await fetchUserListings(profile.id);
+  const [listings, reviews] = await Promise.all([
+    fetchUserListings(profile.id),
+    fetchUserReviews(profile.id),
+  ]);
   const publicProfile = profile as unknown as PublicProfile;
 
   return (
@@ -62,9 +65,6 @@ export default async function ProfilePage({ params: { locale } }: { params: { lo
             </Link>
           ) : null}
 
-          {/* Account verification request (manual review; no payment in MVP). */}
-          {!profile.is_verified ? <RequestVerification type="account" /> : null}
-
           <LogoutButton />
         </div>
 
@@ -75,6 +75,7 @@ export default async function ProfilePage({ params: { locale } }: { params: { lo
           ) : (
             <EmptyState title={t("noListings")} action={<CTAButton href="/new-listing">{tn("addListing")}</CTAButton>} />
           )}
+          <ReviewsList reviews={reviews} />
         </div>
       </div>
     </AppShell>

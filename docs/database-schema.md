@@ -1,11 +1,15 @@
-# Swap — Database Schema
+# JustSwap — Database Schema
 
 All SQL lives in [`/supabase`](../supabase). Run order:
 
 1. `migrations/0001_schema.sql` — tables, constraints, indexes, triggers, RPCs
 2. `migrations/0002_rls.sql` — Row Level Security policies
 3. `migrations/0003_storage.sql` — storage buckets + policies
-4. `seed.sql` — reference data + demo data
+4. `migrations/0004_catalog_expansion.sql` — category parent/child + more GCC cities
+5. `migrations/0005_proposals.sql` — swap proposals (+ items, conversation link)
+6. `seed.sql` — reference data + demo data
+
+(Or paste `supabase/full_setup.sql` — all of the above concatenated — once.)
 
 The TypeScript mirror of these tables is [`packages/types`](../packages/types);
 the typed Supabase `Database` is in `packages/api/src/database.types.ts`.
@@ -18,7 +22,7 @@ the typed Supabase `Database` is in `packages/api/src/database.types.ts`.
 | `countries` | GCC countries; `name_ar/en`, ISO, phone code, currency, timezone |
 | `cities` | Cities per country |
 | `categories` | Listing categories (`name_ar/en`, slug, icon, **`parent_id`** for parent/child) |
-| `listings` | Exchange listings; condition, status, wanted item, verified/featured flags |
+| `listings` | Exchange listings; condition, status, wanted item, featured flag |
 | `listing_images` | Images per listing (free plan ≤ 4) |
 | `conversations` | Chat threads, optionally tied to a listing |
 | `conversation_participants` | Membership (drives chat access in RLS) |
@@ -27,8 +31,13 @@ the typed Supabase `Database` is in `packages/api/src/database.types.ts`.
 | `reports` | Abuse reports for listing/user/message/conversation |
 | `saved_listings` | User bookmarks |
 | `listing_views` | View log (bumps `listings.view_count` via trigger) |
-| `verification_requests` | Account/item verification requests (manual flow) |
+| `swap_proposals` | Barter proposals; status lifecycle, links proposer ↔ recipient ↔ conversation |
+| `swap_proposal_items` | The proposer's offered listings per proposal (bundle support) |
 | `admin_actions` | Audit log of admin actions |
+
+> Trust is a `profiles.completed_swaps_count` counter (+1 per party on an
+> undisputed completed swap). JustSwap does **not** verify identity — there is no
+> `verification_requests` table and no verified flags.
 
 ## Key relationships
 
@@ -62,7 +71,7 @@ the typed Supabase `Database` is in `packages/api/src/database.types.ts`.
   report exists — enforced at the app layer).
 - **reports**: any authenticated user files; reporter or admin reads; admin manages.
 - **saved_listings / follows / listing_views**: owner-scoped writes.
-- **verification_requests**: user creates/reads own; admin manages.
+- **swap_proposals / swap_proposal_items**: read/write limited to the two parties (proposer/recipient); admin manages.
 - **admin_actions**: admin only.
 
 ## Storage buckets

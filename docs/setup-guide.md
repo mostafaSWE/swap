@@ -1,4 +1,4 @@
-# Swap — Setup Guide
+# JustSwap — Setup Guide
 
 ## Prerequisites
 
@@ -73,15 +73,14 @@ supabase db execute -f supabase/seed.sql
 The seed is **idempotent** (safe to re-run). It creates **12 demo auth users**
 (via `auth.users` + a `crypt()`-hashed password, so they are login-ready) plus
 matching profiles, and **44 listings** with images, follows, saved listings,
-8 conversations + messages, reports, and verification requests.
+8 conversations + messages, and reports.
 
 **Demo accounts — development only, password `Swap1234!`:**
 
 | Email | Role |
 |---|---|
-| `ahmed@swap.demo` | admin + verified |
-| `sara@swap.demo`, `fatima@swap.demo`, `noura@swap.demo`, `mariam@swap.demo`, `layla@swap.demo` | verified users |
-| `khalid / omar / yousef / salem / huda / tariq @swap.demo` | regular users |
+| `ahmed@swap.demo` | admin |
+| all others (`sara / khalid / omar / fatima / noura / yousef / mariam / salem / huda / tariq / layla @swap.demo`) | regular users |
 
 > ⚠️ These credentials are for local development. **Never** seed or use them in
 > production.

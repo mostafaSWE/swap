@@ -4,12 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { sendMessage, subscribeToMessages } from "@swap/api";
-import type { Message, PublicProfile } from "@swap/types";
+import type {
+  Message,
+  PublicProfile,
+  Rating,
+  SwapConfirmationView,
+  SwapProposalWithRelations,
+} from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
 import { getApi } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { ChatBubble } from "@/components/ChatBubble";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { ProposalContextCard } from "@/components/ProposalContextCard";
 import { SafetyDisclaimer } from "@/components/SafetyDisclaimer";
 
 export function ChatRoom({
@@ -17,11 +24,17 @@ export function ChatRoom({
   currentUserId,
   otherUser,
   initialMessages,
+  initialProposal,
+  initialConfirmations,
+  initialMyRating,
 }: {
   conversationId: string;
   currentUserId: string;
   otherUser: PublicProfile | null;
   initialMessages: Message[];
+  initialProposal: SwapProposalWithRelations | null;
+  initialConfirmations: SwapConfirmationView[];
+  initialMyRating: Rating | null;
 }) {
   const t = useTranslations("chat");
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -79,6 +92,16 @@ export function ChatRoom({
           </Link>
         ) : null}
       </header>
+
+      {/* Proposal context — pinned above the message stream */}
+      {initialProposal ? (
+        <ProposalContextCard
+          initialProposal={initialProposal}
+          initialConfirmations={initialConfirmations}
+          initialMyRating={initialMyRating}
+          currentUserId={currentUserId}
+        />
+      ) : null}
 
       {/* Messages */}
       <div className="flex-1 space-y-2 overflow-y-auto bg-canvas px-4 py-4">

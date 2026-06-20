@@ -67,17 +67,25 @@ create table if not exists public.profiles (
   avatar_url         text,
   bio                text,
   preferred_language text not null default 'ar' check (preferred_language in ('ar','en')),
-  is_verified        boolean not null default false,  -- verified ACCOUNT (admin/paid later)
   is_admin           boolean not null default false,
   is_suspended       boolean not null default false,
+  -- moderation (added in 0010): permanent ban + temporary-suspension window + reason.
+  is_banned          boolean not null default false,
+  suspended_until    timestamptz,
+  suspension_reason  text,
   followers_count    int not null default 0,
   following_count    int not null default 0,
   listings_count     int not null default 0,
-  -- rating placeholder for the future (no ratings feature in MVP)
+  -- trust signal: completed, undisputed swaps (each party +1 when a swap completes).
+  -- Swap does not verify identity, so this replaces any "verified account" concept.
+  completed_swaps_count int not null default 0,
+  -- post-swap reputation (maintained by the ratings trigger in 0007, never by hand).
   rating             numeric(2,1),
+  ratings_count      int not null default 0,
   created_at         timestamptz not null default now(),
   updated_at         timestamptz not null default now()
 );
+drop trigger if exists profiles_set_updated_at on public.profiles;
 create trigger profiles_set_updated_at before update on public.profiles
   for each row execute function public.set_updated_at();
 
@@ -93,7 +101,6 @@ create table if not exists public.listings (
   condition        text not null check (condition in ('new','used')),
   wanted_exchange  text not null default '',  -- what the owner wants in exchange
   status           text not null default 'active' check (status in ('active','hidden','removed','completed')),
-  is_verified_item boolean not null default false,  -- verified ITEM (paid/manual later)
   is_featured      boolean not null default false,  -- featured ad (paid later)
   view_count       int not null default 0,
   created_at       timestamptz not null default now(),
@@ -105,6 +112,7 @@ create index if not exists listings_category_idx  on public.listings(category_id
 create index if not exists listings_country_idx   on public.listings(country_id);
 create index if not exists listings_city_idx      on public.listings(city_id);
 create index if not exists listings_created_idx   on public.listings(created_at desc);
+drop trigger if exists listings_set_updated_at on public.listings;
 create trigger listings_set_updated_at before update on public.listings
   for each row execute function public.set_updated_at();
 
@@ -127,6 +135,7 @@ create table if not exists public.conversations (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+drop trigger if exists conversations_set_updated_at on public.conversations;
 create trigger conversations_set_updated_at before update on public.conversations
   for each row execute function public.set_updated_at();
 
@@ -191,23 +200,6 @@ create table if not exists public.listing_views (
 );
 create index if not exists listing_views_listing_idx on public.listing_views(listing_id);
 
--- ── verification_requests (account / item) ──────────────────────────────
-create table if not exists public.verification_requests (
-  id         uuid primary key default gen_random_uuid(),
-  user_id    uuid not null references public.profiles(id) on delete cascade,
-  listing_id uuid references public.listings(id) on delete cascade,
-  type       text not null check (type in ('account','item')),
-  country_id uuid references public.countries(id),
-  city_id    uuid references public.cities(id),
-  status     text not null default 'pending' check (status in ('pending','approved','rejected','completed')),
-  notes      text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-create trigger verification_requests_set_updated_at before update on public.verification_requests
-  for each row execute function public.set_updated_at();
--- TODO (Phase 2): payment + automated verification workflow. Manual admin flow only for MVP.
-
 -- ── admin_actions (audit log) ───────────────────────────────────────────
 create table if not exists public.admin_actions (
   id          uuid primary key default gen_random_uuid(),
@@ -216,6 +208,7 @@ create table if not exists public.admin_actions (
   target_type text not null,
   target_id   uuid not null,
   notes       text,
+  ip          text,                  -- actor IP at action time (spec §4.1; added in 0010)
   created_at  timestamptz not null default now()
 );
 
@@ -237,6 +230,7 @@ begin
   return null;
 end;
 $$;
+drop trigger if exists follows_sync_counts on public.follows;
 create trigger follows_sync_counts
   after insert or delete on public.follows
   for each row execute function public.sync_follow_counts();
@@ -253,6 +247,7 @@ begin
   return null;
 end;
 $$;
+drop trigger if exists listings_sync_counts on public.listings;
 create trigger listings_sync_counts
   after insert or delete on public.listings
   for each row execute function public.sync_listing_counts();
@@ -265,6 +260,7 @@ begin
   return null;
 end;
 $$;
+drop trigger if exists listing_views_bump on public.listing_views;
 create trigger listing_views_bump
   after insert on public.listing_views
   for each row execute function public.bump_listing_view_count();

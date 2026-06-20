@@ -14,17 +14,50 @@ const cairo = Cairo({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Swap — بدّل ما لديك بما تحتاجه",
-  description: "Swap — a barter marketplace for the GCC. Exchange what you have for what you need.",
-};
+const SITE_NAME = "JustSwap";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+export function generateMetadata({ params: { locale } }: { params: { locale: string } }): Metadata {
+  const isAr = locale === "ar";
+  const title = isAr ? "JustSwap - بدّل ما لديك بما تحتاجه" : "JustSwap - Exchange what you have for what you need";
+  const description = isAr
+    ? "JustSwap سوق مقايضة في الخليج. بدّل ما لديك بما تحتاجه دون بيع أو شراء."
+    : "JustSwap is a barter marketplace for the GCC. Exchange what you have for what you need without buying or selling.";
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: { default: title, template: `%s · ${SITE_NAME}` },
+    description,
+    applicationName: SITE_NAME,
+    manifest: "/manifest.webmanifest",
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "32x32" },
+        { url: "/brand/justswap-favicon-32.png", sizes: "32x32", type: "image/png" },
+        { url: "/brand/justswap-app-icon.png", type: "image/png" },
+        { url: "/brand/justswap-mark.png", type: "image/png" },
+      ],
+      apple: [{ url: "/brand/justswap-app-icon.png", type: "image/png" }],
+    },
+    alternates: { languages: { ar: "/ar", en: "/en" } },
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+      locale: isAr ? "ar_AR" : "en_US",
+      url: `/${locale}`,
+      title,
+      description,
+      images: [{ url: "/brand/justswap-app-icon.png", width: 1024, height: 1024, alt: SITE_NAME }],
+    },
+    twitter: { card: "summary_large_image", title, description, images: ["/brand/justswap-app-icon.png"] },
+    robots: { index: true, follow: true },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-// The app is database-first and auth-aware: pages read per-request data (DB +
-// session cookies via RLS), so render them on demand rather than at build time.
 export const dynamic = "force-dynamic";
 
 export default async function LocaleLayout({
@@ -36,7 +69,6 @@ export default async function LocaleLayout({
 }) {
   if (!routing.locales.includes(locale as Locale)) notFound();
 
-  // Enable static rendering for this locale.
   setRequestLocale(locale);
 
   const messages = await getMessages();

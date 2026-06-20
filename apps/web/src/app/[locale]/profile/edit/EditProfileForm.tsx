@@ -11,6 +11,7 @@ import { getApi } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
 import { FormInput, FormTextarea } from "@/components/forms";
 import { CountryCitySelector } from "@/components/CountryCitySelector";
+import { AvatarUpload } from "@/components/AvatarUpload";
 import { CTAButton } from "@/components/CTAButton";
 
 interface Values {
@@ -28,6 +29,7 @@ export function EditProfileForm({ profile }: { profile: Profile }) {
 
   const [countryId, setCountryId] = useState(profile.country_id ?? "");
   const [cityId, setCityId] = useState(profile.city_id ?? "");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url);
   const [saved, setSaved] = useState(false);
   const { register, handleSubmit, formState: { isSubmitting } } = useForm<Values>({
     defaultValues: {
@@ -39,7 +41,7 @@ export function EditProfileForm({ profile }: { profile: Profile }) {
   });
 
   async function onSubmit(values: Values) {
-    const patch = { ...values, country_id: countryId || null, city_id: cityId || null };
+    const patch = { ...values, country_id: countryId || null, city_id: cityId || null, avatar_url: avatarUrl };
     const api = getApi();
     if (api) await api.updateMe(patch);
     else await updateProfile(createClient(), profile.id, patch);
@@ -49,6 +51,9 @@ export function EditProfileForm({ profile }: { profile: Profile }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="flex justify-center pb-2">
+        <AvatarUpload userId={profile.id} name={profile.full_name} value={avatarUrl} onUploaded={setAvatarUrl} />
+      </div>
       <FormInput label={t("fullName")} {...register("full_name", { required: true })} />
       <FormInput label={t("username")} {...register("username", { required: true })} />
       <FormInput label={t("phone")} type="tel" {...register("phone")} />

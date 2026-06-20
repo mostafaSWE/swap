@@ -1,13 +1,15 @@
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { formatRelativeTime } from "@swap/ui";
 import type { ConversationPreview, Locale } from "@swap/types";
 import { Link } from "@/i18n/navigation";
 import { ProfileAvatar } from "./ProfileAvatar";
+import { ProposalStatusBadge } from "./badges";
 
 /** Row in the conversations list. */
 export function ConversationCard({ conversation }: { conversation: ConversationPreview }) {
   const locale = useLocale() as Locale;
-  const { other_user, last_message, unread_count } = conversation;
+  const tp = useTranslations("proposal");
+  const { other_user, last_message, unread_count, proposal_status } = conversation;
 
   return (
     <Link
@@ -24,7 +26,12 @@ export function ConversationCard({ conversation }: { conversation: ConversationP
             </span>
           ) : null}
         </div>
-        <p className="truncate text-sm text-muted">{last_message?.body ?? "—"}</p>
+        <div className="flex items-center gap-1.5">
+          {proposal_status ? (
+            <ProposalStatusBadge status={proposal_status} label={tp(`status.${proposal_status}`)} />
+          ) : null}
+          <p className="truncate text-sm text-muted">{last_message?.body ?? "—"}</p>
+        </div>
       </div>
       {unread_count > 0 ? (
         <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-green px-1.5 text-xs font-semibold text-white">

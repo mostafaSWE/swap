@@ -15,7 +15,6 @@ export interface ActiveFilters {
   country?: string; // id
   city?: string; // id
   condition?: string;
-  verified?: string;
   sort?: string;
   search?: string;
 }
@@ -116,15 +115,6 @@ export function ListingFilters({ active }: { active: ActiveFilters }) {
               { value: "used", label: t("condition.used") },
             ]}
           />
-          <label className="flex items-center gap-2 text-sm text-ink">
-            <input
-              type="checkbox"
-              checked={active.verified === "1"}
-              onChange={(e) => update({ verified: e.target.checked ? "1" : undefined })}
-              className="h-4 w-4 accent-green"
-            />
-            {t("listings.verifiedOnly")}
-          </label>
         </div>
       ) : null}
     </div>

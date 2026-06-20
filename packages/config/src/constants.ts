@@ -1,6 +1,6 @@
 /** App-wide constants and business rules shared across web + mobile. */
 
-export const APP_NAME = "Swap";
+export const APP_NAME = "JustSwap";
 
 export const SLOGAN = {
   ar: "بدّل ما لديك بما تحتاجه",
@@ -19,6 +19,8 @@ export const STORAGE_BUCKETS = {
   avatars: "avatars",
   listingImages: "listing-images",
   chatImages: "chat-images",
+  // Private: deal-closing confirmation photos, readable by both parties + admins.
+  swapConfirmations: "swap-confirmations",
 } as const;
 
 /** Listing field length limits (mirror DB CHECK/validation). */

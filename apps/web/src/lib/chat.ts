@@ -1,8 +1,14 @@
-import type { ConversationPreview, Message, PublicProfile } from "@swap/types";
+import type {
+  ConversationPreview,
+  Message,
+  PublicProfile,
+  SwapProposalStatus,
+} from "@swap/types";
+import { getProposalStatuses } from "@swap/api";
 import { createClient } from "./supabase/server";
 
 const PUBLIC_PROFILE_COLUMNS =
-  "id, full_name, username, avatar_url, bio, country_id, city_id, is_verified, followers_count, following_count, listings_count, created_at";
+  "id, full_name, username, avatar_url, bio, country_id, city_id, followers_count, following_count, listings_count, completed_swaps_count, rating, ratings_count, created_at";
 
 /** Build conversation previews (other user + last message + unread) for a user. */
 export async function fetchConversations(userId: string): Promise<ConversationPreview[]> {
@@ -21,6 +27,13 @@ export async function fetchConversations(userId: string): Promise<ConversationPr
     .select("*")
     .in("id", conversationIds)
     .order("updated_at", { ascending: false });
+
+  // Batch-resolve the linked proposal's status for the conversation status badge.
+  // Cosmetic only — a failure here must never take down the whole inbox.
+  const statusByProposalId = await getProposalStatuses(
+    supabase,
+    (conversations ?? []).map((c) => c.proposal_id),
+  ).catch((): Record<string, SwapProposalStatus> => ({}));
 
   const previews = await Promise.all(
     (conversations ?? []).map(async (conversation) => {
@@ -58,6 +71,9 @@ export async function fetchConversations(userId: string): Promise<ConversationPr
         other_user: otherUser ?? fallbackUser(),
         last_message: last ?? null,
         unread_count: unread ?? 0,
+        proposal_status: conversation.proposal_id
+          ? statusByProposalId[conversation.proposal_id] ?? null
+          : null,
       } satisfies ConversationPreview;
     }),
   );
@@ -96,10 +112,12 @@ function fallbackUser(): PublicProfile {
     bio: null,
     country_id: null,
     city_id: null,
-    is_verified: false,
     followers_count: 0,
     following_count: 0,
     listings_count: 0,
+    completed_swaps_count: 0,
+    rating: null,
+    ratings_count: 0,
     created_at: new Date(0).toISOString(),
   };
 }

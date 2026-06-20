@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import type { Conversation, Listing, ListingWithRelations } from "@swap/types";
+import type { Conversation, Listing, ListingImage, ListingWithRelations } from "@swap/types";
 import { FREE_PLAN_MAX_IMAGES, STORAGE_BUCKETS } from "@swap/config";
 import type {
   CreateListingInput,
@@ -14,6 +14,7 @@ import type {
 } from "@swap/validation";
 import { SupabaseService } from "../../common/supabase/supabase.service";
 import { LISTING_SELECT } from "../../common/db.constants";
+import { assertNotBlocked } from "../../common/blocks.util";
 
 @Injectable()
 export class ListingsService {
@@ -51,8 +52,7 @@ export class ListingsService {
 
     const { data, error } = await query.returns<ListingWithRelations[]>();
     if (error) throw error;
-    const rows = data ?? [];
-    return filters.verified ? rows.filter((l) => l.owner?.is_verified) : rows;
+    return data ?? [];
   }
 
   async get(id: string): Promise<ListingWithRelations> {
@@ -101,7 +101,11 @@ export class ListingsService {
   }
 
   async update(id: string, ownerId: string, input: UpdateListingInput): Promise<Listing> {
-    await this.assertOwner(id, ownerId);
+    const existing = await this.assertOwner(id, ownerId);
+    // Terminal states can't be edited — never resurrect a swapped/removed listing.
+    if (existing.status === "completed" || existing.status === "removed") {
+      throw new BadRequestException("This listing can no longer be edited");
+    }
     if (input.category_id && input.country_id && input.city_id) {
       await this.validateRefs(input.category_id, input.country_id, input.city_id);
     }
@@ -153,6 +157,7 @@ export class ListingsService {
     if (currentUserId === otherUserId) {
       throw new BadRequestException("Cannot start a conversation with yourself");
     }
+    await assertNotBlocked(this.db, currentUserId, otherUserId);
 
     // Look for an existing conversation that both users participate in.
     const { data: mine } = await this.db
@@ -252,4 +257,55 @@ export class ListingsService {
       .insert({ listing_id: listingId, image_url: imageUrl, sort_order: count ?? 0 });
     if (error) throw error;
   }
+
+  /** Delete one of a listing's images (owner only) + best-effort remove the storage object. */
+  async removeImage(listingId: string, ownerId: string, imageId: string): Promise<void> {
+    await this.assertOwner(listingId, ownerId);
+    const { data, error } = await this.db
+      .from("listing_images")
+      .select("id, image_url, listing_id")
+      .eq("id", imageId)
+      .maybeSingle();
+    if (error) throw error;
+    const img = data as ListingImage | null;
+    if (!img || img.listing_id !== listingId) throw new NotFoundException("Image not found");
+
+    const { error: delErr } = await this.db.from("listing_images").delete().eq("id", imageId);
+    if (delErr) throw delErr;
+
+    const path = storagePathFromPublicUrl(img.image_url, STORAGE_BUCKETS.listingImages);
+    if (path) {
+      // Best-effort: a dangling object is harmless; never fail the delete on it.
+      await this.db.storage.from(STORAGE_BUCKETS.listingImages).remove([path]);
+    }
+  }
+
+  /** Set image order: `imageIds` must be EXACTLY the listing's images, in the new order. */
+  async reorderImages(listingId: string, ownerId: string, imageIds: string[]): Promise<void> {
+    await this.assertOwner(listingId, ownerId);
+    const { data, error } = await this.db
+      .from("listing_images")
+      .select("id")
+      .eq("listing_id", listingId);
+    if (error) throw error;
+    const owned = new Set((data ?? []).map((r) => r.id));
+    const unique = new Set(imageIds);
+    if (unique.size !== imageIds.length || imageIds.length !== owned.size || !imageIds.every((id) => owned.has(id))) {
+      throw new BadRequestException("Image ids must be the listing's images, each exactly once");
+    }
+    for (let i = 0; i < imageIds.length; i++) {
+      const { error: upErr } = await this.db
+        .from("listing_images")
+        .update({ sort_order: i })
+        .eq("id", imageIds[i]);
+      if (upErr) throw upErr;
+    }
+  }
+}
+
+/** Extract the in-bucket object path from a Supabase public storage URL (or null). */
+function storagePathFromPublicUrl(url: string, bucket: string): string | null {
+  const marker = `/object/public/${bucket}/`;
+  const i = url.indexOf(marker);
+  return i >= 0 ? decodeURIComponent(url.slice(i + marker.length).split("?")[0]) : null;
 }

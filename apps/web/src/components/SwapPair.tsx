@@ -7,7 +7,7 @@ import { CategoryIcon } from "./CategoryIcon";
 import { cn } from "@/lib/utils";
 
 /**
- * SwapPair — Swap's signature component. Visualises the barter deal:
+ * SwapPair — JustSwap's signature component. Visualises the barter deal:
  *   [ what the owner GIVES ]  ⇄  [ what they WANT in exchange ]
  *
  * Requires i18n keys: `swap.gives`, `swap.wants`.

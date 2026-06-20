@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from "@nestjs/common";
 import type { Conversation, Message } from "@swap/types";
 import type { SendMessageInput } from "@swap/validation";
 import { SupabaseService } from "../../common/supabase/supabase.service";
+import { assertNotBlocked } from "../../common/blocks.util";
 
 @Injectable()
 export class ConversationsService {
@@ -50,6 +51,16 @@ export class ConversationsService {
 
   async send(conversationId: string, senderId: string, input: SendMessageInput): Promise<Message> {
     await this.assertParticipant(conversationId, senderId);
+    // Refuse to deliver across a block (spec §3.8). 1:1 chats have one other
+    // participant; loop to stay correct if group chats are ever added.
+    const { data: others } = await this.db
+      .from("conversation_participants")
+      .select("user_id")
+      .eq("conversation_id", conversationId)
+      .neq("user_id", senderId);
+    for (const other of others ?? []) {
+      await assertNotBlocked(this.db, senderId, other.user_id);
+    }
     const { data, error } = await this.db
       .from("messages")
       .insert({

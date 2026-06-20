@@ -14,10 +14,10 @@ interface Values {
   password: string;
 }
 
-export function LoginForm() {
+export function LoginForm({ linkError = false }: { linkError?: boolean }) {
   const t = useTranslations("auth");
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(linkError ? t("linkExpired") : null);
   const {
     register,
     handleSubmit,
@@ -39,7 +39,7 @@ export function LoginForm() {
   return (
     <div className="app-container flex min-h-dvh flex-col justify-center px-6 py-10">
       <div className="mb-8 flex flex-col items-center gap-2">
-        <Logo />
+        <Logo priority />
         <h1 className="text-2xl font-bold text-ink">{t("loginTitle")}</h1>
       </div>
 
@@ -59,7 +59,13 @@ export function LoginForm() {
           {...register("password", { required: true })}
         />
 
-        {error ? <p className="text-sm text-danger">{error}</p> : null}
+        <div className="text-end">
+          <Link href="/forgot-password" className="text-sm font-semibold text-green">
+            {t("forgotTitle")}
+          </Link>
+        </div>
+
+        {error ? <p role="alert" className="text-sm text-danger">{error}</p> : null}
 
         <CTAButton type="submit" disabled={isSubmitting}>
           {t("loginButton")}

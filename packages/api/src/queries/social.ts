@@ -1,5 +1,8 @@
-import type { ListingWithRelations, ReportTargetType } from "@swap/types";
+import type { ListingWithRelations, PublicProfile, ReportTargetType } from "@swap/types";
 import type { SwapClient } from "../client";
+
+const PUBLIC_PROFILE_COLUMNS =
+  "id, full_name, username, avatar_url, bio, country_id, city_id, followers_count, following_count, listings_count, completed_swaps_count, rating, ratings_count, created_at";
 
 /* ── Follows ── */
 
@@ -41,6 +44,64 @@ export async function isFollowing(
     .eq("following_id", followingId);
   if (error) throw error;
   return (count ?? 0) > 0;
+}
+
+/* ── Blocks ── */
+
+export async function blockUser(
+  supabase: SwapClient,
+  blockerId: string,
+  blockedId: string,
+): Promise<void> {
+  if (blockerId === blockedId) throw new Error("Cannot block yourself");
+  const { error } = await supabase
+    .from("blocks")
+    .insert({ blocker_id: blockerId, blocked_id: blockedId });
+  if (error) throw error;
+}
+
+export async function unblockUser(
+  supabase: SwapClient,
+  blockerId: string,
+  blockedId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("blocks")
+    .delete()
+    .eq("blocker_id", blockerId)
+    .eq("blocked_id", blockedId);
+  if (error) throw error;
+}
+
+/** Whether `blockerId` has blocked `blockedId` (one-directional — for button state). */
+export async function isBlocked(
+  supabase: SwapClient,
+  blockerId: string,
+  blockedId: string,
+): Promise<boolean> {
+  const { count, error } = await supabase
+    .from("blocks")
+    .select("*", { count: "exact", head: true })
+    .eq("blocker_id", blockerId)
+    .eq("blocked_id", blockedId);
+  if (error) throw error;
+  return (count ?? 0) > 0;
+}
+
+/** Public profiles of the users a given user has blocked (newest first). */
+export async function getBlockedUsers(
+  supabase: SwapClient,
+  userId: string,
+): Promise<PublicProfile[]> {
+  const { data, error } = await supabase
+    .from("blocks")
+    .select(`created_at, blocked:profiles!blocks_blocked_id_fkey(${PUBLIC_PROFILE_COLUMNS})`)
+    .eq("blocker_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? [])
+    .map((row) => (row as unknown as { blocked: PublicProfile | null }).blocked)
+    .filter((p): p is PublicProfile => Boolean(p));
 }
 
 /* ── Saved listings ── */
@@ -96,7 +157,7 @@ export async function getSavedListings(
         images:listing_images(*),
         owner:profiles!listings_owner_id_fkey(
           id, full_name, username, avatar_url, bio, country_id, city_id,
-          is_verified, followers_count, following_count, listings_count, created_at
+          followers_count, following_count, listings_count, completed_swaps_count, rating, ratings_count, created_at
         ),
         category:categories(*), country:countries(*), city:cities(*)
       )`,

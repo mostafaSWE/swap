@@ -2,7 +2,7 @@ import type { Profile, PublicProfile } from "@swap/types";
 import type { SwapClient } from "../client";
 
 const PUBLIC_PROFILE_COLUMNS =
-  "id, full_name, username, avatar_url, bio, country_id, city_id, is_verified, followers_count, following_count, listings_count, created_at";
+  "id, full_name, username, avatar_url, bio, country_id, city_id, followers_count, following_count, listings_count, completed_swaps_count, rating, ratings_count, created_at";
 
 export async function getProfileById(
   supabase: SwapClient,

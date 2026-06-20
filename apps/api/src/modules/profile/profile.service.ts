@@ -3,6 +3,7 @@ import type { ListingWithRelations, Profile, PublicProfile } from "@swap/types";
 import type { UpdateProfileInput } from "@swap/validation";
 import { SupabaseService } from "../../common/supabase/supabase.service";
 import { LISTING_SELECT, PUBLIC_PROFILE_COLUMNS } from "../../common/db.constants";
+import { assertNotBlocked } from "../../common/blocks.util";
 
 @Injectable()
 export class ProfileService {
@@ -61,6 +62,7 @@ export class ProfileService {
 
   async follow(followerId: string, followingId: string): Promise<void> {
     if (followerId === followingId) throw new BadRequestException("Cannot follow yourself");
+    await assertNotBlocked(this.supabase.admin, followerId, followingId);
     const { error } = await this.supabase.admin
       .from("follows")
       .upsert({ follower_id: followerId, following_id: followingId }, { onConflict: "follower_id,following_id" });
@@ -74,5 +76,44 @@ export class ProfileService {
       .eq("follower_id", followerId)
       .eq("following_id", followingId);
     if (error) throw error;
+  }
+
+  /** Block a user: hides each party's listings from the other + prevents messaging (spec §3.8). */
+  async block(blockerId: string, blockedId: string): Promise<void> {
+    if (blockerId === blockedId) throw new BadRequestException("Cannot block yourself");
+    // Inserting the block row severs any follow edge in BOTH directions via the
+    // `blocks_sever_follows` DB trigger (migration 0009) — so it happens for
+    // every write path (this service AND the direct-RLS web fallback), not just
+    // here. Use a plain insert (ignore duplicates) so a re-block still fires the
+    // INSERT trigger only on a genuinely new row.
+    const { error } = await this.supabase.admin
+      .from("blocks")
+      .upsert({ blocker_id: blockerId, blocked_id: blockedId }, {
+        onConflict: "blocker_id,blocked_id",
+        ignoreDuplicates: true,
+      });
+    if (error) throw error;
+  }
+
+  async unblock(blockerId: string, blockedId: string): Promise<void> {
+    const { error } = await this.supabase.admin
+      .from("blocks")
+      .delete()
+      .eq("blocker_id", blockerId)
+      .eq("blocked_id", blockedId);
+    if (error) throw error;
+  }
+
+  /** Public profiles of the users the caller has blocked (newest first). */
+  async blockedUsers(userId: string): Promise<PublicProfile[]> {
+    const { data, error } = await this.supabase.admin
+      .from("blocks")
+      .select(`created_at, blocked:profiles!blocks_blocked_id_fkey(${PUBLIC_PROFILE_COLUMNS})`)
+      .eq("blocker_id", userId)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? [])
+      .map((row) => (row as unknown as { blocked: PublicProfile | null }).blocked)
+      .filter((p): p is PublicProfile => Boolean(p));
   }
 }

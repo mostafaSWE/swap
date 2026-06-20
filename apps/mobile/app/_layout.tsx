@@ -14,7 +14,7 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.background },
         }}
       >
-        <Stack.Screen name="index" options={{ title: "Swap" }} />
+        <Stack.Screen name="index" options={{ title: "JustSwap" }} />
       </Stack>
     </SafeAreaProvider>
   );

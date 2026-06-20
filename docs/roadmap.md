@@ -1,27 +1,39 @@
-# Swap — Roadmap
+# JustSwap — Roadmap
 
-## Phase 1.6 — Live database integration ✅ (this repo)
+## Phase 1.7 — Proposals foundation + trust model ✅ (this repo)
+
+- **Swap-proposal backend** (`0005_proposals.sql`): `swap_proposals` +
+  `swap_proposal_items` (bundles), `conversations.proposal_id`, RLS, and a NestJS
+  `ProposalsModule` (create / counter / accept / decline / cancel / list).
+- **Removed identity & item verification entirely** — collecting national IDs is
+  legally restricted in the GCC and not reliable. Dropped `verification_requests`,
+  `profiles.is_verified`, `listings.is_verified_item`, the verification module/UI,
+  and all verified badges.
+- **Trust pivot:** `profiles.completed_swaps_count` (+1 per party on an undisputed
+  completed swap) + ratings, surfaced via a `SwapCountBadge`.
+
+## Phase 1.6 — Live database integration ✅
 
 - **Database-first**: removed the silent demo fallback; demo data is gated behind
   `NEXT_PUBLIC_USE_DEMO_DATA` (dev only). Query errors now surface as empty states,
   not fake data.
-- Admin overview, all admin tables (users, listings, reports, verifications,
+- Admin overview, all admin tables (users, listings, reports,
   **categories/countries/cities**) read live from the DB.
 - **Saved listings** wired end-to-end: backend endpoints (`POST/DELETE
   /listings/:id/save`, `GET /me/saved`), `@swap/api` client methods + queries,
   a `SaveButton`, and a DB-backed Saved page.
-- Expanded `supabase/seed.sql`: 12 login-ready demo users (1 admin, 6 verified),
+- Expanded `supabase/seed.sql`: 12 login-ready demo users (1 admin),
   44 listings across categories/GCC/statuses, follows, saved listings, 8
-  conversations + messages, reports, verification requests, admin-action log.
+  conversations + messages, reports, admin-action log.
 
 ## Phase 1.5 — Backend API + polish ✅
 
 - **NestJS backend API** (`/api/v1`) — auth/profile, listings (+ signed image
-  upload), catalog, conversations/messages, follows, reports, verification, admin
+  upload), catalog, conversations/messages, follows, reports, admin
   (with `admin_actions` audit log), safety; Swagger at `/api/docs`
 - Shared `@swap/validation` (zod) used by API DTOs + frontend forms
 - Shared `@swap/api` REST client (web + mobile) with Supabase fallback
-- Mutations routed through the API (create listing, follow, report, chat, verify,
+- Mutations routed through the API (create listing, follow, report, chat,
   admin actions); reads + Realtime stay on Supabase
 - Inclusive 26-category taxonomy (parent/child) + ~98 curated bilingual GCC cities
 - Desktop-responsive layouts (multi-column grids, two-column listing detail,
@@ -38,20 +50,19 @@
 - Listings: create (with image upload), browse, filter/search, detail page
 - Chat: conversations list + realtime chat room
 - Follow + report
-- Verified account / verified item: DB fields, badges, manual admin flow
 - Admin dashboard skeleton + management tables
 - Platform responsibility disclaimers
+- (Trust via completed-swaps count — identity verification intentionally never built)
 
 ## Phase 2 — Depth & trust
 
 - Better chat: read receipts, typing, image messages, block, pagination
 - Notifications (in-app + push)
-- Ratings & reviews after an exchange
-- Full verification workflow (requests → review → badge) + **payments**
-  (account verification, item verification, featured ads, extra images)
+- Ratings & reviews after an exchange (feeds the trust score alongside completed-swaps)
+- **Payments** for featured ads + extra images
 - Featured listings surfacing & ranking
 - Saved listings UI, my-listings management (edit/hide/remove)
-- Admin actions wired (verify, suspend, hide, soft-delete → `admin_actions`)
+- Admin actions wired (suspend, hide, soft-delete → `admin_actions`)
 - Restrict `chat-images` to conversation participants
 
 ## Phase 3 — Scale & native
@@ -67,4 +78,6 @@
 No payment exists in Phase 1 — only DB fields and `TODO`s. Premium services will
 be priced per market using `countries.currency_code`:
 
-- Verified Account · Verified Item · Featured ads · Extra images
+- Featured ads · Extra images
+
+(Paid "verification" is intentionally excluded — JustSwap does not verify identity.)

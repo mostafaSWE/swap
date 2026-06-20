@@ -7,12 +7,18 @@ const LISTING_SELECT = `
   images:listing_images(*),
   owner:profiles!listings_owner_id_fkey(
     id, full_name, username, avatar_url, bio, country_id, city_id,
-    is_verified, followers_count, following_count, listings_count, created_at
+    followers_count, following_count, listings_count, completed_swaps_count, rating, ratings_count, created_at
   ),
   category:categories(*),
   country:countries(*),
   city:cities(*)
 `;
+
+/** Order a listing's embedded images by sort_order (position 0 = cover). The
+ *  PostgREST embed doesn't guarantee order, so normalize it for every consumer. */
+function withSortedImages<T extends ListingWithRelations>(l: T): T {
+  return { ...l, images: [...(l.images ?? [])].sort((a, b) => a.sort_order - b.sort_order) };
+}
 
 export interface ListingFilters {
   search?: string;
@@ -20,8 +26,6 @@ export interface ListingFilters {
   countryId?: string;
   cityId?: string;
   condition?: ListingCondition;
-  /** Only listings whose owner has a verified account. */
-  verifiedOnly?: boolean;
   ownerId?: string;
   sort?: SortOption;
   limit?: number;
@@ -61,10 +65,34 @@ export async function getListings(
 
   const { data, error } = await query.returns<ListingWithRelations[]>();
   if (error) throw error;
+  return (data ?? []).map(withSortedImages);
+}
 
-  // `verifiedOnly` filters on the joined owner; applied in-app to keep the SQL simple.
-  const rows = data ?? [];
-  return filters.verifiedOnly ? rows.filter((l) => l.owner?.is_verified) : rows;
+/** Active listings from the users a given user follows — their "Following" feed (newest first). */
+export async function getFollowingListings(
+  supabase: SwapClient,
+  userId: string,
+  opts: { limit?: number; offset?: number } = {},
+): Promise<ListingWithRelations[]> {
+  const { data: follows, error: followErr } = await supabase
+    .from("follows")
+    .select("following_id")
+    .eq("follower_id", userId);
+  if (followErr) throw followErr;
+  const ids = (follows ?? []).map((f) => f.following_id);
+  if (ids.length === 0) return [];
+
+  const offset = opts.offset ?? 0;
+  const { data, error } = await supabase
+    .from("listings")
+    .select(LISTING_SELECT)
+    .eq("status", "active")
+    .in("owner_id", ids)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + (opts.limit ?? 24) - 1)
+    .returns<ListingWithRelations[]>();
+  if (error) throw error;
+  return (data ?? []).map(withSortedImages);
 }
 
 export async function getFeaturedListings(
@@ -80,7 +108,7 @@ export async function getFeaturedListings(
     .limit(limit)
     .returns<ListingWithRelations[]>();
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).map(withSortedImages);
 }
 
 export async function getListingById(
@@ -93,7 +121,7 @@ export async function getListingById(
     .eq("id", id)
     .maybeSingle<ListingWithRelations>();
   if (error) throw error;
-  return data;
+  return data ? withSortedImages(data) : null;
 }
 
 /** Best-effort view counter. Errors are swallowed — a view is not critical. */

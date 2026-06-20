@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Match all paths except Next internals, static files, and API routes.
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+  // Match all paths except Next internals, static files, API routes, and the
+  // locale-agnostic /auth/* callbacks (email confirm / recovery / OAuth).
+  matcher: ["/((?!api|auth|_next|_vercel|.*\\..*).*)"],
 };

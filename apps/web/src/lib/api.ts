@@ -11,7 +11,7 @@ export function isApiConfigured(): boolean {
 let cached: SwapApiClient | null = null;
 
 /**
- * Browser-side Swap backend API client. Sends the current Supabase access token
+ * Browser-side JustSwap backend API client. Sends the current Supabase access token
  * as a bearer so the NestJS backend can authenticate the user.
  *
  * Returns null when NEXT_PUBLIC_API_URL is not set, so callers can fall back to

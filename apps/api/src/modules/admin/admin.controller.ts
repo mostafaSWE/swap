@@ -1,14 +1,26 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Ip,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import {
+  adminMessageSchema,
   adminUpdateListingSchema,
   adminUpdateUserSchema,
+  adminUserNoteSchema,
   updateReportSchema,
-  updateVerificationSchema,
+  type AdminMessageInput,
   type AdminUpdateListingInput,
   type AdminUpdateUserInput,
+  type AdminUserNoteInput,
   type UpdateReportInput,
-  type UpdateVerificationInput,
 } from "@swap/validation";
 import { AuthGuard } from "../../common/auth/auth.guard";
 import { AdminGuard } from "../../common/auth/admin.guard";
@@ -36,10 +48,31 @@ export class AdminController {
   @Patch("users/:id")
   updateUser(
     @CurrentUserId() adminId: string,
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body(new ZodBody(adminUpdateUserSchema)) input: AdminUpdateUserInput,
+    @Ip() ip: string,
   ) {
-    return this.admin.updateUser(adminId, id, input);
+    return this.admin.updateUser(adminId, id, input, ip);
+  }
+
+  @Post("users/:id/note")
+  addUserNote(
+    @CurrentUserId() adminId: string,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body(new ZodBody(adminUserNoteSchema)) input: AdminUserNoteInput,
+    @Ip() ip: string,
+  ) {
+    return this.admin.addUserNote(adminId, id, input.note, ip);
+  }
+
+  @Post("users/:id/message")
+  messageUser(
+    @CurrentUserId() adminId: string,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body(new ZodBody(adminMessageSchema)) input: AdminMessageInput,
+    @Ip() ip: string,
+  ) {
+    return this.admin.sendUserMessage(adminId, id, input.body, ip);
   }
 
   @Get("listings")
@@ -50,10 +83,21 @@ export class AdminController {
   @Patch("listings/:id")
   updateListing(
     @CurrentUserId() adminId: string,
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body(new ZodBody(adminUpdateListingSchema)) input: AdminUpdateListingInput,
+    @Ip() ip: string,
   ) {
-    return this.admin.updateListing(adminId, id, input);
+    return this.admin.updateListing(adminId, id, input, ip);
+  }
+
+  @Post("listings/:id/request-edits")
+  requestListingEdits(
+    @CurrentUserId() adminId: string,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body(new ZodBody(adminMessageSchema)) input: AdminMessageInput,
+    @Ip() ip: string,
+  ) {
+    return this.admin.requestListingEdits(adminId, id, input.body, ip);
   }
 
   @Get("reports")
@@ -64,24 +108,11 @@ export class AdminController {
   @Patch("reports/:id")
   updateReport(
     @CurrentUserId() adminId: string,
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body(new ZodBody(updateReportSchema)) input: UpdateReportInput,
+    @Ip() ip: string,
   ) {
-    return this.admin.updateReport(adminId, id, input);
-  }
-
-  @Get("verification-requests")
-  verifications() {
-    return this.admin.verifications();
-  }
-
-  @Patch("verification-requests/:id")
-  updateVerification(
-    @CurrentUserId() adminId: string,
-    @Param("id") id: string,
-    @Body(new ZodBody(updateVerificationSchema)) input: UpdateVerificationInput,
-  ) {
-    return this.admin.updateVerification(adminId, id, input);
+    return this.admin.updateReport(adminId, id, input, ip);
   }
 
   @Get("actions")

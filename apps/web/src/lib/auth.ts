@@ -26,12 +26,33 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 }
 
 /**
- * Guard for protected pages. Redirects to /login if signed out.
- * Pass the page's locale so the redirect keeps the language prefix.
+ * Guard for protected pages. Redirects to /login if signed out, or if the
+ * account has been banned / is actively suspended (mirrors the backend
+ * AuthGuard, so moderation is reflected in the web too — not just the API).
+ * Fails OPEN on a profile-read error so a transient blip never locks out a
+ * legitimate user. Pass the page's locale so the redirect keeps the prefix.
+ *
+ * NOTE: this gates every protected/account page. Public read surfaces still
+ * render via RLS until the session expires — full read-level lockout (RLS /
+ * middleware) is deferred to Phase 6.
  */
 export async function requireUser(locale: Locale) {
   const user = await getCurrentUser();
   if (!user) redirect({ href: "/login", locale });
+
+  const supabase = createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_banned,is_suspended,suspended_until")
+    .eq("id", user!.id)
+    .maybeSingle();
+  if (profile) {
+    const activelySuspended =
+      profile.is_suspended && (!profile.suspended_until || new Date(profile.suspended_until) > new Date());
+    if (profile.is_banned || activelySuspended) {
+      redirect({ href: "/login", locale });
+    }
+  }
   return user!;
 }
 

@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation";
-import { Eye, MapPin } from "lucide-react";
+import type { Metadata } from "next";
+import { Eye, Home, MapPin, Pencil, SearchX } from "lucide-react";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { localizedName } from "@swap/ui";
 import type { Locale } from "@swap/types";
@@ -7,15 +7,38 @@ import { AppShell } from "@/components/AppShell";
 import { ListingGallery } from "@/components/ListingGallery";
 import { SwapPair } from "@/components/SwapPair";
 import { ListingActions } from "@/components/ListingActions";
+import { ShareButton } from "@/components/ShareButton";
 import { SaveButton } from "@/components/SaveButton";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { VerifiedBadge, ItemVerifiedBadge } from "@/components/badges";
+import { RatingBadge, SwapCountBadge } from "@/components/badges";
 import { SafetyDisclaimer } from "@/components/SafetyDisclaimer";
 import { ReportDialog } from "@/components/ReportDialog";
 import { Link } from "@/i18n/navigation";
 import { fetchListing } from "@/lib/data";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchIsSaved } from "@/lib/saved";
+import { fetchIsFollowing } from "@/lib/social";
+
+export async function generateMetadata({
+  params: { locale, id },
+}: {
+  params: { locale: Locale; id: string };
+}): Promise<Metadata> {
+  const listing = await fetchListing(id);
+  if (!listing) {
+    const t = await getTranslations({ locale, namespace: "notFound" });
+    return { title: t("title") };
+  }
+  const description = (listing.description || listing.wanted_exchange || "").slice(0, 160);
+  const cover = listing.images?.[0]?.image_url;
+  const images = cover ? [cover] : undefined;
+  return {
+    title: listing.title,
+    description,
+    openGraph: { title: listing.title, description, images, type: "website" },
+    twitter: { card: images ? "summary_large_image" : "summary", title: listing.title, description, images },
+  };
+}
 
 export default async function ListingDetailsPage({
   params: { locale, id },
@@ -24,14 +47,20 @@ export default async function ListingDetailsPage({
 }) {
   setRequestLocale(locale);
   const listing = await fetchListing(id);
-  if (!listing) notFound();
+  if (!listing) return <ListingUnavailable />;
 
   const activeLocale = (await getLocale()) as Locale;
   const t = await getTranslations("listing");
   const tCond = await getTranslations("condition");
 
   const user = await getCurrentUser();
-  const initialSaved = user ? await fetchIsSaved(user.id, listing.id) : false;
+  const isOwner = user?.id === listing.owner_id;
+  const [initialSaved, initialFollowing] = user
+    ? await Promise.all([
+        fetchIsSaved(user.id, listing.id),
+        isOwner ? Promise.resolve(false) : fetchIsFollowing(user.id, listing.owner_id),
+      ])
+    : [false, false];
 
   return (
     <AppShell hideNav>
@@ -47,7 +76,6 @@ export default async function ListingDetailsPage({
             <span className="chip shrink-0">{tCond(listing.condition)}</span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {listing.is_verified_item ? <ItemVerifiedBadge label={t("verifiedItem")} /> : null}
             <span className="flex items-center gap-1 text-sm text-muted">
               <MapPin className="h-4 w-4" aria-hidden />
               {localizedName(listing.city, activeLocale)} · {localizedName(listing.country, activeLocale)}
@@ -66,9 +94,17 @@ export default async function ListingDetailsPage({
         >
           <ProfileAvatar src={listing.owner.avatar_url} name={listing.owner.full_name} />
           <div className="flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold text-ink">{listing.owner.full_name}</span>
-              {listing.owner.is_verified ? <VerifiedBadge label={t("verifiedAccount")} /> : null}
+              <SwapCountBadge count={listing.owner.completed_swaps_count} label={t("completedSwaps")} />
+              <RatingBadge
+                rating={listing.owner.rating}
+                count={listing.owner.ratings_count}
+                ariaLabel={t("ratingAria", {
+                  rating: Number(listing.owner.rating ?? 0).toFixed(1),
+                  count: listing.owner.ratings_count,
+                })}
+              />
             </div>
             <span className="text-sm text-muted">@{listing.owner.username}</span>
           </div>
@@ -89,8 +125,20 @@ export default async function ListingDetailsPage({
 
         <SafetyDisclaimer />
 
-        <ListingActions ownerId={listing.owner_id} listingId={listing.id} />
+        {isOwner ? (
+          <Link href={`/listings/${listing.id}/edit`} className="btn-primary w-full">
+            <Pencil className="h-5 w-5" aria-hidden />
+            {t("editListing")}
+          </Link>
+        ) : (
+          <ListingActions
+            ownerId={listing.owner_id}
+            listingId={listing.id}
+            initialFollowing={initialFollowing}
+          />
+        )}
 
+        <ShareButton title={listing.title} text={listing.wanted_exchange || undefined} />
         <SaveButton listingId={listing.id} initialSaved={initialSaved} />
 
         <div className="flex justify-center pt-2">
@@ -98,6 +146,32 @@ export default async function ListingDetailsPage({
         </div>
         </div>
       </div>
+    </AppShell>
+  );
+}
+
+async function ListingUnavailable() {
+  const t = await getTranslations("notFound");
+
+  return (
+    <AppShell>
+      <section className="mx-auto flex min-h-[62vh] w-full max-w-[960px] flex-col items-center justify-center px-4 py-16 text-center sm:px-6">
+        <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-green-light text-green-dark">
+          <SearchX className="h-8 w-8" aria-hidden />
+        </span>
+        <p className="mt-5 text-sm font-bold uppercase tracking-wide text-green-dark">{t("eyebrow")}</p>
+        <h1 className="mt-2 text-balance text-3xl font-extrabold tracking-tight text-navy md:text-4xl">{t("title")}</h1>
+        <p className="mt-3 max-w-xl text-pretty text-base leading-7 text-muted">{t("description")}</p>
+        <div className="mt-7 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
+          <Link href="/listings" className="btn-primary min-h-12 flex-1">
+            {t("browse")}
+          </Link>
+          <Link href="/" className="btn-secondary min-h-12 flex-1">
+            <Home className="h-4 w-4" aria-hidden />
+            {t("home")}
+          </Link>
+        </div>
+      </section>
     </AppShell>
   );
 }

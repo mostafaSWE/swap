@@ -18,6 +18,11 @@ const config: Config = {
           dark: "#119455",
           light: "#E7F8F0",
         },
+        swap: {
+          DEFAULT: "#18B66A",
+          tint: "#E7F8F0",
+          dark: "#119455",
+        },
         canvas: "#F5F7F8",
         ink: "#111827",
         muted: "#6B7280",

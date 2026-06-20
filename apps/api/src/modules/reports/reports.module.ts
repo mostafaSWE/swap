@@ -28,7 +28,7 @@ class ReportsController {
   constructor(private readonly reports: ReportsService) {}
 
   @Post()
-  @HttpCode(204)
+  @HttpCode(202) // Accepted — the report is queued for admin review (spec §3.8).
   @ApiBearerAuth("supabase-jwt")
   @UseGuards(AuthGuard)
   create(

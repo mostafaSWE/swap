@@ -8,7 +8,6 @@ import type { Locale, ListingWithRelations } from "@swap/types";
 import { Link } from "@/i18n/navigation";
 import { ItemArtwork } from "./ItemArtwork";
 import { SwapPair } from "./SwapPair";
-import { ItemVerifiedBadge } from "./badges";
 
 /** Wide card for the home "Featured swaps" horizontal carousel. */
 export function FeaturedCard({ listing }: { listing: ListingWithRelations }) {
@@ -27,7 +26,6 @@ export function FeaturedCard({ listing }: { listing: ListingWithRelations }) {
             <Sparkles className="h-3 w-3 text-green" aria-hidden />
             {t("home.featured")}
           </span>
-          {listing.is_verified_item ? <ItemVerifiedBadge label={t("listing.verifiedItem")} /> : null}
         </div>
       </div>
 

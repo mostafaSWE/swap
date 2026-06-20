@@ -1,15 +1,15 @@
-# Swap — بدّل ما لديك بما تحتاجه
+# JustSwap — بدّل ما لديك بما تحتاجه
 
 > **Exchange what you have for what you need.**
 
-Swap is a **barter marketplace** for the GCC. Users list items and exchange them
-directly with each other. Swap does **not** handle money, selling, escrow, or
+JustSwap is a **barter marketplace** for the GCC. Users list items and exchange them
+directly with each other. JustSwap does **not** handle money, selling, escrow, or
 delivery — it only connects people and lets them agree on an exchange privately.
 
 - 🟢 Arabic-first (RTL) · full English (LTR) support
 - 🌍 GCC-ready (SA, AE, QA, KW, BH, OM) and extensible
 - 📱 Mobile-first UI · web now, native apps later (shared code)
-- 🛡️ Trust via verified accounts & verified items (manual in MVP)
+- 🛡️ Trust via each user's **completed-swaps count** + ratings (no identity verification)
 
 ## Tech stack
 
@@ -27,8 +27,8 @@ delivery — it only connects people and lets them agree on an exchange privatel
 ### Architecture: backend API vs Supabase
 
 - **NestJS API (`apps/api`)** owns business logic and sensitive writes — create/update
-  listing, image-upload signing + free-limit enforcement, start conversation, send
-  message, follow, report, verification requests, and **all admin actions** (with an
+  listing, image-upload signing + free-limit enforcement, swap proposals, start
+  conversation, send message, follow, report, and **all admin actions** (with an
   `admin_actions` audit log). It authenticates the Supabase JWT (bearer) and uses the
   service-role key with app-level authorization.
 - **Supabase** still handles Auth sessions, Postgres + RLS (protects any direct
@@ -78,15 +78,14 @@ Then connect Supabase and seed (see **[docs/setup-guide.md](docs/setup-guide.md)
 ### Database-first
 
 The app reads and writes **real data from Supabase/Postgres** — there is no
-hidden mock data. `supabase/seed.sql` populates **12 demo users** (1 admin, 6
-verified, across the GCC), **44 listings** (with images, varied status/verified/
-featured), follows, saved listings, 8 conversations + messages, reports, and
-verification requests. A small built-in demo dataset renders the read pages only
-when `NEXT_PUBLIC_USE_DEMO_DATA=true` (local dev without a DB) — never as a
-silent fallback.
+hidden mock data. `supabase/seed.sql` populates **12 demo users** (1 admin,
+across the GCC), **44 listings** (with images, varied status/featured), follows,
+saved listings, 8 conversations + messages, and reports. A small built-in demo
+dataset renders the read pages only when `NEXT_PUBLIC_USE_DEMO_DATA=true` (local
+dev without a DB) — never as a silent fallback.
 
 **Demo accounts** (development only — password `Swap1234!`):
-`ahmed@swap.demo` (admin + verified), `sara@swap.demo` (verified), `khalid@swap.demo`,
+`ahmed@swap.demo` (admin), `sara@swap.demo`, `khalid@swap.demo`,
 … `noura/yousef/mariam/salem/huda/tariq/layla@swap.demo`. **Never use these in production.**
 
 ## Environment variables
@@ -114,14 +113,12 @@ Never commit real secrets.
 ## Roadmap (short)
 
 - **Phase 1** (this repo): MVP foundation.
-- **Phase 2**: better chat, notifications, ratings, verification workflow +
-  payments, featured listings, premium features.
+- **Phase 2**: better chat, notifications, ratings, featured listings, premium features.
 - **Phase 3**: native iOS/Android, AI matching, maps, video.
 
-> **Disclaimer:** Swap does not own, buy, sell, guarantee, or escrow products,
-> and does not guarantee product condition unless verified via the official
-> verified-item service. The final agreement and handover are the users'
-> responsibility.
+> **Disclaimer:** JustSwap does not own, buy, sell, guarantee, or escrow products,
+> does not verify user identity, and does not guarantee the condition of any
+> listed product. The final agreement and handover are the users' responsibility.
 
 ## Repository
 

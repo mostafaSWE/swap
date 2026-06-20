@@ -2,7 +2,7 @@
   "name": "swap",
   "private": true,
   "version": "0.1.0",
-  "description": "Swap — a barter marketplace. Exchange what you have for what you need.",
+  "description": "JustSwap - a barter marketplace. Exchange what you have for what you need.",
   "packageManager": "pnpm@11.2.2",
   "scripts": {
     "dev": "turbo run dev",

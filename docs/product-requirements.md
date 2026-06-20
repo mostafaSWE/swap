@@ -1,20 +1,20 @@
-# Swap — Product Requirements (Phase 1 foundation)
+# JustSwap — Product Requirements (Phase 1 foundation)
 
 ## The idea
 
-**Swap** is a barter marketplace where users exchange goods directly with each
-other. Swap is **not** a buying/selling platform.
+**JustSwap** is a barter marketplace where users exchange goods directly with each
+other. JustSwap is **not** a buying/selling platform.
 
 > **بدّل ما لديك بما تحتاجه** — Exchange what you have for what you need
 
-Swap **does not** handle money, escrow, selling, delivery, or payment between
+JustSwap **does not** handle money, escrow, selling, delivery, or payment between
 users. It only helps users discover each other and agree on an exchange; the
 actual handover happens privately between the two parties.
 
 Examples: a pen ↔ a notebook, an air conditioner ↔ a washing machine, an iPhone
 ↔ another device.
 
-## What Swap does
+## What JustSwap does
 
 - Accounts (sign up / login / profile)
 - List items to exchange (with photos + what you want in return)
@@ -23,7 +23,7 @@ Examples: a pen ↔ a notebook, an air conditioner ↔ a washing machine, an iPh
 - User-to-user chat (Supabase Realtime)
 - Follow users
 - Report abuse (listing / user / message / conversation)
-- Trust signals: **verified accounts** and **verified items**
+- Trust signals: **completed-swaps count** (per user) + ratings — JustSwap does **not** verify identity
 
 ## Architecture (Phase 1.5)
 
@@ -38,7 +38,7 @@ The app is **database-first**: every page and action reads/writes real
 Supabase/Postgres data (no hidden mock data). A built-in demo dataset is used by
 the read pages **only** when `NEXT_PUBLIC_USE_DEMO_DATA=true` (local dev without a
 DB). `supabase/seed.sql` populates realistic MVP data (12 users incl. admin,
-44 listings, conversations, follows, saved listings, reports, verifications).
+44 listings, conversations, follows, saved listings, reports).
 
 ## MVP scope (Phase 1 — this foundation)
 
@@ -51,13 +51,14 @@ DB). `supabase/seed.sql` populates realistic MVP data (12 users incl. admin,
 - Chat (conversations + realtime messages)
 - Follow + report
 - Admin dashboard skeleton + management tables
-- Verification: DB fields + manual admin flow + UI badges
+- Trust: per-user **completed-swaps count** (no identity verification — see Platform responsibility)
 
 ## Explicitly NOT in Phase 1
 
 Real payment, escrow, in-app monetary exchange, delivery/logistics, AI matching,
-full verification automation, native store deployment, full notifications,
-advanced analytics. The codebase is prepared for these (fields + `TODO`s).
+identity verification (intentionally never — legally restricted in the GCC),
+native store deployment, full notifications, advanced analytics. The codebase is
+prepared for the rest (fields + `TODO`s).
 
 ## Country & region support
 
@@ -88,18 +89,17 @@ the catalog API.
 
 ## Platform responsibility
 
-Swap clearly states it does **not** own, buy, sell, guarantee, or escrow
-products, and does **not** guarantee product condition unless an item was
-manually verified through the official **Verified Item** service. The final
-agreement and handover are the users' responsibility. The disclaimer appears on
-listing details, before starting an exchange chat, and on the Safety page.
+JustSwap clearly states it does **not** own, buy, sell, guarantee, or escrow
+products, does **not** verify user identity, and does **not** guarantee the
+condition of any listed product. The final agreement and handover are the users'
+responsibility. The disclaimer appears on listing details, before starting an
+exchange chat, and on the Safety page.
 
 ## Monetization (future — no payment now)
 
-Prepared in the schema, gated behind `TODO`s:
+Prepared in the schema, gated behind `TODO`s (note: identity/item *verification*
+is intentionally **not** a product — see Trust & Reputation):
 
-- **Verified Account** (paid badge + trust + search visibility)
-- **Verified Item** (paid manual inspection by the Swap team)
 - **Featured listings** (`listings.is_featured`)
 - **Extra images** (free plan = 4; premium = 10–15)
 

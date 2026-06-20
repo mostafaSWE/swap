@@ -2,7 +2,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { formatDate } from "@swap/ui";
 import type { Locale, PublicProfile } from "@swap/types";
 import { ProfileAvatar } from "./ProfileAvatar";
-import { VerifiedBadge } from "./badges";
+import { RatingBadge, SwapCountBadge } from "./badges";
 
 function Stat({ value, label }: { value: number; label: string }) {
   return (
@@ -30,9 +30,17 @@ export function ProfileHeader({
       <div className="flex items-center gap-3">
         <ProfileAvatar src={profile.avatar_url} name={profile.full_name} size="lg" />
         <div className="flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-lg font-bold text-ink">{profile.full_name}</h1>
-            {profile.is_verified ? <VerifiedBadge label={tl("verifiedAccount")} /> : null}
+            <SwapCountBadge count={profile.completed_swaps_count} label={tl("completedSwaps")} />
+            <RatingBadge
+              rating={profile.rating}
+              count={profile.ratings_count}
+              ariaLabel={tl("ratingAria", {
+                rating: Number(profile.rating ?? 0).toFixed(1),
+                count: profile.ratings_count,
+              })}
+            />
           </div>
           <p className="text-sm text-muted">@{profile.username}</p>
           <p className="text-xs text-muted">
@@ -43,7 +51,8 @@ export function ProfileHeader({
 
       {profile.bio ? <p className="mt-3 text-sm text-ink/80">{profile.bio}</p> : null}
 
-      <div className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3">
+      <div className="mt-4 grid grid-cols-4 gap-2 border-t border-line pt-3">
+        <Stat value={profile.completed_swaps_count} label={tl("completedSwaps")} />
         <Stat value={profile.listings_count} label={t("listings")} />
         <Stat value={profile.followers_count} label={t("followers")} />
         <Stat value={profile.following_count} label={t("following")} />

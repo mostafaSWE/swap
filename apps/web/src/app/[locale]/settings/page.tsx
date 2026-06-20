@@ -12,6 +12,7 @@ export default async function SettingsPage({ params: { locale } }: { params: { l
   const tc = await getTranslations("common");
   const ts = await getTranslations("safety");
   const tt = await getTranslations("terms");
+  const tb = await getTranslations("block");
 
   return (
     <AppShell>
@@ -27,6 +28,7 @@ export default async function SettingsPage({ params: { locale } }: { params: { l
         </div>
 
         <div className="card divide-y divide-line">
+          <Link href="/settings/blocked" className="block px-4 py-3 text-ink">{tb("blockedTitle")}</Link>
           <Link href="/safety" className="block px-4 py-3 text-ink">{ts("title")}</Link>
           <Link href="/terms" className="block px-4 py-3 text-ink">{tt("title")}</Link>
         </div>

@@ -1,22 +1,19 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import type {
-  AdminAction,
-  Listing,
-  Profile,
-  Report,
-  VerificationRequest,
-} from "@swap/types";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import type { AdminAction, Listing, Profile, Report } from "@swap/types";
 import type {
   AdminUpdateListingInput,
   AdminUpdateUserInput,
   UpdateReportInput,
-  UpdateVerificationInput,
 } from "@swap/validation";
 import { SupabaseService } from "../../common/supabase/supabase.service";
 
 export interface AdminOverview {
   totalUsers: number;
-  verifiedUsers: number;
   activeListings: number;
   hiddenListings: number;
   pendingReports: number;
@@ -54,7 +51,6 @@ export class AdminService {
   async overview(): Promise<AdminOverview> {
     const [
       totalUsers,
-      verifiedUsers,
       activeListings,
       hiddenListings,
       pendingReports,
@@ -64,7 +60,6 @@ export class AdminService {
       usersByCountry,
     ] = await Promise.all([
       this.count("profiles"),
-      this.count("profiles", (q) => q.eq("is_verified", true)),
       this.count("listings", (q) => q.eq("status", "active")),
       this.count("listings", (q) => q.eq("status", "hidden")),
       this.count("reports", (q) => q.eq("status", "pending")),
@@ -75,7 +70,6 @@ export class AdminService {
     ]);
     return {
       totalUsers,
-      verifiedUsers,
       activeListings,
       hiddenListings,
       pendingReports,
@@ -92,14 +86,20 @@ export class AdminService {
     targetType: string,
     targetId: string,
     notes?: string,
+    ip?: string,
   ): Promise<void> {
-    await this.db.from("admin_actions").insert({
+    // The audit row is non-negotiable: surface a failure instead of swallowing
+    // it, so a moderation write is never recorded as successful with no trail
+    // (and so a lost `note` — whose only storage IS this row — fails loudly).
+    const { error } = await this.db.from("admin_actions").insert({
       admin_id: adminId,
       action_type: actionType,
       target_type: targetType,
       target_id: targetId,
       notes: notes ?? null,
+      ip: ip ?? null,
     });
+    if (error) throw error;
   }
 
   /* ── Users ── */
@@ -112,7 +112,21 @@ export class AdminService {
     return data ?? [];
   }
 
-  async updateUser(adminId: string, id: string, input: AdminUpdateUserInput): Promise<Profile> {
+  async updateUser(
+    adminId: string,
+    id: string,
+    input: AdminUpdateUserInput,
+    ip?: string,
+  ): Promise<Profile> {
+    // Guard against self-lockout / self-demotion: an admin cannot flip their own
+    // admin/ban/suspension state (AuthGuard + AdminGuard would lock them out, and
+    // with a single admin that is unrecoverable without direct DB access).
+    if (
+      id === adminId &&
+      (input.is_admin !== undefined || input.is_banned !== undefined || input.is_suspended !== undefined)
+    ) {
+      throw new ForbiddenException("Cannot change your own admin, ban, or suspension state");
+    }
     const { data, error } = await this.db
       .from("profiles")
       .update(input)
@@ -121,7 +135,7 @@ export class AdminService {
       .maybeSingle();
     if (error) throw error;
     if (!data) throw new NotFoundException("User not found");
-    await this.logAction(adminId, "update_user", "user", id, JSON.stringify(input));
+    await this.logAction(adminId, "update_user", "user", id, JSON.stringify(input), ip);
     return data;
   }
 
@@ -135,7 +149,12 @@ export class AdminService {
     return data ?? [];
   }
 
-  async updateListing(adminId: string, id: string, input: AdminUpdateListingInput): Promise<Listing> {
+  async updateListing(
+    adminId: string,
+    id: string,
+    input: AdminUpdateListingInput,
+    ip?: string,
+  ): Promise<Listing> {
     const { data, error } = await this.db
       .from("listings")
       .update({ ...input, updated_at: new Date().toISOString() })
@@ -144,7 +163,7 @@ export class AdminService {
       .maybeSingle();
     if (error) throw error;
     if (!data) throw new NotFoundException("Listing not found");
-    await this.logAction(adminId, "update_listing", "listing", id, JSON.stringify(input));
+    await this.logAction(adminId, "update_listing", "listing", id, JSON.stringify(input), ip);
     return data;
   }
 
@@ -158,7 +177,12 @@ export class AdminService {
     return data ?? [];
   }
 
-  async updateReport(adminId: string, id: string, input: UpdateReportInput): Promise<Report> {
+  async updateReport(
+    adminId: string,
+    id: string,
+    input: UpdateReportInput,
+    ip?: string,
+  ): Promise<Report> {
     const { data, error } = await this.db
       .from("reports")
       .update({ status: input.status })
@@ -167,48 +191,8 @@ export class AdminService {
       .maybeSingle();
     if (error) throw error;
     if (!data) throw new NotFoundException("Report not found");
-    await this.logAction(adminId, "update_report", "report", id, input.status);
+    await this.logAction(adminId, "update_report", "report", id, input.status, ip);
     return data;
-  }
-
-  /* ── Verification ── */
-  async verifications(): Promise<VerificationRequest[]> {
-    const { data } = await this.db
-      .from("verification_requests")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(200);
-    return data ?? [];
-  }
-
-  /**
-   * Approve/reject a verification request. On approval, mark the user verified
-   * (account) or the listing verified (item). No payment in MVP.
-   */
-  async updateVerification(
-    adminId: string,
-    id: string,
-    input: UpdateVerificationInput,
-  ): Promise<VerificationRequest> {
-    const { data: request, error } = await this.db
-      .from("verification_requests")
-      .update({ status: input.status, notes: input.notes ?? null, updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .select("*")
-      .maybeSingle();
-    if (error) throw error;
-    if (!request) throw new NotFoundException("Verification request not found");
-
-    const approved = input.status === "approved" || input.status === "completed";
-    if (approved) {
-      if (request.type === "account") {
-        await this.db.from("profiles").update({ is_verified: true }).eq("id", request.user_id);
-      } else if (request.type === "item" && request.listing_id) {
-        await this.db.from("listings").update({ is_verified_item: true }).eq("id", request.listing_id);
-      }
-    }
-    await this.logAction(adminId, "update_verification", "verification", id, input.status);
-    return request;
   }
 
   async actions(): Promise<AdminAction[]> {
@@ -218,5 +202,102 @@ export class AdminService {
       .order("created_at", { ascending: false })
       .limit(200);
     return data ?? [];
+  }
+
+  /* ── Moderation messaging & notes ─────────────────────────────────────── */
+
+  private async assertUserExists(id: string): Promise<Profile> {
+    const { data } = await this.db.from("profiles").select("*").eq("id", id).maybeSingle();
+    if (!data) throw new NotFoundException("User not found");
+    return data;
+  }
+
+  /**
+   * Returns the id of the 1:1 conversation between the admin and `userId`,
+   * creating it (with both participant rows) if none exists. Runs as the
+   * service role, so it does not go through the RLS-bound get_or_create RPC.
+   */
+  private async getOrCreateConversation(adminId: string, userId: string): Promise<string> {
+    const { data: mine } = await this.db
+      .from("conversation_participants")
+      .select("conversation_id")
+      .eq("user_id", adminId);
+    const myIds = (mine ?? []).map((r) => r.conversation_id);
+    if (myIds.length) {
+      const { data: shared } = await this.db
+        .from("conversation_participants")
+        .select("conversation_id")
+        .eq("user_id", userId)
+        .in("conversation_id", myIds)
+        .limit(1);
+      if (shared && shared.length) return shared[0].conversation_id;
+    }
+
+    const { data: convo, error } = await this.db
+      .from("conversations")
+      .insert({})
+      .select("id")
+      .single();
+    if (error || !convo) throw error ?? new Error("Failed to create conversation");
+    const { error: partErr } = await this.db.from("conversation_participants").insert([
+      { conversation_id: convo.id, user_id: adminId },
+      { conversation_id: convo.id, user_id: userId },
+    ]);
+    // Without both participant rows the message is undeliverable (no inbox row,
+    // no new_message notification), so fail rather than return an orphan thread.
+    if (partErr) throw partErr;
+    return convo.id;
+  }
+
+  /** Inserts a message from the admin to the user and bumps the conversation. */
+  private async deliverMessage(adminId: string, userId: string, body: string): Promise<void> {
+    if (adminId === userId) throw new BadRequestException("Cannot message yourself");
+    const conversationId = await this.getOrCreateConversation(adminId, userId);
+    const { error } = await this.db
+      .from("messages")
+      .insert({ conversation_id: conversationId, sender_id: adminId, body });
+    if (error) throw error;
+    // Surface the message at the top of the user's inbox (ordered by updated_at).
+    await this.db
+      .from("conversations")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("id", conversationId);
+  }
+
+  private static snippet(text: string): string {
+    return text.length > 140 ? `${text.slice(0, 137)}…` : text;
+  }
+
+  /** Sends a system message to a user (delivered as a chat message from the admin). */
+  async sendUserMessage(adminId: string, userId: string, body: string, ip?: string): Promise<{ ok: true }> {
+    await this.assertUserExists(userId);
+    await this.deliverMessage(adminId, userId, body);
+    await this.logAction(adminId, "message", "user", userId, AdminService.snippet(body), ip);
+    return { ok: true };
+  }
+
+  /** Records a private moderator note about a user (admin-only readable audit row). */
+  async addUserNote(adminId: string, userId: string, note: string, ip?: string): Promise<{ ok: true }> {
+    await this.assertUserExists(userId);
+    await this.logAction(adminId, "note", "user", userId, note, ip);
+    return { ok: true };
+  }
+
+  /** Asks a listing owner to edit their listing (message to the owner + audit row). */
+  async requestListingEdits(
+    adminId: string,
+    listingId: string,
+    body: string,
+    ip?: string,
+  ): Promise<{ ok: true }> {
+    const { data: listing } = await this.db
+      .from("listings")
+      .select("owner_id")
+      .eq("id", listingId)
+      .maybeSingle();
+    if (!listing) throw new NotFoundException("Listing not found");
+    await this.deliverMessage(adminId, listing.owner_id, body);
+    await this.logAction(adminId, "request_edits", "listing", listingId, AdminService.snippet(body), ip);
+    return { ok: true };
   }
 }

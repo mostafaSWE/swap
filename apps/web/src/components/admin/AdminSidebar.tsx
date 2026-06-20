@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  BadgeCheck,
   Flag,
   LayoutDashboard,
   ListTree,
   MapPin,
   Package,
+  ScrollText,
   Tags,
   Users,
 } from "lucide-react";
@@ -20,7 +20,7 @@ type AdminNavKey =
   | "users"
   | "listings"
   | "reports"
-  | "verifications"
+  | "audit"
   | "categories"
   | "countries"
   | "cities";
@@ -32,7 +32,7 @@ const ITEMS: AdminNavItem[] = [
   { href: "/admin/users", key: "users", icon: Users },
   { href: "/admin/listings", key: "listings", icon: Package },
   { href: "/admin/reports", key: "reports", icon: Flag },
-  { href: "/admin/verifications", key: "verifications", icon: BadgeCheck },
+  { href: "/admin/audit", key: "audit", icon: ScrollText },
   { href: "/admin/categories", key: "categories", icon: Tags },
   { href: "/admin/countries", key: "countries", icon: ListTree },
   { href: "/admin/cities", key: "cities", icon: MapPin },

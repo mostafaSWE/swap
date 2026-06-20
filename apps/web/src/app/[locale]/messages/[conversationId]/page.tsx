@@ -1,5 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getMessages } from "@swap/api";
+import {
+  getConfirmations,
+  getMessages,
+  getMyRatingForProposal,
+  getProposalByConversationId,
+} from "@swap/api";
 import type { Locale } from "@swap/types";
 import { EmptyState } from "@/components/primitives";
 import { CTAButton } from "@/components/CTAButton";
@@ -23,9 +28,19 @@ export default async function ChatRoomPage({
 
   const user = await requireUser(locale);
   const supabase = createClient();
-  const [messages, otherUser] = await Promise.all([
+  const [messages, otherUser, proposal] = await Promise.all([
     getMessages(supabase, conversationId),
     fetchOtherParticipant(conversationId, user.id),
+    getProposalByConversationId(supabase, conversationId).catch(() => null),
+  ]);
+  // Deal-closing confirmation photos (only relevant once a proposal exists) and,
+  // once the swap is completed, this user's existing rating (to show "you rated"
+  // vs. the "rate this swap" prompt).
+  const [confirmations, myRating] = await Promise.all([
+    proposal ? getConfirmations(supabase, proposal.id).catch(() => []) : [],
+    proposal && proposal.status === "completed"
+      ? getMyRatingForProposal(supabase, proposal.id, user.id).catch(() => null)
+      : null,
   ]);
 
   return (
@@ -34,6 +49,9 @@ export default async function ChatRoomPage({
       currentUserId={user.id}
       otherUser={otherUser}
       initialMessages={messages}
+      initialProposal={proposal}
+      initialConfirmations={confirmations}
+      initialMyRating={myRating}
     />
   );
 }

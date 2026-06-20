@@ -1,5 +1,5 @@
 /**
- * Design tokens — the single source of truth for Swap's visual language.
+ * Design tokens — the single source of truth for JustSwap's visual language.
  * Consumed by the web app (mapped into Tailwind theme) and the mobile app
  * (mapped into React Native styles), so both platforms stay in sync.
  *
@@ -10,7 +10,7 @@
 export const colors = {
   /** Brand navy — hero sections, brand surfaces, admin sidebar. */
   navy: "#0B1324",
-  /** Brand green — primary buttons, verification badges, accents. */
+  /** Brand green — primary buttons, trust accents (e.g. completed-swaps). */
   green: "#18B66A",
   greenDark: "#119455",
   greenLight: "#E7F8F0",
