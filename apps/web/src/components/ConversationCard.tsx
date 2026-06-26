@@ -14,7 +14,7 @@ export function ConversationCard({ conversation }: { conversation: ConversationP
   return (
     <Link
       href={`/messages/${conversation.id}`}
-      className="flex items-center gap-3 border-b border-line bg-white px-4 py-3 transition-colors hover:bg-canvas"
+      className="flex items-center gap-3 border-b border-line bg-surface px-4 py-3 transition-colors hover:bg-canvas"
     >
       <ProfileAvatar src={other_user.avatar_url} name={other_user.full_name} size="md" />
       <div className="min-w-0 flex-1">

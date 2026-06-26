@@ -2,16 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ──────────────────────────────────────────────────────────────────────────
+   Swap ships a light theme and a deep-navy dark theme, switched by the user
+   (next-themes → `.dark` on <html>). Tokens are space-separated RGB channels so
+   Tailwind can apply opacity modifiers: `rgb(var(--token) / <alpha-value>)`.
+   The accent (green #18B66A) and brand navy (#0B1324) are the same in both
+   themes; surfaces, text, borders and shadows flip.
+   ────────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: #f5f7f8;
-  --foreground: #111827;
+  color-scheme: light;
+
+  --canvas: 245 247 248; /* #F5F7F8 page */
+  --surface: 255 255 255; /* #FFFFFF cards */
+  --elevated: 248 250 252; /* #F8FAFC raised */
+  --field: 255 255 255; /* #FFFFFF inputs */
+
+  --ink: 17 24 39; /* #111827 */
+  --muted: 107 114 128; /* #6B7280 */
+  --faint: 156 163 175; /* #9CA3AF */
+
+  --line: 229 231 235; /* #E5E7EB */
+  --linestrong: 209 213 219; /* #D1D5DB */
+
+  --navy: 11 19 36; /* #0B1324 brand panel (dark in both themes) */
+  --onnavy: 233 237 246; /* light text used on navy panels */
+
+  --accent: 24 182 106; /* #18B66A green */
+  --accent-hover: 17 148 85; /* #119455 */
+  --green-dark: 17 148 85; /* #119455 */
+  --green-light: 231 248 240; /* #E7F8F0 */
+
+  --success: 22 163 74;
+  --warning: 217 119 6;
+  --danger: 220 38 38;
+  --info: 37 99 235;
+
+  --shadow-card: 0 1px 2px rgba(16, 24, 39, 0.06), 0 1px 3px rgba(16, 24, 39, 0.1);
+  --shadow-elevated: 0 10px 30px rgba(16, 24, 39, 0.12);
+  --shimmer: rgba(17, 24, 39, 0.06);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --canvas: 10 14 26; /* #0A0E1A page */
+  --surface: 18 24 41; /* #121829 cards */
+  --elevated: 27 36 56; /* #1B2438 raised */
+  --field: 21 28 46; /* #151C2E inputs */
+
+  --ink: 233 237 246; /* #E9EDF6 */
+  --muted: 151 161 183; /* #97A1B7 */
+  --faint: 92 103 129; /* #5C6781 */
+
+  --line: 35 44 66; /* #232C42 */
+  --linestrong: 49 60 88; /* #313C58 */
+
+  --navy: 11 19 36; /* #0B1324 */
+  --onnavy: 233 237 246;
+
+  --accent: 24 182 106; /* #18B66A */
+  --accent-hover: 20 158 91; /* #149E5B */
+  --green-dark: 22 168 99; /* #16A863 */
+  --green-light: 16 42 30; /* #102A1E */
+
+  --success: 34 197 94;
+  --warning: 245 158 11;
+  --danger: 239 68 68;
+  --info: 59 130 246;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 16px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shimmer: rgba(233, 237, 246, 0.06);
 }
 
 html,
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: rgb(var(--canvas));
+  color: rgb(var(--ink));
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@supports not (overflow: clip) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.28);
+  color: rgb(var(--ink));
+}
+
+/* Themed scrollbars (WebKit + Firefox). */
+* {
+  scrollbar-color: rgb(var(--linestrong)) transparent;
+  scrollbar-width: thin;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--linestrong));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--muted));
 }
 
 @layer components {
@@ -20,30 +121,52 @@ body {
   }
 
   .card {
-    @apply rounded-card bg-white border border-line shadow-card;
+    @apply rounded-card bg-surface border border-line shadow-card;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-pill bg-green px-5 py-3
-      font-semibold text-white transition-all hover:bg-green-dark active:scale-[0.97]
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/40 focus-visible:ring-offset-2
+    @apply inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-5 py-3
+      font-semibold text-white transition-all hover:bg-accent-hover active:scale-[0.97]
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2
+      focus-visible:ring-offset-canvas
       disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-pill border border-line
-      bg-white px-5 py-3 font-semibold text-ink transition-all hover:bg-canvas active:scale-[0.97]
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/30 focus-visible:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 rounded-pill border border-linestrong
+      bg-elevated px-5 py-3 font-semibold text-ink transition-all hover:bg-line/50 active:scale-[0.97]
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 focus-visible:ring-offset-2
+      focus-visible:ring-offset-canvas;
   }
 
   .input-field {
-    @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-ink
-      placeholder:text-muted outline-none focus:border-green focus:ring-2 focus:ring-green/20;
+    @apply w-full min-h-[2.875rem] rounded-xl border border-linestrong bg-field px-4 py-3 text-ink
+      placeholder:text-muted outline-none transition-[color,background-color,border-color,box-shadow]
+      hover:border-muted/60 focus:border-accent focus:ring-2 focus:ring-accent/25;
+  }
+  /* Error state, driven by aria-invalid — compound selector wins on specificity,
+     so it overrides the accent focus styles regardless of utility order. */
+  .input-field[aria-invalid="true"] {
+    @apply border-danger focus:border-danger focus:ring-danger/25;
   }
 
   .chip {
-    @apply inline-flex items-center gap-1 rounded-pill border border-line bg-white
+    @apply inline-flex items-center gap-1 rounded-pill border border-line bg-elevated
       px-3 py-1.5 text-sm text-ink whitespace-nowrap;
+  }
+
+  /* Theme-aware brand surfaces (hero + auth panel). */
+  .bg-brand {
+    background:
+      radial-gradient(circle at top left, rgb(var(--accent) / 0.16), transparent 45%),
+      radial-gradient(circle at bottom right, rgb(var(--navy) / 0.18), transparent 45%),
+      linear-gradient(180deg, rgb(var(--canvas)) 0%, rgb(var(--surface)) 100%);
+  }
+
+  .bg-cta {
+    background:
+      radial-gradient(circle at top right, rgb(var(--accent) / 0.18), transparent 55%),
+      linear-gradient(135deg, rgb(var(--surface)) 0%, rgb(var(--canvas)) 100%);
   }
 }
 
@@ -113,9 +236,44 @@ body {
   animation: swap-ring 1.1s ease-out infinite;
 }
 
+/* Gentle floating drift for the hero visual. */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+/* Same drift, half a cycle out of phase — paired floats see-saw (swap motif). */
+.animate-float-delayed {
+  animation: float 6s ease-in-out -3s infinite;
+}
+
+/* Slow drifting glow behind the mobile auth hero — adds life without distraction. */
+@keyframes auth-glow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translate3d(6%, -8%, 0) scale(1.12);
+    opacity: 1;
+  }
+}
+.animate-auth-glow {
+  animation: auth-glow 9s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
 /* Skeleton shimmer for loading states. */
 .skeleton {
-  @apply rounded-card bg-line/60;
+  @apply rounded-card bg-elevated;
   position: relative;
   overflow: hidden;
 }
@@ -124,7 +282,7 @@ body {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  background: linear-gradient(90deg, transparent, var(--shimmer), transparent);
   animation: shimmer 1.4s infinite;
 }
 @keyframes shimmer {
@@ -138,6 +296,11 @@ body {
   .animate-fade-in,
   .animate-swap-pop,
   .animate-swap-ring,
+  .animate-swap-spin,
+  .animate-float,
+  .animate-float-delayed,
+  .animate-auth-glow,
+  .animate-spin,
   .skeleton::after {
     animation: none;
   }
@@ -156,8 +319,8 @@ html[dir="rtl"] .skeleton::after {
   animation-direction: reverse;
 }
 
-/* Soft neutral background behind <img> so a slow/failed load shows a gray
-   surface instead of a broken-image glyph (covers avatars + artwork covers). */
+/* Soft themed background behind <img> so a slow/failed load shows a surface
+   instead of a broken-image glyph (covers avatars + artwork covers). */
 img {
-  background-color: #e5e7eb;
+  background-color: rgb(var(--field));
 }

@@ -1,23 +1,27 @@
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@swap/types";
 import { AppShell } from "@/components/AppShell";
+import { LegalArticle, LegalHero, type LegalSection } from "@/components/legal";
+
+export async function generateMetadata({ params: { locale } }: { params: { locale: Locale } }): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "terms" });
+  return { title: t("title"), description: t("subtitle") };
+}
 
 export default async function TermsPage({ params: { locale } }: { params: { locale: Locale } }) {
   setRequestLocale(locale);
   const t = await getTranslations("terms");
+  const tc = await getTranslations("legalCommon");
 
   return (
     <AppShell>
-      <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-        <p className="text-sm font-bold uppercase tracking-wide text-green-dark">{t("eyebrow")}</p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-ink md:text-4xl">{t("title")}</h1>
-        <div className="mt-6 space-y-5 text-base leading-8 text-muted">
-          <p>{t("intro")}</p>
-          <p>{t("marketplace")}</p>
-          <p>{t("conduct")}</p>
-          <p>{t("handover")}</p>
-        </div>
-      </div>
+      <LegalHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} updated={t("updated")} />
+      <LegalArticle
+        sections={t.raw("sections") as LegalSection[]}
+        onThisPage={tc("onThisPage")}
+        help={{ title: tc("helpTitle"), body: tc("helpBody"), cta: tc("helpCta") }}
+      />
     </AppShell>
   );
 }

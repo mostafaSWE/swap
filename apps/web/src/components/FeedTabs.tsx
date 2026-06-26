@@ -27,7 +27,7 @@ export function FeedTabs({
   );
 
   return (
-    <div className="inline-flex gap-1 rounded-pill border border-line bg-white p-1">
+    <div className="inline-flex gap-1 rounded-pill border border-line bg-surface p-1">
       {tab("latest", labels.latest, "/")}
       {tab("following", labels.following, "/?feed=following")}
     </div>

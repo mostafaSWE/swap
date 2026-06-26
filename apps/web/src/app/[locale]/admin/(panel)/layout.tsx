@@ -1,7 +1,6 @@
-import { getTranslations } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@swap/types";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { Link } from "@/i18n/navigation";
+import { AdminNavbar } from "@/components/admin/AdminNavbar";
 import { requireAdmin } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/env";
 
@@ -16,21 +15,11 @@ export default async function AdminPanelLayout({
   // viewable in local dev). In production, requireAdmin enforces access. The
   // /admin/login page sits OUTSIDE this (panel) group, so it is never guarded.
   if (isSupabaseConfigured()) await requireAdmin(locale);
-  const t = await getTranslations("nav");
 
   return (
-    <div className="flex min-h-dvh bg-canvas">
-      <AdminSidebar />
-      <div className="min-w-0 flex-1">
-        {/* Mobile admin top bar */}
-        <div className="flex items-center justify-between border-b border-line bg-white px-4 py-3 md:hidden">
-          <span className="font-bold text-navy">{t("admin")}</span>
-          <Link href="/" className="text-sm text-green">
-            {t("home")}
-          </Link>
-        </div>
-        <main className="mx-auto max-w-6xl p-4 md:p-6">{children}</main>
-      </div>
+    <div className="min-h-dvh bg-canvas">
+      <AdminNavbar />
+      <main className="mx-auto max-w-7xl p-4 md:p-6">{children}</main>
     </div>
   );
 }

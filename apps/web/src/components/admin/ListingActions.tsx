@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ListingStatus } from "@swap/types";
 import { getApi } from "@/lib/api";
+import { createClient } from "@/lib/supabase/client";
 import {
   ActionBtn,
   ConfirmActionButton,
@@ -19,14 +21,24 @@ export function ListingActions({
   id,
   status,
   featured,
+  ownerId,
 }: {
   id: string;
   status: ListingStatus;
   featured: boolean;
+  ownerId: string;
 }) {
   const t = useTranslations("admin");
   const tc = useTranslations("common");
   const refresh = useAdminRefresh();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUserId(data.user?.id ?? null);
+    });
+  }, []);
 
   if (!adminApiReady()) return <span className="text-xs text-muted">{t("apiOff")}</span>;
   const api = getApi()!;
@@ -51,15 +63,19 @@ export function ListingActions({
         {featured ? t("actions.unfeature") : t("actions.feature")}
       </ActionBtn>
 
-      <TextActionButton
-        label={t("actions.requestEdits")}
-        tone="navy"
-        title={t("requestEdits.title")}
-        placeholder={t("requestEdits.placeholder")}
-        submitLabel={t("requestEdits.send")}
-        closeLabel={tc("close")}
-        onSubmit={(body) => api.admin.requestListingEdits(id, { body }).then(refresh)}
-      />
+      {/* Disallow asking for edits on self-owned listings (fails with "cannot message yourself") */}
+      {ownerId !== currentUserId ? (
+        <TextActionButton
+          label={t("actions.requestEdits")}
+          tone="navy"
+          title={t("requestEdits.title")}
+          placeholder={t("requestEdits.placeholder")}
+          submitLabel={t("requestEdits.send")}
+          closeLabel={tc("close")}
+          onSubmit={(body) => api.admin.requestListingEdits(id, { body }).then(refresh)}
+          successMessage={t("requestEdits.success")}
+        />
+      ) : null}
 
       {status !== "removed" ? (
         <ConfirmActionButton

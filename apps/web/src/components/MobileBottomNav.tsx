@@ -1,7 +1,7 @@
 "use client";
 
 import { Grid2x2, Home, LogIn, MessageCircle, PackageSearch, Plus, User, UserPlus } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -32,26 +32,32 @@ const USER_TABS: Tab[] = [
 
 export function MobileBottomNav({ isAuthenticated }: { isAuthenticated: boolean }) {
   const t = useTranslations("nav");
+  const listings = useTranslations("listings");
+  const locale = useLocale();
   const pathname = usePathname();
   const tabs = isAuthenticated ? USER_TABS : PUBLIC_TABS;
 
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  const labelFor = (key: TabKey) => {
+    if (key === "browseListings") return listings("title");
+    if (key === "register" && locale === "en") return "Sign up";
+    return t(key);
+  };
 
   return (
     <nav
-      className="sticky bottom-0 z-30 border-t border-line bg-white/95 backdrop-blur md:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 shadow-[0_-12px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl md:hidden"
       aria-label={t("mobileNav")}
     >
-      <ul className="mx-auto flex w-full max-w-app items-center justify-around px-1.5 py-1.5">
+      <ul className="mx-auto flex w-full max-w-app items-end justify-around px-2 pb-[calc(0.375rem+env(safe-area-inset-bottom))] pt-1.5">
         {tabs.map(({ href, icon: Icon, key, primary }) => {
           if (primary) {
             return (
               <li key={key}>
                 <Link
                   href={href}
-                  aria-label={t(key)}
-                  className="flex h-12 w-12 -translate-y-3 items-center justify-center rounded-full bg-green text-white shadow-elevated ring-4 ring-white transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-dark"
+                  aria-label={labelFor(key)}
+                  className="flex h-12 w-12 -translate-y-2.5 items-center justify-center rounded-full bg-accent text-white shadow-glow ring-4 ring-canvas transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-hover"
                 >
                   <Icon className="h-6 w-6" aria-hidden strokeWidth={2.4} />
                 </Link>
@@ -64,12 +70,12 @@ export function MobileBottomNav({ isAuthenticated }: { isAuthenticated: boolean 
               <Link
                 href={href}
                 className={cn(
-                  "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 text-center text-[10px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/40",
-                  active ? "bg-green-light text-green-dark" : "text-muted hover:text-navy",
+                  "flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-1 text-center text-[10px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/40",
+                  active ? "bg-accent-soft text-accent shadow-sm" : "text-muted hover:bg-elevated hover:text-ink",
                 )}
-              >
+                >
                 <Icon className="h-[21px] w-[21px]" aria-hidden strokeWidth={active ? 2.3 : 2} />
-                <span className="max-w-full truncate">{t(key)}</span>
+                <span className="max-w-full truncate">{labelFor(key)}</span>
               </Link>
             </li>
           );

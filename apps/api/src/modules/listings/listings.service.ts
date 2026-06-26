@@ -41,6 +41,7 @@ export class ListingsService {
     if (filters.country) query = query.eq("country_id", filters.country);
     if (filters.city) query = query.eq("city_id", filters.city);
     if (filters.condition) query = query.eq("condition", filters.condition);
+    if (filters.featured !== undefined) query = query.eq("is_featured", filters.featured);
 
     query =
       filters.sort === "most_viewed"

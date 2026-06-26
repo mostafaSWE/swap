@@ -56,10 +56,10 @@ export async function requireUser(locale: Locale) {
   return user!;
 }
 
-/** Guard for admin pages. Redirects home if not an admin. */
+/** Guard for admin pages. Redirects to admin login if not an admin. */
 export async function requireAdmin(locale: Locale): Promise<Profile> {
   const profile = await getCurrentProfile();
-  if (!profile) redirect({ href: "/login", locale });
-  if (!profile!.is_admin) redirect({ href: "/", locale });
+  if (!profile) redirect({ href: "/admin/login", locale });
+  if (!profile!.is_admin) redirect({ href: "/admin/login", locale });
   return profile!;
 }

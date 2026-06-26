@@ -3,6 +3,9 @@ import type { Country, Locale } from "@swap/types";
 import { AdminTable, type Column } from "@/components/AdminTable";
 import { StatusBadge } from "@/components/badges";
 import { fetchAdminCountries } from "@/lib/admin";
+import { AddCountryButton } from "@/components/admin/AddCountryButton";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminCountriesPage({ params: { locale } }: { params: { locale: Locale } }) {
   setRequestLocale(locale);
@@ -15,13 +18,15 @@ export default async function AdminCountriesPage({ params: { locale } }: { param
     { key: "iso", header: "ISO", render: (c) => c.iso_code },
     { key: "phone", header: "☎", render: (c) => c.phone_code },
     { key: "currency", header: "¤", render: (c) => c.currency_code },
-    { key: "status", header: "•", render: (c) => <StatusBadge status={c.is_active ? "active" : "removed"} /> },
+    { key: "status", header: t("status"), render: (c) => <StatusBadge status={c.is_active ? "active" : "removed"} /> },
   ];
 
   return (
-    <div>
-      <h1 className="mb-4 text-2xl font-bold text-ink">{t("countries")}</h1>
-      {/* Loaded from the DB. TODO (Phase 2): inline create/edit via the admin catalog API. */}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between border-b border-line pb-4">
+        <h1 className="text-2xl font-bold text-ink">{t("countries")}</h1>
+        <AddCountryButton />
+      </div>
       <AdminTable columns={columns} rows={countries} empty={t("countries")} />
     </div>
   );

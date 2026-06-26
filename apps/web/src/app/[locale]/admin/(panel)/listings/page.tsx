@@ -42,11 +42,11 @@ export default async function AdminListingsPage({
       </div>
 
       {rows.length === 0 ? (
-        <p className="rounded-card border border-line bg-white px-4 py-10 text-center text-sm text-muted">
+        <p className="rounded-card border border-line bg-surface px-4 py-10 text-center text-sm text-muted">
           {t("listingsTable.empty")}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-card border border-line bg-white">
+        <div className="overflow-x-auto rounded-card border border-line bg-surface">
           <table className="w-full text-start text-sm">
             <thead className="border-b border-line bg-canvas">
               <tr>
@@ -67,8 +67,13 @@ export default async function AdminListingsPage({
                     </Link>
                     <span className="ms-2 text-xs text-muted">{tcond(l.condition)}</span>
                     {l.is_featured ? (
-                      <span className="ms-2 rounded-pill bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700">
+                      <span className="ms-2 rounded-pill bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
                         {t("listingsTable.featured")}
+                      </span>
+                    ) : null}
+                    {l.has_edit_request ? (
+                      <span className="ms-2 rounded-pill bg-blue-100 px-2 py-0.5 text-[11px] font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+                        {t("listingsTable.editsRequested")}
                       </span>
                     ) : null}
                   </td>
@@ -84,7 +89,7 @@ export default async function AdminListingsPage({
                   <td className="px-4 py-3 text-ink">{l.view_count}</td>
                   <td className="px-4 py-3">
                     {l.pending_reports ? (
-                      <span className="rounded-pill bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
+                      <span className="rounded-pill bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700 dark:bg-red-500/15 dark:text-red-300">
                         {l.pending_reports}
                       </span>
                     ) : (
@@ -95,7 +100,7 @@ export default async function AdminListingsPage({
                     <StatusBadge status={l.status} />
                   </td>
                   <td className="px-4 py-3">
-                    <ListingActions id={l.id} status={l.status} featured={l.is_featured} />
+                    <ListingActions id={l.id} status={l.status} featured={l.is_featured} ownerId={l.owner_id} />
                   </td>
                 </tr>
               ))}

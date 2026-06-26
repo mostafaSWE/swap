@@ -34,6 +34,7 @@ function applyDemoFilters(filters: ListingFilters): ListingWithRelations[] {
   if (filters.cityId) rows = rows.filter((l) => l.city_id === filters.cityId);
   if (filters.condition) rows = rows.filter((l) => l.condition === filters.condition);
   if (filters.ownerId) rows = rows.filter((l) => l.owner_id === filters.ownerId);
+  if (filters.isFeatured !== undefined) rows = rows.filter((l) => l.is_featured === filters.isFeatured);
   if (filters.sort === "most_viewed") rows.sort((a, b) => b.view_count - a.view_count);
   return rows;
 }

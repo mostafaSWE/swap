@@ -17,6 +17,7 @@ export interface ActiveFilters {
   condition?: string;
   sort?: string;
   search?: string;
+  featured?: string;
 }
 
 /** URL-driven filter bar for the listings page. */
@@ -85,7 +86,7 @@ export function ListingFilters({ active }: { active: ActiveFilters }) {
       </div>
 
       {open ? (
-        <div className="space-y-3 rounded-card border border-line bg-white p-3">
+        <div className="grid gap-3 sm:grid-cols-2 rounded-card border border-line bg-surface p-3">
           <SelectInput
             label={t("common.country")}
             value={active.country ?? ""}
@@ -113,6 +114,15 @@ export function ListingFilters({ active }: { active: ActiveFilters }) {
               { value: "", label: t("common.all") },
               { value: "new", label: t("condition.new") },
               { value: "used", label: t("condition.used") },
+            ]}
+          />
+          <SelectInput
+            label={t("listings.featured")}
+            value={active.featured ?? ""}
+            onChange={(e) => update({ featured: e.target.value || undefined })}
+            options={[
+              { value: "", label: t("common.all") },
+              { value: "true", label: t("listings.featuredOnly") },
             ]}
           />
         </div>

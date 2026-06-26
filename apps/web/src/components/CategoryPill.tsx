@@ -33,7 +33,7 @@ export function CategoryPill({
       <span
         className={cn(
           "flex h-11 w-11 items-center justify-center rounded-xl",
-          active ? "bg-white" : "bg-canvas",
+          active ? "bg-surface" : "bg-canvas",
         )}
       >
         <CategoryIcon icon={category.icon} className="h-[22px] w-[22px]" />
@@ -46,7 +46,7 @@ export function CategoryPill({
     "flex shrink-0 flex-col items-center gap-2 rounded-2xl border px-4 py-3 transition-all",
     active
       ? "border-green bg-green-light text-green-dark"
-      : "border-line bg-white text-navy hover:border-green/40 hover:bg-canvas",
+      : "border-line bg-surface text-ink hover:border-green/40 hover:bg-canvas",
   );
 
   if (href) {

@@ -10,7 +10,7 @@ import type { ListingCondition, ListingWithRelations, Locale } from "@swap/types
 import { createClient } from "@/lib/supabase/client";
 import { getApi } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
-import { FormInput, FormTextarea } from "@/components/forms";
+import { FormInput, FormTextarea, FormCheckbox } from "@/components/forms";
 import { CountryCitySelector } from "@/components/CountryCitySelector";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { ListingImageManager } from "@/components/ListingImageManager";
@@ -21,6 +21,7 @@ interface Values {
   title: string;
   description: string;
   wanted_exchange: string;
+  open_to_any?: boolean;
 }
 
 /** Single-page edit for an existing listing (owner only — enforced on the route + API). */
@@ -29,6 +30,7 @@ export function EditListingForm({ listing }: { listing: ListingWithRelations }) 
   const tn = useTranslations("newListing");
   const tc = useTranslations("common");
   const tCond = useTranslations("condition");
+  const tListing = useTranslations("listing");
   const locale = useLocale() as Locale;
   const router = useRouter();
 
@@ -46,14 +48,18 @@ export function EditListingForm({ listing }: { listing: ListingWithRelations }) 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<Values>({
     defaultValues: {
       title: listing.title,
       description: listing.description,
-      wanted_exchange: listing.wanted_exchange,
+      wanted_exchange: listing.wanted_exchange === "__any__" ? "" : listing.wanted_exchange,
+      open_to_any: listing.wanted_exchange === "__any__",
     },
   });
+
+  const openToAny = watch("open_to_any");
 
   async function onSubmit(values: Values) {
     setError(null);
@@ -66,7 +72,7 @@ export function EditListingForm({ listing }: { listing: ListingWithRelations }) 
     const patch = {
       title: values.title,
       description: values.description,
-      wanted_exchange: values.wanted_exchange,
+      wanted_exchange: values.open_to_any ? "__any__" : values.wanted_exchange,
       condition,
       category_id: categoryId,
       country_id: countryId,
@@ -138,7 +144,7 @@ export function EditListingForm({ listing }: { listing: ListingWithRelations }) 
                   "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
                   categoryId === c.id
                     ? "border-green bg-green-light text-green-dark"
-                    : "border-line bg-white text-navy hover:bg-canvas",
+                    : "border-line bg-surface text-ink hover:bg-canvas",
                 )}
               >
                 <CategoryIcon icon={c.icon} className="h-4 w-4" />
@@ -160,7 +166,7 @@ export function EditListingForm({ listing }: { listing: ListingWithRelations }) 
                   "rounded-xl border-2 px-4 py-3 text-sm font-bold transition-colors",
                   condition === c
                     ? "border-green bg-green-light text-green-dark"
-                    : "border-line bg-white text-navy hover:bg-canvas",
+                    : "border-line bg-surface text-ink hover:bg-canvas",
                 )}
               >
                 {tCond(c)}
@@ -181,19 +187,34 @@ export function EditListingForm({ listing }: { listing: ListingWithRelations }) 
         />
 
         <FormTextarea label={tn("fieldDescription")} rows={4} {...register("description")} />
-        <FormTextarea label={tn("fieldWanted")} rows={3} {...register("wanted_exchange")} />
+
+        <div className="mb-4">
+          <FormCheckbox
+            label={tn("fieldOpenToAny")}
+            hint={tn("fieldOpenToAnyHint")}
+            {...register("open_to_any")}
+          />
+        </div>
+
+        <FormTextarea
+          label={tn("fieldWanted")}
+          rows={3}
+          {...register("wanted_exchange")}
+          disabled={openToAny}
+          placeholder={openToAny ? tListing("openToAnyExchange") : ""}
+        />
 
         {/* Status (active ⇄ paused) */}
         <button
           type="button"
           onClick={() => setPaused((p) => !p)}
-          className="flex w-full items-center justify-between rounded-card border border-line bg-white px-4 py-3"
+          className="flex w-full items-center justify-between rounded-card border border-line bg-surface px-4 py-3"
         >
           <span className="flex items-center gap-2 text-sm font-semibold text-ink">
             {paused ? <EyeOff className="h-4 w-4 text-muted" aria-hidden /> : <Eye className="h-4 w-4 text-green" aria-hidden />}
             {paused ? t("statusPaused") : t("statusActive")}
           </span>
-          <span className={cn("rounded-pill px-2 py-0.5 text-xs font-bold", paused ? "bg-amber-100 text-amber-700" : "bg-green-light text-green-dark")}>
+          <span className={cn("rounded-pill px-2 py-0.5 text-xs font-bold", paused ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" : "bg-green-light text-green-dark")}>
             {paused ? t("paused") : t("active")}
           </span>
         </button>
@@ -228,7 +249,7 @@ export function EditListingForm({ listing }: { listing: ListingWithRelations }) 
           <button
             type="button"
             onClick={() => setConfirmDelete(true)}
-            className="flex w-full items-center justify-center gap-2 rounded-pill py-2.5 text-sm font-semibold text-danger hover:bg-red-50"
+            className="flex w-full items-center justify-center gap-2 rounded-pill py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
           >
             <Trash2 className="h-4 w-4" aria-hidden />
             {t("delete")}

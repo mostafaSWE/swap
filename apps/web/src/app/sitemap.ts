@@ -12,10 +12,12 @@ const staticPaths = [
   "",
   "/listings",
   "/categories",
+  "/legal",
   "/safety",
   "/disclaimer",
   "/privacy",
   "/terms",
+  "/support",
   "/login",
   "/register",
 ];

@@ -21,12 +21,16 @@ export async function AppShell({
 }) {
   const user = await getCurrentUser();
   const isAuthenticated = Boolean(user);
+  const mainClassName = hideNav
+    ? "flex-1"
+    : hideFooter
+      ? "flex-1 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-6"
+      : "flex-1 md:pb-6";
 
   return (
     <div className="flex min-h-dvh w-full flex-col bg-canvas">
       {hideTopBar ? null : <TopBar isAuthenticated={isAuthenticated} />}
-      {/* Extra bottom padding on mobile to clear the fixed bottom nav. */}
-      <main className={hideNav ? "flex-1" : "flex-1 pb-20 md:pb-6"}>{children}</main>
+      <main className={mainClassName}>{children}</main>
       {hideNav || hideFooter ? null : <Footer />}
       {hideNav ? null : <MobileBottomNav isAuthenticated={isAuthenticated} />}
     </div>

@@ -51,7 +51,7 @@ export function Sheet({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="animate-slide-up flex max-h-[90dvh] w-full max-w-app flex-col rounded-t-card bg-white outline-none sm:rounded-card"
+        className="animate-slide-up flex max-h-[90dvh] w-full max-w-app flex-col rounded-t-card bg-surface outline-none sm:rounded-card"
       >
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <h2 id={titleId} className="text-lg font-bold text-ink">

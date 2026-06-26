@@ -58,11 +58,11 @@ export default async function AdminUsersPage({
       </div>
 
       {rows.length === 0 ? (
-        <p className="rounded-card border border-line bg-white px-4 py-10 text-center text-sm text-muted">
+        <p className="rounded-card border border-line bg-surface px-4 py-10 text-center text-sm text-muted">
           {t("usersTable.empty")}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-card border border-line bg-white">
+        <div className="overflow-x-auto rounded-card border border-line bg-surface">
           <table className="w-full text-start text-sm">
             <thead className="border-b border-line bg-canvas">
               <tr>

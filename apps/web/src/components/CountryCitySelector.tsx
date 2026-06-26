@@ -47,7 +47,7 @@ export function CountryCitySelector({
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
       <SelectInput
         label={countryLabel}
         value={countryId}

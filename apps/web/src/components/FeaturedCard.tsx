@@ -17,13 +17,14 @@ export function FeaturedCard({ listing }: { listing: ListingWithRelations }) {
   return (
     <Link
       href={`/listings/${listing.id}`}
-      className="card group relative w-[290px] shrink-0 snap-start overflow-hidden text-start transition-all hover:shadow-elevated"
+      className="card group relative w-[290px] shrink-0 snap-start overflow-hidden text-start transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 hover:shadow-elevated"
     >
-      <div className="relative h-40 w-full">
-        <ItemArtwork listing={listing} className="h-full w-full" sizes="290px" />
+      <div className="relative h-40 w-full overflow-hidden">
+        <ItemArtwork listing={listing} className="h-full w-full transition-transform duration-300 group-hover:scale-[1.04]" sizes="290px" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/45 to-transparent" />
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-2.5">
-          <span className="inline-flex items-center gap-1 rounded-pill bg-white/95 px-2 py-0.5 text-[11px] font-bold text-navy shadow-sm">
-            <Sparkles className="h-3 w-3 text-green" aria-hidden />
+          <span className="inline-flex items-center gap-1 rounded-pill bg-night/70 px-2 py-0.5 text-[11px] font-bold text-ink shadow-sm ring-1 ring-white/10 backdrop-blur-sm">
+            <Sparkles className="h-3 w-3 text-accent" aria-hidden />
             {t("home.featured")}
           </span>
         </div>

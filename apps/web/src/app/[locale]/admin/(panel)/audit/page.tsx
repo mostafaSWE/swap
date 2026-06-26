@@ -35,11 +35,11 @@ export default async function AdminAuditPage({
       <UrlSearch placeholder={t("auditTable.searchPlaceholder")} initial={searchParams.search ?? ""} />
 
       {rows.length === 0 ? (
-        <p className="rounded-card border border-line bg-white px-4 py-10 text-center text-sm text-muted">
+        <p className="rounded-card border border-line bg-surface px-4 py-10 text-center text-sm text-muted">
           {t("auditTable.empty")}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-card border border-line bg-white">
+        <div className="overflow-x-auto rounded-card border border-line bg-surface">
           <table className="w-full text-start text-sm">
             <thead className="border-b border-line bg-canvas">
               <tr>
@@ -68,7 +68,7 @@ export default async function AdminAuditPage({
                         <span className="text-muted">{a.target_type}</span>
                       )}
                     </td>
-                    <td className="max-w-xs px-4 py-3 text-ink-muted">
+                    <td className="max-w-xs px-4 py-3 text-muted">
                       <span className="line-clamp-2 whitespace-pre-wrap">{a.notes ?? "—"}</span>
                     </td>
                     <td className="px-4 py-3 text-muted">{formatDate(a.created_at, locale)}</td>

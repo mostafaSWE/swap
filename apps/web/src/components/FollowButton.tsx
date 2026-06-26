@@ -17,10 +17,12 @@ import { cn } from "@/lib/utils";
 export function FollowButton({
   userId,
   initialFollowing = false,
+  fullWidth = true,
   className,
 }: {
   userId: string;
   initialFollowing?: boolean;
+  fullWidth?: boolean;
   className?: string;
 }) {
   const t = useTranslations("listing");
@@ -61,7 +63,7 @@ export function FollowButton({
       onClick={toggle}
       disabled={busy}
       aria-pressed={following}
-      className={cn("btn-secondary w-full", className)}
+      className={cn("btn-secondary", fullWidth && "w-full", className)}
     >
       {following ? (
         <UserCheck className="h-5 w-5 text-green" aria-hidden />

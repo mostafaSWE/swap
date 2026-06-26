@@ -10,14 +10,29 @@ import { AppModule } from "./app.module";
 // comma-separated override; otherwise fall back to the public app URL / local dev.
 // Use `||` (not `??`) so an empty/whitespace value falls through instead of
 // producing an empty allowlist that would block every origin.
-const corsOrigins = (process.env.CORS_ORIGINS?.trim() || process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000")
+const corsAllowlist: (string | RegExp)[] = (
+  process.env.CORS_ORIGINS?.trim() ||
+  process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+  "http://localhost:3000"
+)
   .split(",")
   .map((o) => o.trim())
   .filter(Boolean);
 
+// In development the Next.js dev server falls back to the next free port
+// (e.g. :3001) whenever :3000 is already taken. The fixed allowlist would then
+// reject the browser's CORS preflight for every authenticated POST — silently
+// breaking message send / propose swap / create listing while RLS-backed reads
+// (which hit Supabase directly, not this API) keep working. So in dev we accept
+// any localhost origin regardless of port; production keeps the strict allowlist.
+const corsOrigin: (string | RegExp)[] =
+  process.env.NODE_ENV === "production"
+    ? corsAllowlist
+    : [...corsAllowlist, /^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/];
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    cors: { origin: corsOrigins, credentials: true },
+    cors: { origin: corsOrigin, credentials: true },
   });
 
   // Behind a reverse proxy, trust X-Forwarded-For so the rate limiter keys on the

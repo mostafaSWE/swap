@@ -55,7 +55,7 @@ export function AdminLoginForm() {
   return (
     <div className="app-container flex min-h-dvh flex-col justify-center px-6 py-10">
       <div className="mb-8 flex flex-col items-center gap-2 text-center">
-        <span className="flex h-12 w-12 items-center justify-center rounded-card bg-navy text-white">
+        <span className="flex h-12 w-12 items-center justify-center rounded-card bg-accent/15 text-accent ring-1 ring-accent/25">
           <ShieldCheck className="h-6 w-6" aria-hidden />
         </span>
         <h1 className="text-2xl font-bold text-ink">{t("title")}</h1>
@@ -84,7 +84,7 @@ export function AdminLoginForm() {
           </p>
         ) : null}
 
-        <CTAButton type="submit" disabled={isSubmitting}>
+        <CTAButton type="submit" disabled={isSubmitting} className="w-full">
           {t("button")}
         </CTAButton>
       </form>

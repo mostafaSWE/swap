@@ -6,8 +6,9 @@ import { CheckCircle2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Logo } from "@/components/Logo";
-import { FormInput } from "@/components/forms";
+import { AuthShell } from "@/components/AuthShell";
+import { FormAlert } from "@/components/forms";
+import { PasswordInput } from "@/components/PasswordInput";
 import { CTAButton } from "@/components/CTAButton";
 
 interface Values {
@@ -58,48 +59,43 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <div className="app-container flex min-h-dvh flex-col justify-center px-6 py-10">
-      <div className="mb-8 flex flex-col items-center gap-2">
-        <Logo priority />
-        <h1 className="text-2xl font-bold text-ink">{t("resetTitle")}</h1>
-      </div>
+    <AuthShell>
+      <h1 className="text-2xl font-bold tracking-tight text-ink">{t("resetTitle")}</h1>
 
       {done ? (
-        <div className="flex flex-col items-center gap-3 text-center">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-green-light text-green-dark">
+        <div className="mt-6 flex flex-col items-center gap-3 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-soft text-accent ring-1 ring-accent/25">
             <CheckCircle2 className="h-7 w-7" aria-hidden />
           </span>
-          <p className="text-sm text-ink/80">{t("resetDone")}</p>
+          <p className="text-sm text-muted">{t("resetDone")}</p>
         </div>
       ) : hasSession === false ? (
-        <div className="flex flex-col items-center gap-3 text-center">
-          <p className="text-sm text-ink/80">{t("resetExpired")}</p>
-          <Link href="/forgot-password" className="font-semibold text-green">
+        <div className="mt-6 flex flex-col items-center gap-3 text-center">
+          <p className="text-sm text-muted">{t("resetExpired")}</p>
+          <Link href="/forgot-password" className="font-semibold text-accent hover:underline">
             {t("forgotTitle")}
           </Link>
         </div>
       ) : (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <FormInput
-            type="password"
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+          <PasswordInput
             label={t("newPassword")}
             autoComplete="new-password"
             error={errors.password && t("passwordTooShort")}
             {...register("password", { required: true, minLength: 6 })}
           />
-          <FormInput
-            type="password"
+          <PasswordInput
             label={t("confirmPassword")}
             autoComplete="new-password"
             error={errors.confirm && t("errorGeneric")}
             {...register("confirm", { required: true })}
           />
-          {error ? <p role="alert" className="text-sm text-danger">{error}</p> : null}
-          <CTAButton type="submit" disabled={isSubmitting || hasSession === null}>
+          {error ? <FormAlert>{error}</FormAlert> : null}
+          <CTAButton type="submit" disabled={isSubmitting || hasSession === null} className="w-full">
             {t("resetSubmit")}
           </CTAButton>
         </form>
       )}
-    </div>
+    </AuthShell>
   );
 }

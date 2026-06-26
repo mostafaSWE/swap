@@ -34,11 +34,11 @@ export function SwapPair({
 
   return (
     <div className={cn("flex items-start", d.gap, className)}>
-      {/* Gives */}
+      {/* Gives — the neutral item the owner hands over */}
       <Cell label={t("gives")} labelClass={d.label}>
         <span
           className={cn(
-            "flex items-center justify-center rounded-xl border border-line bg-canvas text-navy",
+            "flex items-center justify-center rounded-xl border border-linestrong bg-elevated text-ink",
             d.box,
           )}
         >
@@ -46,21 +46,24 @@ export function SwapPair({
         </span>
       </Cell>
 
-      {/* Connector */}
+      {/* Connector — terracotta swap arrow */}
       <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-2">
         <span
-          className={cn("flex items-center justify-center rounded-full bg-navy text-white shadow-card", d.arrow)}
+          className={cn(
+            "flex items-center justify-center rounded-full bg-accent text-white shadow-glow ring-1 ring-accent/30",
+            d.arrow,
+          )}
           aria-hidden
         >
-          <ArrowLeftRight className="h-full w-full" />
+          <ArrowLeftRight className="h-full w-full rtl-flip" />
         </span>
       </div>
 
-      {/* Wants */}
+      {/* Wants — the highlighted thing being asked for */}
       <Cell label={t("wants")} labelClass={d.label} accent>
         <span
           className={cn(
-            "flex items-center justify-center rounded-xl border border-green/40 bg-green-light text-green-dark",
+            "flex items-center justify-center rounded-xl border border-accent/45 bg-accent-soft text-accent",
             d.box,
           )}
         >
@@ -85,7 +88,7 @@ function Cell({
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
       {children}
-      <span className={cn("max-w-full truncate font-medium", labelClass, accent ? "text-green-dark" : "text-muted")}>
+      <span className={cn("max-w-full truncate font-semibold uppercase tracking-wide", labelClass, accent ? "text-accent" : "text-muted")}>
         {label}
       </span>
     </div>

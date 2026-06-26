@@ -45,6 +45,7 @@ export default async function ListingsPage({
     countryId: searchParams.country,
     cityId: searchParams.city,
     condition: searchParams.condition as ListingCondition | undefined,
+    isFeatured: searchParams.featured === "true" ? true : undefined,
     sort: (searchParams.sort as SortOption) ?? "newest",
     limit: 48,
   });
@@ -52,7 +53,11 @@ export default async function ListingsPage({
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-[1440px] space-y-5 px-4 py-8 sm:px-6 lg:px-8">
-        <SearchBar defaultValue={searchParams.search} />
+        <SearchBar
+          defaultValue={searchParams.search}
+          defaultCountry={searchParams.country}
+          defaultCity={searchParams.city}
+        />
         <ListingFilters active={searchParams} />
         <p className="text-sm text-muted">{t("resultsCount", { count: listings.length })}</p>
 

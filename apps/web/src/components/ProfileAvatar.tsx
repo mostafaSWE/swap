@@ -21,7 +21,7 @@ export function ProfileAvatar({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-full bg-navy/10 flex items-center justify-center shrink-0",
+        "relative overflow-hidden rounded-full bg-elevated flex items-center justify-center shrink-0",
         className,
       )}
       style={{ width: px, height: px }}
@@ -29,7 +29,7 @@ export function ProfileAvatar({
       {src ? (
         <Image src={src} alt={name ?? ""} fill sizes={`${px}px`} className="object-cover" />
       ) : (
-        <span className="font-semibold text-navy" style={{ fontSize: px / 2.5 }}>
+        <span className="font-semibold text-ink" style={{ fontSize: px / 2.5 }}>
           {initial}
         </span>
       )}

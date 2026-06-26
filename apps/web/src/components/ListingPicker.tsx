@@ -93,7 +93,7 @@ export function ListingPicker({
             aria-pressed={selected}
             disabled={blocked}
             className={cn(
-              "group relative overflow-hidden rounded-card border bg-white text-start transition focus:outline-none focus-visible:ring-2 focus-visible:ring-green/50",
+              "group relative overflow-hidden rounded-card border bg-surface text-start transition focus:outline-none focus-visible:ring-2 focus-visible:ring-green/50",
               selected ? "border-green ring-2 ring-green/40" : "border-line hover:border-green/50",
               blocked && "cursor-not-allowed opacity-50",
             )}

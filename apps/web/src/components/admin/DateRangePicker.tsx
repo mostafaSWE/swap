@@ -66,7 +66,7 @@ export function DateRangePicker({
             onClick={() => preset(p.n)}
             className={cn(
               "rounded-pill px-3 py-1.5 text-sm font-medium transition-colors",
-              activeN === p.n ? "bg-navy text-white" : "border border-line text-ink hover:bg-canvas",
+              activeN === p.n ? "bg-accent text-white" : "border border-linestrong text-ink hover:bg-elevated",
             )}
           >
             {p.label}
@@ -97,7 +97,7 @@ export function DateRangePicker({
       <button
         type="button"
         onClick={() => f && t && go(f, t)}
-        className="rounded-pill bg-green px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-dark"
+        className="rounded-pill bg-accent px-4 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover"
       >
         {labels.apply}
       </button>

@@ -1,149 +1,135 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, PackagePlus, Repeat2, Search } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, PackagePlus, Repeat2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { localizedName } from "@swap/ui";
-import type { Locale, ListingWithRelations } from "@swap/types";
 import { Link } from "@/i18n/navigation";
-import { ItemArtwork } from "./ItemArtwork";
-import { SwapPair } from "./SwapPair";
+import { cn } from "@/lib/utils";
+import { Reveal, Stagger, StaggerItem } from "./motion";
 
-export function Hero({
-  sample,
-  isAuthenticated,
-}: {
-  sample?: ListingWithRelations;
-  isAuthenticated: boolean;
-}) {
+/**
+ * Feathers all four edges of the hero visual to transparent so its rectangular
+ * backdrop melts into the page (and the motif behind it) instead of reading as a
+ * pasted-in card. Two linear masks intersected = a soft, rounded-feeling edge.
+ */
+const FEATHER =
+  "linear-gradient(to right, transparent, #000 8%, #000 92%, transparent), linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent)";
+const softEdge: React.CSSProperties = {
+  WebkitMaskImage: FEATHER,
+  maskImage: FEATHER,
+  WebkitMaskComposite: "source-in",
+  maskComposite: "intersect",
+};
+
+export function Hero({ isAuthenticated }: { isAuthenticated: boolean }) {
   const t = useTranslations();
-  const locale = useLocale() as Locale;
+  const locale = useLocale();
+  const isArabic = locale === "ar";
   const addHref = isAuthenticated ? "/new-listing" : "/login";
 
   return (
-    <section className="relative isolate overflow-hidden bg-white">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(24,182,106,0.16),transparent_34%),linear-gradient(180deg,#ffffff_0%,#f5f7f8_100%)]" />
-      <div className="mx-auto grid w-full max-w-[1440px] items-center gap-10 px-4 py-10 sm:px-6 md:py-14 lg:grid-cols-[1fr_0.92fr] lg:px-8 lg:py-16">
-        <div className="max-w-3xl">
-          <span className="inline-flex items-center gap-2 rounded-pill border border-green/20 bg-green-light px-3 py-1.5 text-xs font-bold text-green-dark">
-            <Repeat2 className="h-4 w-4" aria-hidden />
-            {t("home.heroBadge")}
-          </span>
-          <h1 className="mt-5 max-w-4xl text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-navy md:text-5xl lg:text-6xl">
-            {t("home.heroTitle")}
-          </h1>
-          <p className="mt-5 max-w-2xl text-pretty text-base leading-8 text-ink/70 md:text-lg">
-            {t("home.heroSubtitle")}
-          </p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Link href={addHref} className="btn-primary min-h-12 px-6 text-base">
-              <PackagePlus className="h-5 w-5" aria-hidden />
-              {t("home.cta")}
-            </Link>
-            <Link href="/categories" className="btn-secondary min-h-12 px-6 text-base">
-              {t("home.browseCategories")}
-              <ArrowRight className="rtl-flip h-5 w-5" aria-hidden />
-            </Link>
-          </div>
-          <p className="mt-4 max-w-xl text-sm leading-6 text-muted">{t("home.heroTrustNote")}</p>
-        </div>
+    <section className="relative isolate overflow-hidden bg-canvas">
+      {/* Branded background image — theme-swapped, full-bleed. Decorative.
+          The source has the swap motif on the start side; mirror it on the
+          vertical axis in RTL only, so EN and AR are mirror images of each other. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-20 bg-[url('/images/landing/hero-bg-light-cropped.webp')] bg-cover bg-center rtl:[transform:scaleX(-1)] dark:bg-[url('/images/landing/hero-bg-dark-cropped.webp')] md:bg-[url('/images/landing/hero-bg-light.webp')] md:dark:bg-[url('/images/landing/hero-bg-dark.webp')]"
+      />
 
-        <div className="relative mx-auto w-full max-w-2xl lg:mx-0">
-          <div className="absolute -end-4 -top-4 h-28 w-28 rounded-full bg-green/15 blur-2xl" />
-          <div className="absolute -bottom-8 start-10 h-32 w-32 rounded-full bg-navy/10 blur-2xl" />
-          {sample ? (
-            <div className="relative rounded-[28px] border border-white/80 bg-white/80 p-3 shadow-elevated backdrop-blur">
-              <div className="grid gap-3 sm:grid-cols-[1fr_0.9fr]">
-                <article className="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
-                  <div className="relative aspect-[4/3]">
-                    <ItemArtwork
-                      listing={sample}
-                      className="h-full w-full"
-                      sizes="(max-width: 1024px) 90vw, 420px"
-                      priority
-                    />
-                    <span className="absolute start-3 top-3 rounded-pill bg-white/95 px-3 py-1 text-xs font-bold text-navy shadow-sm">
-                      {t("home.realListing")}
-                    </span>
-                  </div>
-                  <div className="space-y-3 p-4">
-                    <div>
-                      <h2 className="line-clamp-2 text-lg font-extrabold leading-6 text-ink">{sample.title}</h2>
-                      <p className="mt-1 text-sm text-muted">{localizedName(sample.city, locale)}</p>
-                    </div>
-                    <div className="rounded-2xl bg-canvas p-3">
-                      <SwapPair listing={sample} size="md" />
-                    </div>
-                  </div>
-                </article>
+      {/* Contrast scrim: keeps the text side readable over the image while leaving
+          the visual side vivid. Vertical on mobile (text on top), inline-start on
+          desktop (RTL-aware). Canvas-coloured, so it follows the theme. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-gradient-to-b from-canvas/55 via-canvas/20 to-transparent dark:from-canvas dark:via-canvas/70 lg:via-canvas/35 lg:dark:via-canvas/45 lg:ltr:bg-gradient-to-r lg:rtl:bg-gradient-to-l"
+      />
 
-                <div className="flex flex-col justify-between gap-3 rounded-2xl bg-navy p-5 text-white">
-                  <div>
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-green-light">
-                      <Repeat2 className="h-5 w-5" aria-hidden />
-                    </span>
-                    <p className="mt-4 text-sm font-bold text-green-light">{t("home.heroPreviewLabel")}</p>
-                    <p className="mt-2 text-pretty text-2xl font-extrabold leading-tight">{sample.wanted_exchange}</p>
-                  </div>
-                  <div className="space-y-3 border-t border-white/15 pt-4 text-sm text-white/75">
-                    <p className="flex items-start gap-2">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-light" aria-hidden />
-                      {t("home.heroPreviewTrust")}
-                    </p>
-                    <p className="flex items-start gap-2">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-light" aria-hidden />
-                      {t("home.heroPreviewSafety")}
-                    </p>
-                  </div>
-                </div>
-              </div>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_58%,rgb(var(--accent)/0.10),transparent_48%)] dark:hidden"
+      />
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-28 translate-y-px bg-gradient-to-b from-canvas/0 via-canvas/55 to-canvas dark:via-canvas/85 sm:h-36 md:h-44 lg:h-56"
+      />
+
+      <div className="relative mx-auto grid w-full max-w-[1440px] items-start px-4 pb-5 pt-7 sm:px-6 sm:pb-9 sm:pt-10 md:min-h-[620px] md:grid-cols-[1fr_0.9fr] md:items-center md:gap-8 md:overflow-visible md:py-16 lg:min-h-[680px] lg:grid-cols-[1fr_0.95fr] lg:px-8 lg:py-24">
+        <Stagger className="relative z-10 mx-auto max-w-[25rem] text-center md:mx-0 md:max-w-2xl md:text-start" gap={0.1}>
+          <StaggerItem>
+            <span className="inline-flex items-center gap-2 rounded-pill border border-accent/25 bg-accent-soft px-3 py-1.5 text-xs font-bold text-accent backdrop-blur-sm">
+              <Repeat2 className="h-4 w-4" aria-hidden />
+              {t("home.heroBadge")}
+            </span>
+          </StaggerItem>
+          <StaggerItem>
+            <h1
+              className={cn(
+                "mx-auto mt-4 font-bold leading-[1.08] tracking-normal text-ink md:mx-0 md:max-w-4xl md:text-5xl md:leading-[1.04] lg:text-6xl",
+                isArabic
+                  ? "max-w-[calc(100vw-2rem)] whitespace-nowrap text-[clamp(1.75rem,7.55vw,2.3rem)] sm:text-5xl"
+                  : "max-w-[12ch] text-balance text-[2.35rem] min-[390px]:text-[2.55rem] sm:max-w-[13ch] sm:text-5xl",
+              )}
+            >
+              {t("home.heroTitle")}
+            </h1>
+          </StaggerItem>
+          <StaggerItem>
+            <p className="mx-auto mt-3 max-w-[34rem] text-pretty text-sm leading-7 text-muted sm:text-base md:mx-0 md:mt-5 md:text-lg md:leading-8">
+              {t("home.heroSubtitle")}
+            </p>
+          </StaggerItem>
+          <StaggerItem>
+            <div className="mx-auto mt-5 grid max-w-sm gap-2.5 sm:max-w-none sm:grid-cols-2 sm:gap-3 md:mx-0 md:mt-7 md:flex md:flex-row md:gap-3">
+              <Link href={addHref} className="btn-primary min-h-12 px-6 text-base shadow-glow">
+                <PackagePlus className="h-5 w-5" aria-hidden />
+                {t("home.cta")}
+              </Link>
+              <Link href="/categories" className="btn-secondary min-h-12 border-white/10 bg-surface/80 px-6 text-base backdrop-blur-md md:bg-elevated">
+                {t("home.browseCategories")}
+                <ArrowRight className="rtl-flip h-5 w-5" aria-hidden />
+              </Link>
             </div>
-          ) : (
-            <EmptyHeroVisual />
-          )}
-        </div>
+          </StaggerItem>
+          <StaggerItem>
+            <p className="mx-auto mt-3 max-w-[32rem] text-xs leading-6 text-muted sm:text-sm md:mx-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+              {t("home.heroTrustNote")}
+            </p>
+          </StaggerItem>
+        </Stagger>
+
+        {/* Hero visual — theme-swapped product-swap illustration. Its own backdrop
+            matches the theme canvas, so it blends into the section (no hard frame);
+            a soft accent glow gives depth without looking pasted on. */}
+        <Reveal
+          delay={0.15}
+          y={24}
+          className="pointer-events-none relative z-0 mx-auto hidden md:flex md:pointer-events-auto md:h-auto md:w-auto md:max-w-none md:items-center md:justify-center"
+        >
+          <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-2/3 w-2/3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/15 blur-3xl" />
+          <Image
+            src="/images/landing/hero-visual-light.webp"
+            alt={t("home.heroVisualAlt")}
+            width={1448}
+            height={1086}
+            unoptimized
+            sizes="(max-width: 1024px) 46vw, 600px"
+            style={softEdge}
+            className="animate-float h-auto w-full max-w-[600px] object-contain dark:hidden"
+          />
+          <Image
+            src="/images/landing/hero-visual-dark.webp"
+            alt={t("home.heroVisualAlt")}
+            width={1448}
+            height={1086}
+            unoptimized
+            sizes="(max-width: 1024px) 46vw, 600px"
+            style={softEdge}
+            className="animate-float hidden h-auto w-full max-w-[600px] object-contain dark:block"
+          />
+        </Reveal>
       </div>
     </section>
-  );
-}
-
-function EmptyHeroVisual() {
-  const t = useTranslations("home");
-
-  return (
-    <div className="relative rounded-[28px] border border-white/80 bg-white/85 p-4 shadow-elevated backdrop-blur">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <FlowCard icon={<PackagePlus className="h-6 w-6" aria-hidden />} title={t("how.step1Title")} text={t("how.step1Body")} />
-        <FlowCard icon={<Search className="h-6 w-6" aria-hidden />} title={t("how.step2Title")} text={t("how.step2Body")} />
-        <FlowCard icon={<Repeat2 className="h-6 w-6" aria-hidden />} title={t("how.step3Title")} text={t("how.step3Body")} accent />
-      </div>
-    </div>
-  );
-}
-
-function FlowCard({
-  icon,
-  title,
-  text,
-  accent,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  text: string;
-  accent?: boolean;
-}) {
-  return (
-    <div className={accent ? "rounded-2xl bg-navy p-5 text-white" : "rounded-2xl border border-line bg-white p-5"}>
-      <span
-        className={
-          accent
-            ? "flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-green-light"
-            : "flex h-12 w-12 items-center justify-center rounded-2xl bg-green-light text-green-dark"
-        }
-      >
-        {icon}
-      </span>
-      <h2 className={accent ? "mt-5 text-base font-extrabold text-white" : "mt-5 text-base font-extrabold text-ink"}>{title}</h2>
-      <p className={accent ? "mt-2 text-sm leading-6 text-white/70" : "mt-2 text-sm leading-6 text-muted"}>{text}</p>
-    </div>
   );
 }

@@ -73,7 +73,7 @@ export function RatingStars({
       {[1, 2, 3, 4, 5].map((n) => {
         const star = (
           <Star
-            className={cn(SIZES[size], n <= value ? "fill-amber-400 text-amber-400" : "fill-transparent text-line")}
+            className={cn(SIZES[size], n <= value ? "fill-amber-400 text-amber-400" : "fill-transparent text-faint")}
             aria-hidden
           />
         );

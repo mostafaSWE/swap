@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Check, ChevronLeft } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronLeft, Repeat2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   CATEGORY_BY_ID,
@@ -15,11 +15,10 @@ import type { Category, ListingCondition, Locale } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
 import { getApi } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
-import { FormInput, FormTextarea } from "@/components/forms";
+import { FormInput, FormTextarea, FormCheckbox } from "@/components/forms";
 import { CountryCitySelector } from "@/components/CountryCitySelector";
 import { ImageUploader } from "@/components/ImageUploader";
 import { SafetyDisclaimer } from "@/components/SafetyDisclaimer";
-import { SwapPair } from "@/components/SwapPair";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +26,7 @@ interface Values {
   title: string;
   description: string;
   wanted_exchange: string;
+  open_to_any?: boolean;
 }
 
 const TOTAL_STEPS = 3;
@@ -52,6 +52,119 @@ function Field({
   );
 }
 
+function ExchangePreview({
+  title,
+  category,
+  categoryName,
+  coverUrl,
+  wanted,
+  modeLabel,
+  titleLabel,
+  wantedLabel,
+  previewLabel,
+}: {
+  title: string;
+  category?: Category;
+  categoryName: string;
+  coverUrl: string | null;
+  wanted: string;
+  modeLabel: string;
+  titleLabel: string;
+  wantedLabel: string;
+  previewLabel: string;
+}) {
+  return (
+    <section className="space-y-2" aria-live="polite">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted">{previewLabel}</p>
+        <span className="max-w-[56%] truncate rounded-full border border-accent/30 bg-accent-soft px-2.5 py-1 text-[11px] font-bold text-accent">
+          {modeLabel}
+        </span>
+      </div>
+
+      <div className="relative overflow-hidden rounded-[24px] border border-linestrong bg-surface p-3 shadow-card">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-accent/10 to-transparent" />
+        <div className="relative grid grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)] items-stretch gap-2 sm:grid-cols-[minmax(0,1fr)_56px_minmax(0,1fr)] sm:gap-3">
+          <PreviewSide label={titleLabel} title={title} meta={categoryName}>
+            <PreviewMedia title={title} category={category} coverUrl={coverUrl} />
+          </PreviewSide>
+
+          <div className="flex items-center justify-center">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white shadow-glow ring-4 ring-accent/10 sm:h-12 sm:w-12">
+              <ArrowLeftRight className="rtl-flip h-5 w-5" aria-hidden strokeWidth={2.5} />
+            </span>
+          </div>
+
+          <PreviewSide label={wantedLabel} title={wanted} meta={modeLabel} accent>
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/35 bg-accent text-white shadow-card">
+              <Repeat2 className="h-7 w-7" aria-hidden strokeWidth={2.3} />
+            </span>
+          </PreviewSide>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PreviewSide({
+  label,
+  title,
+  meta,
+  accent,
+  children,
+}: {
+  label: string;
+  title: string;
+  meta: string;
+  accent?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex min-h-[142px] min-w-0 flex-col items-center justify-between rounded-2xl border px-3 py-3 text-center",
+        accent ? "border-accent/35 bg-accent-soft" : "border-line bg-canvas/75",
+      )}
+    >
+      <span className={cn("max-w-full truncate text-[10px] font-bold uppercase tracking-wide", accent ? "text-accent" : "text-muted")}>
+        {label}
+      </span>
+      {children}
+      <div className="min-w-0">
+        <p className="line-clamp-2 break-words text-sm font-extrabold leading-5 text-ink">{title}</p>
+        <p className={cn("mt-1 line-clamp-1 text-[11px] font-medium", accent ? "text-accent" : "text-muted")}>{meta}</p>
+      </div>
+    </div>
+  );
+}
+
+function PreviewMedia({
+  title,
+  category,
+  coverUrl,
+}: {
+  title: string;
+  category?: Category;
+  coverUrl: string | null;
+}) {
+  if (coverUrl) {
+    return (
+      <span
+        role="img"
+        aria-label={title}
+        className="block h-14 w-14 rounded-2xl border border-line bg-elevated bg-cover bg-center shadow-card"
+        style={{ backgroundImage: `url(${coverUrl})` }}
+      />
+    );
+  }
+
+  return (
+    <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-linestrong bg-elevated text-ink shadow-card">
+      <CategoryIcon icon={category?.icon ?? "other"} className="h-7 w-7" />
+    </span>
+  );
+}
+
 /**
  * Add New Listing — 3-step wizard (redesign).
  *   1. Photos + title + category   2. Condition + location + description
@@ -65,6 +178,7 @@ export function NewListingForm() {
   const t = useTranslations("newListing");
   const tc = useTranslations("common");
   const tCond = useTranslations("condition");
+  const tListing = useTranslations("listing");
   const locale = useLocale() as Locale;
   const router = useRouter();
 
@@ -87,7 +201,23 @@ export function NewListingForm() {
 
   const title = watch("title");
   const wanted = watch("wanted_exchange");
+  const openToAny = watch("open_to_any");
+  const previewWanted = openToAny ? tListing("openToAnyExchange") : wanted;
   const selectedCategory: Category | undefined = categoryId ? CATEGORY_BY_ID[categoryId] : undefined;
+  const coverPreviewUrl = useMemo(() => {
+    const cover = files[0];
+    return cover ? URL.createObjectURL(cover) : null;
+  }, [files]);
+  const previewTitle = title.trim() || t("yourItem");
+  const previewWantedText = previewWanted.trim() || tListing("openToOffers");
+  const previewCategoryName = selectedCategory ? localizedName(selectedCategory, locale) : t("fieldCategory");
+  const previewModeLabel = openToAny ? t("fieldOpenToAny") : tListing("wantedExchange");
+
+  useEffect(() => {
+    return () => {
+      if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl);
+    };
+  }, [coverPreviewUrl]);
 
   async function next() {
     setError(null);
@@ -142,7 +272,7 @@ export function NewListingForm() {
       title: values.title,
       description: values.description,
       condition,
-      wanted_exchange: values.wanted_exchange,
+      wanted_exchange: values.open_to_any ? "__any__" : values.wanted_exchange,
     };
     const images = files.slice(0, FREE_PLAN_MAX_IMAGES); // TODO (Phase 2): premium raises the limit.
     const api = getApi();
@@ -210,7 +340,7 @@ export function NewListingForm() {
           type="button"
           onClick={back}
           aria-label={tc("back")}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-navy transition-colors hover:bg-canvas"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-canvas"
         >
           <ChevronLeft className="rtl-flip h-5 w-5" aria-hidden />
         </button>
@@ -253,7 +383,7 @@ export function NewListingForm() {
                       "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
                       categoryId === c.id
                         ? "border-green bg-green-light text-green-dark"
-                        : "border-line bg-white text-navy hover:bg-canvas",
+                        : "border-line bg-surface text-ink hover:bg-canvas",
                     )}
                   >
                     <CategoryIcon icon={c.icon} className="h-4 w-4" />
@@ -279,7 +409,7 @@ export function NewListingForm() {
                       "rounded-xl border-2 px-4 py-3.5 text-sm font-bold transition-colors",
                       condition === c
                         ? "border-green bg-green-light text-green-dark"
-                        : "border-line bg-white text-navy hover:bg-canvas",
+                        : "border-line bg-surface text-ink hover:bg-canvas",
                     )}
                   >
                     {tCond(c)}
@@ -308,23 +438,34 @@ export function NewListingForm() {
         {/* ── Step 3: wanted + live preview + safety ── */}
         {step === 3 ? (
           <>
-            <FormTextarea label={t("fieldWanted")} rows={3} {...register("wanted_exchange")} />
-
-            <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted">{t("swapPreview")}</p>
-              <div className="rounded-2xl border border-line bg-white p-4 shadow-card">
-                <p className="mb-3 truncate text-center text-sm font-bold text-ink">
-                  {title || t("yourItem")}
-                </p>
-                <SwapPair
-                  listing={{
-                    category: selectedCategory ?? ({ icon: "other" } as Category),
-                    wanted_exchange: wanted,
-                  }}
-                  size="lg"
-                />
-              </div>
+            <div className="rounded-card border border-line bg-surface p-4 shadow-card">
+              <FormCheckbox
+                label={t("fieldOpenToAny")}
+                hint={t("fieldOpenToAnyHint")}
+                {...register("open_to_any")}
+              />
             </div>
+
+            <FormTextarea
+              label={t("fieldWanted")}
+              rows={3}
+              {...register("wanted_exchange")}
+              disabled={openToAny}
+              className={cn(openToAny && "bg-elevated text-muted")}
+              placeholder={openToAny ? tListing("openToAnyExchange") : ""}
+            />
+
+            <ExchangePreview
+              title={previewTitle}
+              category={selectedCategory}
+              categoryName={previewCategoryName}
+              coverUrl={coverPreviewUrl}
+              wanted={previewWantedText}
+              modeLabel={previewModeLabel}
+              titleLabel={t("yourItem")}
+              wantedLabel={t("previewWanted")}
+              previewLabel={t("swapPreview")}
+            />
 
             <SafetyDisclaimer variant="compact" />
           </>

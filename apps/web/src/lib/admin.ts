@@ -227,6 +227,7 @@ export type ListingTab = "all" | "reported" | "flagged";
 export interface EnrichedListing extends Listing {
   owner_username: string | null;
   pending_reports: number;
+  has_edit_request: boolean;
 }
 
 export interface AdminListingsQuery {
@@ -275,20 +276,33 @@ export async function fetchAdminListings(query: AdminListingsQuery = {}): Promis
 
     // Pending-report counts for just this page's listings.
     const counts: Record<string, number> = {};
+    const editRequests = new Set<string>();
     if (listings.length) {
-      const { data: rep } = await supabase
-        .from("reports")
-        .select("target_id")
-        .eq("target_type", "listing")
-        .eq("status", "pending")
-        .in("target_id", listings.map((l) => l.id));
-      for (const r of rep ?? []) counts[r.target_id] = (counts[r.target_id] ?? 0) + 1;
+      const [repRes, reqRes] = await Promise.all([
+        supabase
+          .from("reports")
+          .select("target_id")
+          .eq("target_type", "listing")
+          .eq("status", "pending")
+          .in("target_id", listings.map((l) => l.id)),
+        supabase
+          .from("admin_actions")
+          .select("target_id")
+          .eq("action_type", "request_edits")
+          .in("target_id", listings.map((l) => l.id)),
+      ]);
+
+      for (const r of repRes.data ?? []) counts[r.target_id] = (counts[r.target_id] ?? 0) + 1;
+      for (const r of reqRes.data ?? []) {
+        if (r.target_id) editRequests.add(r.target_id);
+      }
     }
 
     const rows: EnrichedListing[] = listings.map((l) => ({
       ...l,
       owner_username: owners[l.owner_id] ?? null,
       pending_reports: counts[l.id] ?? 0,
+      has_edit_request: editRequests.has(l.id),
     }));
     const t = total ?? 0;
     return { rows, total: t, page, pageSize: PAGE_SIZE, pageCount: Math.ceil(t / PAGE_SIZE) };

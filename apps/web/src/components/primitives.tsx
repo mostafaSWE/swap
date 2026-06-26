@@ -48,7 +48,7 @@ export function ErrorState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
-      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-danger">
+      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-500/12 dark:text-red-300">
         <ShieldAlert className="h-7 w-7" aria-hidden />
       </span>
       <p className="text-base font-bold text-ink">{title}</p>

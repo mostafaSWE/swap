@@ -89,11 +89,11 @@ export function NotificationBell() {
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls="notification-panel"
-        className="relative rounded-full p-1 text-navy transition-colors hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swap"
+        className="relative rounded-full p-1 text-ink transition-colors hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <Bell className="h-6 w-6" aria-hidden />
         {unread > 0 ? (
-          <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-swap px-1 text-[10px] font-bold text-white ring-2 ring-white">
+          <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-white ring-2 ring-night">
             {unread > 9 ? "9+" : unread}
           </span>
         ) : null}
@@ -104,7 +104,7 @@ export function NotificationBell() {
           id="notification-panel"
           role="region"
           aria-labelledby="notification-panel-title"
-          className="animate-fade-in absolute end-0 z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-line bg-white shadow-elevated"
+          className="animate-fade-in absolute end-0 z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-line bg-surface shadow-elevated"
         >
           <div className="border-b border-line px-4 py-3">
             <h2 id="notification-panel-title" className="text-sm font-bold text-ink">
@@ -113,7 +113,7 @@ export function NotificationBell() {
           </div>
           {items.length === 0 ? (
             <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
-              <Bell className="h-8 w-8 text-line" aria-hidden />
+              <Bell className="h-8 w-8 text-muted" aria-hidden />
               <p className="text-sm text-muted">{t("empty")}</p>
             </div>
           ) : (

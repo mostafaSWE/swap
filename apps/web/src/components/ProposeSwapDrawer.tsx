@@ -85,7 +85,7 @@ export function ProposeSwapDrawer({
 
       {open && userId ? (
         <div className="animate-fade-in fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center">
-          <div className="animate-slide-up flex max-h-[90dvh] w-full max-w-app flex-col rounded-t-card bg-white sm:rounded-card">
+          <div className="animate-slide-up flex max-h-[90dvh] w-full max-w-app flex-col rounded-t-card bg-surface sm:rounded-card">
             <div className="flex items-center justify-between border-b border-line px-5 py-4">
               <h2 className="text-lg font-bold text-ink">{t("title")}</h2>
               <button type="button" onClick={() => setOpen(false)} aria-label={tc("close")}>

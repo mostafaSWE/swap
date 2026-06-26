@@ -14,10 +14,10 @@ function severityChip(severity: number, labels: { high: string; medium: string; 
   const tier = severity >= 3 ? "high" : severity === 2 ? "medium" : "low";
   const style =
     tier === "high"
-      ? "bg-red-100 text-red-700"
+      ? "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300"
       : tier === "medium"
-        ? "bg-amber-100 text-amber-700"
-        : "bg-gray-100 text-gray-600";
+        ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
+        : "bg-elevated text-muted";
   return <span className={cn("rounded-pill px-2 py-0.5 text-[11px] font-bold", style)}>{labels[tier]}</span>;
 }
 
@@ -65,7 +65,7 @@ export default async function AdminReportsPage({
       <UrlTabs paramName="sort" value={sort} options={sortOptions} />
 
       {rows.length === 0 ? (
-        <p className="rounded-card border border-line bg-white px-4 py-10 text-center text-sm text-muted">
+        <p className="rounded-card border border-line bg-surface px-4 py-10 text-center text-sm text-muted">
           {t("reportsTable.empty")}
         </p>
       ) : (
@@ -73,7 +73,7 @@ export default async function AdminReportsPage({
           {rows.map((r) => {
             const href = targetHref(r.target_type, r.target_id);
             return (
-              <li key={r.id} className="rounded-card border border-line bg-white p-4">
+              <li key={r.id} className="rounded-card border border-line bg-surface p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   {severityChip(r.severity, sevLabels)}
                   <span className="font-semibold text-ink">{reasonLabel(r.reason)}</span>
@@ -99,7 +99,7 @@ export default async function AdminReportsPage({
                 </div>
 
                 {r.description ? (
-                  <p className="mt-2 whitespace-pre-wrap rounded-card bg-canvas px-3 py-2 text-sm text-ink-muted">
+                  <p className="mt-2 whitespace-pre-wrap rounded-card bg-night px-3 py-2 text-sm text-muted">
                     {r.description}
                   </p>
                 ) : null}

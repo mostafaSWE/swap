@@ -9,8 +9,9 @@ import type { Locale } from "@swap/types";
 import { updateProfile } from "@swap/api";
 import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Logo } from "@/components/Logo";
-import { FormInput } from "@/components/forms";
+import { AuthShell } from "@/components/AuthShell";
+import { FormAlert, FormInput, FormSection } from "@/components/forms";
+import { PasswordInput } from "@/components/PasswordInput";
 import { CountryCitySelector } from "@/components/CountryCitySelector";
 import { CTAButton } from "@/components/CTAButton";
 
@@ -88,60 +89,78 @@ export function RegisterForm() {
 
   if (emailSent) {
     return (
-      <div className="app-container flex min-h-dvh flex-col justify-center px-6 py-10">
+      <AuthShell>
         <div className="flex flex-col items-center gap-3 text-center">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-swap-tint text-swap">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-soft text-accent ring-1 ring-accent/25">
             <MailCheck className="h-7 w-7" aria-hidden />
           </span>
           <h1 className="text-xl font-bold text-ink">{t("confirmEmailTitle")}</h1>
-          <p className="text-sm text-ink/80">{t("confirmEmailBody")}</p>
-          <Link href="/login" className="mt-2 font-semibold text-green">
+          <p className="text-sm text-muted">{t("confirmEmailBody")}</p>
+          <Link href="/login" className="mt-2 font-semibold text-accent hover:underline">
             {t("backToLogin")}
           </Link>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="app-container flex min-h-dvh flex-col justify-center px-6 py-10">
-      <div className="mb-6 flex flex-col items-center gap-2">
-        <Logo priority />
-        <h1 className="text-2xl font-bold text-ink">{t("registerTitle")}</h1>
+    <AuthShell>
+      <div className="space-y-1.5">
+        <h1 className="text-2xl font-bold tracking-tight text-ink">{t("registerTitle")}</h1>
+        <p className="text-sm text-muted">{t("registerSubtitle")}</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <FormInput label={t("fullName")} error={errors.full_name && t("errorGeneric")} {...register("full_name", { required: true })} />
-        <FormInput label={t("username")} error={errors.username && t("errorGeneric")} {...register("username", { required: true })} />
-        <FormInput type="email" label={t("email")} autoComplete="email" error={errors.email && t("errorGeneric")} {...register("email", { required: true })} />
-        <FormInput type="tel" label={t("phone")} hint={tc("optional")} inputMode="tel" {...register("phone")} />
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
+        <FormSection title={t("secPersonal")}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FormInput label={t("fullName")} autoComplete="name" error={errors.full_name && t("errorGeneric")} {...register("full_name", { required: true })} />
+            <FormInput label={t("username")} autoComplete="username" error={errors.username && t("errorGeneric")} {...register("username", { required: true })} />
+          </div>
+        </FormSection>
 
-        <CountryCitySelector
-          countryId={countryId}
-          cityId={cityId}
-          onCountryChange={setCountryId}
-          onCityChange={setCityId}
-          countryLabel={t("country")}
-          cityLabel={t("city")}
-          countryPlaceholder={tc("selectCountry")}
-          cityPlaceholder={tc("selectCity")}
-        />
+        <FormSection title={t("secContact")}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FormInput type="email" label={t("email")} autoComplete="email" error={errors.email && t("errorGeneric")} {...register("email", { required: true })} />
+            <FormInput type="tel" label={t("phone")} error={errors.phone && t("errorGeneric")} inputMode="tel" autoComplete="tel" {...register("phone", { required: true })} />
+          </div>
+        </FormSection>
 
-        <FormInput type="password" label={t("password")} autoComplete="new-password" error={errors.password && t("errorGeneric")} {...register("password", { required: true, minLength: 6 })} />
+        <FormSection title={t("secLocation")}>
+          <CountryCitySelector
+            countryId={countryId}
+            cityId={cityId}
+            onCountryChange={setCountryId}
+            onCityChange={setCityId}
+            countryLabel={t("country")}
+            cityLabel={t("city")}
+            countryPlaceholder={tc("selectCountry")}
+            cityPlaceholder={tc("selectCity")}
+          />
+        </FormSection>
 
-        {error ? <p role="alert" className="text-sm text-danger">{error}</p> : null}
+        <FormSection title={t("secSecurity")}>
+          <PasswordInput
+            label={t("password")}
+            autoComplete="new-password"
+            error={errors.password && (errors.password.type === "minLength" ? t("passwordTooShort") : t("errorGeneric"))}
+            {...register("password", { required: true, minLength: 6 })}
+          />
+        </FormSection>
 
-        <CTAButton type="submit" disabled={isSubmitting}>
+        {error ? <FormAlert>{error}</FormAlert> : null}
+
+        <CTAButton type="submit" disabled={isSubmitting} className="w-full">
           {t("registerButton")}
         </CTAButton>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted">
         {t("haveAccount")}{" "}
-        <Link href="/login" className="font-semibold text-green">
+        <Link href="/login" className="font-semibold text-accent hover:underline">
           {t("loginInstead")}
         </Link>
       </p>
-    </div>
+    </AuthShell>
   );
 }

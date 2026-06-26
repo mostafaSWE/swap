@@ -59,7 +59,7 @@ export default async function ProfilePage({ params: { locale } }: { params: { lo
           />
 
           {profile.is_admin ? (
-            <Link href="/admin" className="card flex items-center gap-2 p-3 text-navy">
+            <Link href="/admin" className="card flex items-center gap-2 p-3 text-ink">
               <ShieldCheck className="h-5 w-5 text-green" aria-hidden />
               <span className="font-semibold">{tn("admin")}</span>
             </Link>

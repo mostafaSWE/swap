@@ -12,7 +12,7 @@ export function ChatBubble({ message, isOwn }: { message: Message; isOwn: boolea
       <div
         className={cn(
           "max-w-[78%] rounded-2xl px-3.5 py-2 text-sm",
-          isOwn ? "bg-green text-white" : "bg-white text-ink border border-line",
+          isOwn ? "bg-green text-white" : "bg-surface text-ink border border-line",
         )}
       >
         <p className="whitespace-pre-wrap break-words">{message.body}</p>

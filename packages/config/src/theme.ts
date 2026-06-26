@@ -3,29 +3,35 @@
  * Consumed by the web app (mapped into Tailwind theme) and the mobile app
  * (mapped into React Native styles), so both platforms stay in sync.
  *
- * Palette derived from the product design reference: clean, modern,
- * trustworthy, mobile-first, Arabic-first.
+ * Swap runs a single deep-navy dark theme: cool near-black navy surfaces, the
+ * brand green accent (#18B66A), brand navy panels, cool off-white text.
+ * Arabic-first, mobile-first. There is no light mode.
  */
 
 export const colors = {
-  /** Brand navy — hero sections, brand surfaces, admin sidebar. */
+  /** Brand deep panel — hero visual, admin sidebar. */
   navy: "#0B1324",
-  /** Brand green — primary buttons, trust accents (e.g. completed-swaps). */
+  /** Brand green accent — primary buttons, links, trust accents. */
   green: "#18B66A",
-  greenDark: "#119455",
-  greenLight: "#E7F8F0",
+  greenDark: "#16A863",
+  /** Soft accent surface (green tint over dark). */
+  greenLight: "#102A1E",
 
   white: "#FFFFFF",
-  /** App canvas / light gray background. */
-  background: "#F5F7F8",
+  /** App canvas — cool near-black navy page base. */
+  background: "#0A0E1A",
   /** Card / surface background. */
-  surface: "#FFFFFF",
-  border: "#E5E7EB",
+  surface: "#121829",
+  /** Elevated surface (dropdowns, raised cards, inputs). */
+  elevated: "#1B2438",
+  border: "#232C42",
+  borderStrong: "#313C58",
 
-  text: "#111827",
-  textMuted: "#6B7280",
+  text: "#E9EDF6",
+  textMuted: "#97A1B7",
+  textFaint: "#5C6781",
 
-  success: "#18B66A",
+  success: "#22C55E",
   warning: "#F59E0B",
   danger: "#EF4444",
   info: "#3B82F6",

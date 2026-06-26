@@ -7,8 +7,8 @@ import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
 import { Link } from "@/i18n/navigation";
-import { Logo } from "@/components/Logo";
-import { FormInput } from "@/components/forms";
+import { AuthShell } from "@/components/AuthShell";
+import { FormAlert, FormInput } from "@/components/forms";
 import { CTAButton } from "@/components/CTAButton";
 
 export function ForgotPasswordForm() {
@@ -35,26 +35,23 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <div className="app-container flex min-h-dvh flex-col justify-center px-6 py-10">
-      <div className="mb-8 flex flex-col items-center gap-2">
-        <Logo priority />
-        <h1 className="text-2xl font-bold text-ink">{t("forgotTitle")}</h1>
-      </div>
+    <AuthShell>
+      <h1 className="text-2xl font-bold tracking-tight text-ink">{t("forgotTitle")}</h1>
 
       {sent ? (
-        <div className="flex flex-col items-center gap-3 text-center">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-swap-tint text-swap">
+        <div className="mt-6 flex flex-col items-center gap-3 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-soft text-accent ring-1 ring-accent/25">
             <MailCheck className="h-7 w-7" aria-hidden />
           </span>
-          <p className="text-sm text-ink/80">{t("forgotSent")}</p>
-          <Link href="/login" className="mt-2 font-semibold text-green">
+          <p className="text-sm text-muted">{t("forgotSent")}</p>
+          <Link href="/login" className="mt-2 font-semibold text-accent hover:underline">
             {t("backToLogin")}
           </Link>
         </div>
       ) : (
         <>
-          <p className="mb-4 text-center text-sm text-muted">{t("forgotHint")}</p>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <p className="mt-2 text-sm text-muted">{t("forgotHint")}</p>
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
             <FormInput
               type="email"
               label={t("email")}
@@ -62,18 +59,18 @@ export function ForgotPasswordForm() {
               error={errors.email && t("errorGeneric")}
               {...register("email", { required: true })}
             />
-            {error ? <p role="alert" className="text-sm text-danger">{error}</p> : null}
-            <CTAButton type="submit" disabled={isSubmitting}>
+            {error ? <FormAlert>{error}</FormAlert> : null}
+            <CTAButton type="submit" disabled={isSubmitting} className="w-full">
               {t("forgotSubmit")}
             </CTAButton>
           </form>
           <p className="mt-6 text-center text-sm text-muted">
-            <Link href="/login" className="font-semibold text-green">
+            <Link href="/login" className="font-semibold text-accent hover:underline">
               {t("backToLogin")}
             </Link>
           </p>
         </>
       )}
-    </div>
+    </AuthShell>
   );
 }

@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@swap/types";
 import { AppShell } from "@/components/AppShell";
 import { ConversationList } from "@/components/ConversationList";
+import { MessagesBottomNav } from "@/components/MessagesBottomNav";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchConversations } from "@/lib/chat";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -26,12 +27,14 @@ export default async function MessagesLayout({
   return (
     <AppShell hideNav>
       <div className="md:grid md:min-h-[calc(100dvh-61px)] md:grid-cols-[340px_1fr]">
-        <aside className="hidden border-e border-line bg-white md:block md:overflow-y-auto">
+        <aside className="hidden border-e border-line bg-surface md:block md:overflow-y-auto">
           <h1 className="px-4 py-3 text-lg font-bold text-ink">{t("title")}</h1>
           <ConversationList conversations={conversations} />
         </aside>
         <div className="min-w-0">{children}</div>
       </div>
+      {/* Keep the bottom nav on the conversation list; hidden inside a room. */}
+      <MessagesBottomNav isAuthenticated={Boolean(user)} />
     </AppShell>
   );
 }

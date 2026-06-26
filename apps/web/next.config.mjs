@@ -55,6 +55,9 @@ const nextConfig = {
   // Transpile the shared workspace packages (they ship raw TS).
   transpilePackages: ["@swap/types", "@swap/config", "@swap/api", "@swap/ui"],
   images: {
+    // Prefer AVIF (much cleaner on smooth gradients than WebP — avoids banding on
+    // the hero backgrounds), falling back to WebP.
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "i.pravatar.cc" },

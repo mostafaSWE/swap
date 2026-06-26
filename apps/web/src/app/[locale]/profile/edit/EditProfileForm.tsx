@@ -31,7 +31,7 @@ export function EditProfileForm({ profile }: { profile: Profile }) {
   const [cityId, setCityId] = useState(profile.city_id ?? "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url);
   const [saved, setSaved] = useState(false);
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm<Values>({
+  const { register, handleSubmit, formState: { isSubmitting, errors } } = useForm<Values>({
     defaultValues: {
       full_name: profile.full_name,
       username: profile.username,
@@ -54,9 +54,9 @@ export function EditProfileForm({ profile }: { profile: Profile }) {
       <div className="flex justify-center pb-2">
         <AvatarUpload userId={profile.id} name={profile.full_name} value={avatarUrl} onUploaded={setAvatarUrl} />
       </div>
-      <FormInput label={t("fullName")} {...register("full_name", { required: true })} />
-      <FormInput label={t("username")} {...register("username", { required: true })} />
-      <FormInput label={t("phone")} type="tel" {...register("phone")} />
+      <FormInput label={t("fullName")} error={errors.full_name && t("errorGeneric")} {...register("full_name", { required: true })} />
+      <FormInput label={t("username")} error={errors.username && t("errorGeneric")} {...register("username", { required: true })} />
+      <FormInput label={t("phone")} type="tel" error={errors.phone && t("errorGeneric")} {...register("phone", { required: true })} />
       <FormTextarea label={tp("bio")} maxLength={LIMITS.bioMax} {...register("bio")} />
 
       <CountryCitySelector

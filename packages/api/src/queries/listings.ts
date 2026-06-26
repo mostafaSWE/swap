@@ -30,6 +30,7 @@ export interface ListingFilters {
   sort?: SortOption;
   limit?: number;
   offset?: number;
+  isFeatured?: boolean;
 }
 
 /** Browse active listings with optional filters. Respects RLS (active only for the public). */
@@ -52,6 +53,7 @@ export async function getListings(
   if (filters.cityId) query = query.eq("city_id", filters.cityId);
   if (filters.condition) query = query.eq("condition", filters.condition);
   if (filters.ownerId) query = query.eq("owner_id", filters.ownerId);
+  if (filters.isFeatured !== undefined) query = query.eq("is_featured", filters.isFeatured);
 
   query =
     filters.sort === "most_viewed"

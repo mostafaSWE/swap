@@ -22,7 +22,7 @@ export function AdminTable<T extends { id?: string }>({
   }
 
   return (
-    <div className="overflow-x-auto rounded-card border border-line bg-white">
+    <div className="overflow-x-auto rounded-card border border-line bg-surface">
       <table className="w-full text-start text-sm">
         <thead className="border-b border-line bg-canvas">
           <tr>
@@ -35,7 +35,7 @@ export function AdminTable<T extends { id?: string }>({
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={row.id ?? i} className="border-b border-line last:border-0">
+            <tr key={row.id ?? i} className="border-b border-line transition-colors last:border-0 hover:bg-white/[0.02]">
               {columns.map((c) => (
                 <td key={c.key} className={cn("px-4 py-3 text-ink", c.className)}>
                   {c.render(row)}

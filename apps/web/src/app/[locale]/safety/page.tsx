@@ -1,18 +1,36 @@
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@swap/types";
 import { AppShell } from "@/components/AppShell";
 import { SafetyDisclaimer } from "@/components/SafetyDisclaimer";
+import { LegalArticle, LegalHero, type LegalSection } from "@/components/legal";
+
+export async function generateMetadata({ params: { locale } }: { params: { locale: Locale } }): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "safety" });
+  return { title: t("title"), description: t("subtitle") };
+}
 
 export default async function SafetyPage({ params: { locale } }: { params: { locale: Locale } }) {
   setRequestLocale(locale);
   const t = await getTranslations("safety");
+  const tc = await getTranslations("legalCommon");
 
   return (
     <AppShell>
-      <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-10 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-extrabold tracking-tight text-ink md:text-4xl">{t("title")}</h1>
-        <SafetyDisclaimer />
-      </div>
+      <LegalHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} updated={t("updated")} />
+      <LegalArticle
+        sections={t.raw("sections") as LegalSection[]}
+        onThisPage={tc("onThisPage")}
+        help={{ title: tc("helpTitle"), body: tc("helpBody"), cta: tc("helpCta") }}
+        extra={
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-ink md:text-2xl">{t("noticeTitle")}</h2>
+            <div className="mt-3">
+              <SafetyDisclaimer />
+            </div>
+          </div>
+        }
+      />
     </AppShell>
   );
 }

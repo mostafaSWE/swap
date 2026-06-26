@@ -1,16 +1,16 @@
-# Graph Report - Swap  (2026-06-20)
+# Graph Report - Swap  (2026-06-26)
 
 ## Corpus Check
-- 272 files · ~106,809 words
+- 302 files · ~341,317 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2550 nodes · 4137 edges · 165 communities (154 shown, 11 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 49 edges (avg confidence: 0.84)
+- 2662 nodes · 4492 edges · 168 communities (155 shown, 13 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 51 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f4542ecd`
+- Built from commit: `76c25974`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -33,7 +33,7 @@
 - [[_COMMUNITY_Auth i18n Strings (alt locale)|Auth i18n Strings (alt locale)]]
 - [[_COMMUNITY_App Shell & UI Primitives|App Shell & UI Primitives]]
 - [[_COMMUNITY_NestJS API Dependencies|NestJS API Dependencies]]
-- [[_COMMUNITY_Listings Search & Data|Listings Search & Data]]
+- [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Graphify Skill Docs|Graphify Skill Docs]]
 - [[_COMMUNITY_Mobile App Dependencies|Mobile App Dependencies]]
 - [[_COMMUNITY_Social Action Buttons|Social Action Buttons]]
@@ -153,11 +153,8 @@
 - [[_COMMUNITY_Community 140|Community 140]]
 - [[_COMMUNITY_Community 141|Community 141]]
 - [[_COMMUNITY_Community 142|Community 142]]
-- [[_COMMUNITY_Community 143|Community 143]]
 - [[_COMMUNITY_Community 144|Community 144]]
 - [[_COMMUNITY_Community 145|Community 145]]
-- [[_COMMUNITY_Community 146|Community 146]]
-- [[_COMMUNITY_Community 147|Community 147]]
 - [[_COMMUNITY_Community 148|Community 148]]
 - [[_COMMUNITY_Community 149|Community 149]]
 - [[_COMMUNITY_Community 150|Community 150]]
@@ -168,30 +165,31 @@
 - [[_COMMUNITY_Community 157|Community 157]]
 - [[_COMMUNITY_Community 158|Community 158]]
 - [[_COMMUNITY_Community 164|Community 164]]
+- [[_COMMUNITY_Community 170|Community 170]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `proposal` - 69 edges
+1. `cn()` - 88 edges
 2. `proposal` - 69 edges
-3. `cn()` - 63 edges
-4. `Locale` - 57 edges
-5. `auth` - 35 edges
-6. `auth` - 35 edges
-7. `admin` - 28 edges
-8. `admin` - 28 edges
-9. `common` - 27 edges
-10. `common` - 27 edges
+3. `proposal` - 69 edges
+4. `Locale` - 65 edges
+5. `auth` - 44 edges
+6. `auth` - 44 edges
+7. `home` - 35 edges
+8. `home` - 35 edges
+9. `getApi()` - 31 edges
+10. `listing` - 30 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `generateMetadata()` --calls--> `localizedName()`  [INFERRED]
+  apps/web/src/app/[locale]/listings/page.tsx → packages/ui/src/format.ts
 - `AdminUserDetailPage()` --calls--> `localizedName()`  [INFERRED]
   apps/web/src/app/[locale]/admin/(panel)/users/[id]/page.tsx → packages/ui/src/format.ts
 - `LocaleLayout()` --calls--> `getMessages()`  [INFERRED]
   apps/web/src/app/[locale]/layout.tsx → packages/api/src/queries/chat.ts
+- `ListingDetailsPage()` --calls--> `formatDate()`  [INFERRED]
+  apps/web/src/app/[locale]/listings/[id]/page.tsx → packages/ui/src/format.ts
 - `ListingDetailsPage()` --calls--> `localizedName()`  [INFERRED]
   apps/web/src/app/[locale]/listings/[id]/page.tsx → packages/ui/src/format.ts
-- `generateMetadata()` --calls--> `localizedName()`  [INFERRED]
-  apps/web/src/app/[locale]/listings/page.tsx → packages/ui/src/format.ts
-- `EnrichedListing` --inherits--> `Listing`  [EXTRACTED]
-  apps/web/src/lib/admin.ts → packages/types/src/entities.ts
 
 ## Import Cycles
 - None detected.
@@ -201,7 +199,7 @@
 - **graphify extraction pipeline** — skill_graphify_ast_extraction, skill_graphify_semantic_extraction, references_extraction_spec_subagent_prompt, skill_graphify_community_detection [INFERRED 0.85]
 - **Swap DB migrations implementing product features** — build_plan_migration_0005, build_plan_migration_0006, build_plan_migration_0007, build_plan_migration_0008 [INFERRED 0.75]
 
-## Communities (165 total, 11 thin omitted)
+## Communities (168 total, 13 thin omitted)
 
 ### Community 0 - "Swap/Proposal i18n Strings"
 Cohesion: 0.03
@@ -212,72 +210,72 @@ Cohesion: 0.03
 Nodes (68): proposal, accept, addPhoto, agreed, apiRequired, awaitingConfirmation, awaitingOther, awaitingYou (+60 more)
 
 ### Community 2 - "Admin Pages & URL Controls"
-Cohesion: 0.06
-Nodes (61): ActionBtn(), adminApiReady(), ConfirmActionButton(), SuspendButton(), TextActionButton(), Tone, useAdminRefresh(), ListingActions() (+53 more)
+Cohesion: 0.07
+Nodes (49): AdminPagination(), UrlSearch(), UrlTabs(), useQueryString(), AdminAuditPage(), KNOWN_ACTIONS, AdminCategoriesPage(), AdminCitiesPage() (+41 more)
 
 ### Community 3 - "Product Spec & Build Plan"
-Cohesion: 0.15
-Nodes (20): Architecture rules (thin controllers, services own logic), Swap never handles money/escrow/shipping, conversations table, Database Schema doc, handle_new_user trigger, listings table, profiles table, Storage buckets (+12 more)
+Cohesion: 0.29
+Nodes (10): conversations table, Database Schema doc, handle_new_user trigger, listings table, profiles table, Storage buckets, swap_proposals table, 26-category taxonomy (+2 more)
 
 ### Community 4 - "Web UI Components"
-Cohesion: 0.09
-Nodes (26): AvatarUpload(), EXT_BY_TYPE, FollowButton(), FormInput, FormTextarea, SelectOption, ListingImageManager(), ProposeSwapDrawer() (+18 more)
+Cohesion: 0.10
+Nodes (13): ChatBubble(), ConversationCard(), LegalArticle(), LegalHero(), LegalSection, NotificationRow(), ProfileAvatar(), SIZES (+5 more)
 
 ### Community 5 - "Listings API"
-Cohesion: 0.06
-Nodes (18): addImageBodySchema, ListingsController, reportBodySchema, signBodySchema, ListingsModule, ListingsService, storagePathFromPublicUrl(), CreateListingInput (+10 more)
+Cohesion: 0.07
+Nodes (5): ListingsController, ListingsService, storagePathFromPublicUrl(), ListingFiltersInput, ReorderImagesInput
 
 ### Community 6 - "Proposals API"
 Cohesion: 0.05
-Nodes (37): ProposalsController, LISTING_CONDITIONS, LISTING_STATUSES, ListingStatus, NOTIFICATION_TYPES, NotificationType, REPORT_STATUSES, REPORT_TARGET_TYPES (+29 more)
+Nodes (38): AdminController, AdminOverview, ProposalsController, AdminOverview, SafetyDisclaimer, SwapApiClient, SwapApiOptions, AdminAction (+30 more)
 
 ### Community 7 - "Admin Analytics Charts"
 Cohesion: 0.09
-Nodes (35): AXIS_TICK, CategoryDonut(), CityBarChart(), DailyLineChart(), ProposalFunnel(), SERIES_COLORS, Sparkline(), WeeklyBarChart() (+27 more)
+Nodes (35): CategoryDonut(), CityBarChart(), DailyLineChart(), ProposalFunnel(), SERIES_COLORS, Sparkline(), useChartColors(), WeeklyBarChart() (+27 more)
 
 ### Community 8 - "Chat & Feed UI"
-Cohesion: 0.08
-Nodes (33): AdminNavItem, AdminNavKey, ITEMS, PROPOSAL_STATUS_STYLES, ProposalStatusBadge(), RatingBadge(), STATUS_STYLES, SwapCountBadge() (+25 more)
+Cohesion: 0.17
+Nodes (18): AvatarUpload(), EXT_BY_TYPE, CountryCitySelector(), FormCheckbox, FormTextarea, ListingImageManager(), REASONS, ReportDialog() (+10 more)
 
 ### Community 9 - "Web App Dependencies"
 Cohesion: 0.05
-Nodes (38): dependencies, clsx, @hookform/resolvers, lucide-react, next, next-intl, react, react-dom (+30 more)
+Nodes (40): dependencies, clsx, framer-motion, @hookform/resolvers, lucide-react, next, next-intl, next-themes (+32 more)
 
 ### Community 10 - "Conversations & Blocking API"
-Cohesion: 0.08
-Nodes (14): assertNotBlocked(), usersBlockEachOther(), ConversationsController, ConversationsService, ACTIVE_STATUSES, CANCELLABLE_STATUSES, CONFIRMABLE_STATUSES, flattenProposal() (+6 more)
+Cohesion: 0.09
+Nodes (4): ProfileController, ProfileModule, ProfileService, UpdateProfileInput
 
 ### Community 11 - "Auth & Admin Guards"
-Cohesion: 0.16
-Nodes (9): AdminGuard, AuthenticatedRequest, AuthGuard, CurrentProfile, CurrentUserId, ZodBody, ReportsController, ReportsService (+1 more)
+Cohesion: 0.09
+Nodes (22): AdminGuard, AuthenticatedRequest, AuthGuard, CurrentProfile, CurrentUserId, addImageBodySchema, reportBodySchema, signBodySchema (+14 more)
 
 ### Community 12 - "Admin Service & API Client"
-Cohesion: 0.16
-Nodes (29): AdminOverview, AdminUserDetail, AdminOverview, SafetyDisclaimer, SwapApiOptions, Database, Json, Table (+21 more)
+Cohesion: 0.07
+Nodes (43): AdminUserDetail, extra, sendMessage(), subscribeToMessages(), getNotifications(), getUnreadNotificationCount(), markAllNotificationsRead(), subscribeToNotifications() (+35 more)
 
 ### Community 13 - "Monorepo Build Config"
 Cohesion: 0.05
 Nodes (35): description, devDependencies, rimraf, turbo, typescript, engines, node, name (+27 more)
 
 ### Community 14 - "Auth i18n Strings"
-Cohesion: 0.06
-Nodes (35): auth, backToLogin, city, confirmEmailBody, confirmEmailTitle, confirmPassword, country, createOne (+27 more)
+Cohesion: 0.05
+Nodes (44): auth, backToLogin, city, confirmEmailBody, confirmEmailTitle, confirmPassword, country, createOne (+36 more)
 
 ### Community 15 - "Auth i18n Strings (alt locale)"
-Cohesion: 0.06
-Nodes (35): auth, backToLogin, city, confirmEmailBody, confirmEmailTitle, confirmPassword, country, createOne (+27 more)
+Cohesion: 0.05
+Nodes (44): auth, backToLogin, city, confirmEmailBody, confirmEmailTitle, confirmPassword, country, createOne (+36 more)
 
 ### Community 16 - "App Shell & UI Primitives"
-Cohesion: 0.18
-Nodes (13): AppShell(), CTAButton(), Variant, LanguageSwitcher(), ListingGrid(), LogoutButton(), EmptyState(), LoadingSpinner() (+5 more)
+Cohesion: 0.25
+Nodes (14): AppShell(), getCurrentProfile(), getCurrentUser(), requireAdmin(), requireUser(), isSupabaseConfigured(), MessagesLayout(), MyListingsPage() (+6 more)
 
 ### Community 17 - "NestJS API Dependencies"
 Cohesion: 0.06
 Nodes (33): helmet, @nestjs/common, @nestjs/config, @nestjs/core, @nestjs/platform-express, @nestjs/swagger, @nestjs/throttler, reflect-metadata (+25 more)
 
-### Community 18 - "Listings Search & Data"
-Cohesion: 0.15
-Nodes (23): generateMetadata(), applyDemoFilters(), fetchFeaturedListings(), fetchFollowingListings(), fetchListing(), fetchListings(), fetchPublicProfile(), fetchUserListings() (+15 more)
+### Community 18 - "Community 18"
+Cohesion: 0.09
+Nodes (20): AuthShell(), CTAButton(), Variant, FieldError(), FieldLabel(), FormAlert(), FormInput, FormSection() (+12 more)
 
 ### Community 19 - "Graphify Skill Docs"
 Cohesion: 0.08
@@ -297,15 +295,15 @@ Nodes (26): baseUrl, emitDecoratorMetadata, esModuleInterop, experimentalDecorat
 
 ### Community 23 - "Common i18n Strings"
 Cohesion: 0.07
-Nodes (27): common, all, apply, arabic, back, cancel, category, city (+19 more)
+Nodes (29): common, all, allLocations, apply, arabic, back, cancel, category (+21 more)
 
 ### Community 24 - "Common i18n Strings (alt locale)"
 Cohesion: 0.07
-Nodes (27): common, all, apply, arabic, back, cancel, category, city (+19 more)
+Nodes (29): common, all, allLocations, apply, arabic, back, cancel, category (+21 more)
 
 ### Community 25 - "Listings i18n Strings"
-Cohesion: 0.09
-Nodes (22): block, block, blockedEmpty, blockedNotice, blockedTitle, unblock, brand, name (+14 more)
+Cohesion: 0.11
+Nodes (17): brand, name, slogan, condition, new, used, sort, label (+9 more)
 
 ### Community 26 - "Mobile App Config"
 Cohesion: 0.08
@@ -313,115 +311,115 @@ Nodes (25): backgroundColor, adaptiveIcon, package, tsconfigPaths, typedRoutes, 
 
 ### Community 27 - "Messaging Pages & Auth"
 Cohesion: 0.13
-Nodes (26): AdminSidebar(), ConversationList(), ChatRoom(), ChatRoomPage(), EditListingForm(), EditProfilePage(), getCurrentProfile(), getCurrentUser() (+18 more)
+Nodes (22): ActiveFilters, EditListingPage(), generateMetadata(), applyDemoFilters(), fetchFeaturedListings(), fetchFollowingListings(), fetchListing(), fetchListings() (+14 more)
 
 ### Community 28 - "Supabase Realtime & Notifications"
-Cohesion: 0.16
-Nodes (12): extra, getOrCreateConversation(), sendMessage(), subscribeToMessages(), getNotifications(), getUnreadNotificationCount(), markAllNotificationsRead(), subscribeToNotifications() (+4 more)
+Cohesion: 0.14
+Nodes (13): ProposalStatusBadge(), ListingPicker(), LoadingSpinner(), Action, BANNER_KEY, CLOSING_STATUSES, ItemColumn(), OPEN_STATUSES (+5 more)
 
 ### Community 29 - "NestJS Module Wiring"
-Cohesion: 0.13
-Nodes (10): AdminModule, CatalogModule, ConversationsModule, HealthController, HealthModule, ProposalsModule, ReportsModule, AppModule (+2 more)
+Cohesion: 0.12
+Nodes (11): AdminModule, CatalogModule, ConversationsModule, HealthController, HealthModule, ListingsModule, ProposalsModule, SafetyController (+3 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.09
-Nodes (20): CategoryIcon(), ICON_MAP, FeaturedCard(), ImageUploader(), ArtworkListing, ItemArtwork(), NEUTRAL, TINT (+12 more)
+Cohesion: 0.13
+Nodes (16): AdminLogoutButton(), AdminNavbar(), AdminNavItem, AdminNavKey, ITEMS, AdminNavItem, AdminNavKey, AdminSidebar() (+8 more)
 
 ### Community 31 - "Community 31"
 Cohesion: 0.13
-Nodes (6): CatalogController, CatalogService, City, UpsertCategoryInput, UpsertCityInput, UpsertCountryInput
+Nodes (8): CatalogController, CatalogService, Category, City, Country, UpsertCategoryInput, UpsertCityInput, UpsertCountryInput
 
 ### Community 32 - "Community 32"
-Cohesion: 0.09
-Nodes (4): ProfileController, ProfileModule, ProfileService, UpdateProfileInput
+Cohesion: 0.07
+Nodes (19): assertNotBlocked(), usersBlockEachOther(), ConversationsController, ConversationsService, ACTIVE_STATUSES, CANCELLABLE_STATUSES, CONFIRMABLE_STATUSES, flattenProposal() (+11 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.09
-Nodes (22): block, block, blockedEmpty, blockedNotice, blockedTitle, unblock, brand, name (+14 more)
+Cohesion: 0.11
+Nodes (17): brand, name, slogan, condition, new, used, sort, label (+9 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.09
-Nodes (23): analytics, charts, funnel, range, categoryTitle, cityTitle, completions, completionsTitle (+15 more)
+Cohesion: 0.15
+Nodes (13): analytics, funnel, range, agreed, completed, proposals, apply, from (+5 more)
 
 ### Community 35 - "Community 35"
-Cohesion: 0.09
-Nodes (23): analytics, charts, funnel, range, categoryTitle, cityTitle, completions, completionsTitle (+15 more)
+Cohesion: 0.15
+Nodes (13): analytics, funnel, range, agreed, completed, proposals, apply, from (+5 more)
 
 ### Community 36 - "Community 36"
-Cohesion: 0.12
-Nodes (15): ListingPicker(), Action, BANNER_KEY, CLOSING_STATUSES, ItemColumn(), OPEN_STATUSES, ProposalContextCard(), RatingStars() (+7 more)
+Cohesion: 0.23
+Nodes (8): ConversationList(), EmptyState(), EditProfileForm(), EditProfilePage(), fetchConversations(), MessagesPage(), getProposalStatuses(), ConversationPreview
 
 ### Community 37 - "Community 37"
-Cohesion: 0.09
-Nodes (22): userDetail, back, bio, by, city, completedSwaps, email, joined (+14 more)
+Cohesion: 0.23
+Nodes (9): EmailOtpType, ChatRoom(), ChatRoomPage(), count(), fetchOtherParticipant(), getMessages(), getConfirmations(), getMyRatingForProposal() (+1 more)
 
 ### Community 38 - "Community 38"
-Cohesion: 0.09
-Nodes (22): newListing, addImage, cover, fieldCategory, fieldCity, fieldCondition, fieldCountry, fieldDescription (+14 more)
+Cohesion: 0.08
+Nodes (24): newListing, addImage, cover, fieldCategory, fieldCity, fieldCondition, fieldCountry, fieldDescription (+16 more)
 
 ### Community 39 - "Community 39"
-Cohesion: 0.09
-Nodes (22): userDetail, back, bio, by, city, completedSwaps, email, joined (+14 more)
+Cohesion: 0.12
+Nodes (13): Footer(), DocCard(), MessagesBottomNav(), MobileBottomNav(), PUBLIC_TABS, Tab, TabKey, USER_TABS (+5 more)
 
 ### Community 40 - "Community 40"
-Cohesion: 0.09
-Nodes (22): newListing, addImage, cover, fieldCategory, fieldCity, fieldCondition, fieldCountry, fieldDescription (+14 more)
+Cohesion: 0.08
+Nodes (24): newListing, addImage, cover, fieldCategory, fieldCity, fieldCondition, fieldCountry, fieldDescription (+16 more)
 
 ### Community 41 - "Community 41"
-Cohesion: 0.10
-Nodes (21): approve, ban, dismiss, feature, hide, message, note, openChat (+13 more)
+Cohesion: 0.17
+Nodes (12): approve, ban, feature, hide, message, note, remove, show (+4 more)
 
 ### Community 42 - "Community 42"
-Cohesion: 0.10
-Nodes (21): approve, ban, dismiss, feature, hide, message, note, openChat (+13 more)
+Cohesion: 0.17
+Nodes (12): approve, ban, feature, hide, message, note, remove, show (+4 more)
 
 ### Community 43 - "Community 43"
 Cohesion: 0.24
-Nodes (3): ProposalsService, SwapProposalWithRelations, SwapProposalStatus
+Nodes (3): ProposalsService, SwapProposal, SwapProposalWithRelations
 
 ### Community 44 - "Community 44"
 Cohesion: 0.11
 Nodes (18): dependencies, @swap/types, devDependencies, typescript, exports, ./categories, ./cities, ./countries (+10 more)
 
 ### Community 45 - "Community 45"
-Cohesion: 0.11
-Nodes (19): home, categories, cta, exampleSwap, featured, feedFollowing, followingEmpty, followingEmptyHint (+11 more)
+Cohesion: 0.06
+Nodes (33): home, browseCategories, browseListings, categories, categoriesDescription, categoriesEyebrow, cta, ctaDescription (+25 more)
 
 ### Community 46 - "Community 46"
-Cohesion: 0.11
-Nodes (19): home, categories, cta, exampleSwap, featured, feedFollowing, followingEmpty, followingEmptyHint (+11 more)
+Cohesion: 0.06
+Nodes (33): home, browseCategories, browseListings, categories, categoriesDescription, categoriesEyebrow, cta, ctaDescription (+25 more)
 
 ### Community 47 - "Community 47"
 Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, declaration, incremental, jsx, lib, moduleResolution, noEmit (+10 more)
 
 ### Community 49 - "Community 49"
-Cohesion: 0.11
-Nodes (18): 0. Context & Starting Point, 1. Tech Stack — Do Not Deviate, 2.1 Principles, 2.2 Token System, 2.3 Component Standards, 2. Design System & Visual Identity, 4.1 Admin Auth, 4.2 Analytics Dashboard (landing page after login) (+10 more)
+Cohesion: 0.05
+Nodes (40): 0. Context & Starting Point, 1. Tech Stack — Do Not Deviate, 2.1 Principles, 2.2 Token System, 2.3 Component Standards, 2. Design System & Visual Identity, 3.1 Authentication, 3.2 Listings (+32 more)
 
 ### Community 50 - "Community 50"
-Cohesion: 0.11
-Nodes (18): listing, completedSwaps, description, details, editListing, follow, following, interested (+10 more)
+Cohesion: 0.07
+Nodes (30): listing, aboutSeller, completedSwaps, description, details, editListing, featured, follow (+22 more)
 
 ### Community 51 - "Community 51"
-Cohesion: 0.11
-Nodes (18): listing, completedSwaps, description, details, editListing, follow, following, interested (+10 more)
+Cohesion: 0.07
+Nodes (30): listing, aboutSeller, completedSwaps, description, details, editListing, featured, follow (+22 more)
 
 ### Community 52 - "Community 52"
 Cohesion: 0.12
 Nodes (16): exports, main, type, types, dependencies, @supabase/supabase-js, @swap/types, @swap/validation (+8 more)
 
 ### Community 53 - "Community 53"
-Cohesion: 0.15
-Nodes (15): Conversations / Realtime chat, Deal Closing (dual photo confirmation), No identity verification (GCC legal), Reports & Safety (auto soft-hide), Swap Proposal Flow (core loop), Trust & Reputation (completed-swaps + ratings), Migration 0005 proposals, Migration 0006 deal closing + RPC (+7 more)
+Cohesion: 0.25
+Nodes (8): Conversations / Realtime chat, Reports & Safety (auto soft-hide), Swap Proposal Flow (core loop), Migration 0005 proposals, Migration 0008 notifications + triggers, Migration 0009 blocks + auto-hide, get_or_create_conversation RPC, Roadmap doc
 
 ### Community 54 - "Community 54"
-Cohesion: 0.12
-Nodes (16): nav, account, add, addListing, admin, categories, home, login (+8 more)
+Cohesion: 0.11
+Nodes (19): nav, account, add, addListing, admin, browseListings, categories, home (+11 more)
 
 ### Community 55 - "Community 55"
-Cohesion: 0.12
-Nodes (16): nav, account, add, addListing, admin, categories, home, login (+8 more)
+Cohesion: 0.11
+Nodes (19): nav, account, add, addListing, admin, browseListings, categories, home (+11 more)
 
 ### Community 56 - "Community 56"
 Cohesion: 0.12
@@ -432,20 +430,20 @@ Cohesion: 0.12
 Nodes (15): dependencies, @swap/types, zod, devDependencies, typescript, exports, main, name (+7 more)
 
 ### Community 58 - "Community 58"
-Cohesion: 0.21
-Nodes (7): routing, cairo, LOCALES, config, intlMiddleware, middleware(), updateSession()
+Cohesion: 0.17
+Nodes (9): ThemeProvider(), routing, inter, LocaleLayout(), plexArabic, config, intlMiddleware, middleware() (+1 more)
 
 ### Community 59 - "Community 59"
-Cohesion: 0.11
-Nodes (19): admin, audit, ban, categories, cities, countries, dashboard, listings (+11 more)
+Cohesion: 0.18
+Nodes (11): admin, audit, categories, cities, countries, dashboard, listings, reports (+3 more)
 
 ### Community 60 - "Community 60"
 Cohesion: 0.13
 Nodes (15): notifications, empty, someone, title, type, new_follower, new_message, new_rating (+7 more)
 
 ### Community 61 - "Community 61"
-Cohesion: 0.13
-Nodes (15): admin, audit, ban, categories, cities, countries, dashboard, listings (+7 more)
+Cohesion: 0.18
+Nodes (11): admin, audit, categories, cities, countries, dashboard, listings, reports (+3 more)
 
 ### Community 62 - "Community 62"
 Cohesion: 0.13
@@ -456,24 +454,24 @@ Cohesion: 0.13
 Nodes (14): dependencies, @swap/types, devDependencies, typescript, exports, main, name, private (+6 more)
 
 ### Community 64 - "Community 64"
-Cohesion: 0.24
-Nodes (9): EditListingPage(), ListingDetailsPage(), fetchIsSaved(), fetchSavedListings(), LocaleLayout(), NotFound(), getSavedListings(), isListingSaved() (+1 more)
+Cohesion: 0.14
+Nodes (20): PROPOSAL_STATUS_STYLES, RatingBadge(), STATUS_STYLES, SwapCountBadge(), FollowButton(), ImageUploader(), ListingActions(), ListingGallery() (+12 more)
 
 ### Community 65 - "Community 65"
-Cohesion: 0.14
-Nodes (3): AdminController, AdminMessageInput, AdminUserNoteInput
+Cohesion: 0.26
+Nodes (13): ActionBtn(), adminApiReady(), ConfirmActionButton(), SuspendButton(), TextActionButton(), Tone, useAdminRefresh(), AddCityButton() (+5 more)
 
 ### Community 66 - "Community 66"
 Cohesion: 0.05
-Nodes (29): styles, SafetyController, SafetyModule, CATEGORIES, CATEGORY_BY_ID, CATEGORY_BY_SLUG, CategorySeed, catId() (+21 more)
+Nodes (31): styles, COUNTRY_BY_ISO_MAP, DEMO_LISTINGS, owners, Spec, specs, CATEGORIES, CATEGORY_BY_ID (+23 more)
 
 ### Community 67 - "Community 67"
-Cohesion: 0.15
-Nodes (13): reportsTable, details, empty, reason, reporter, severity, sortNewest, sortSeverity (+5 more)
+Cohesion: 0.20
+Nodes (10): how, description, eyebrow, step1Body, step1Title, step2Body, step2Title, step3Body (+2 more)
 
 ### Community 68 - "Community 68"
-Cohesion: 0.15
-Nodes (13): reportsTable, details, empty, reason, reporter, severity, sortNewest, sortSeverity (+5 more)
+Cohesion: 0.20
+Nodes (10): how, description, eyebrow, step1Body, step1Title, step2Body, step2Title, step3Body (+2 more)
 
 ### Community 69 - "Community 69"
 Cohesion: 0.19
@@ -484,8 +482,8 @@ Cohesion: 0.15
 Nodes (12): devDependencies, typescript, exports, main, name, private, scripts, lint (+4 more)
 
 ### Community 71 - "Community 71"
-Cohesion: 0.16
-Nodes (15): BlockedUsersPage(), fetchBlockedUsers(), fetchIsBlocked(), fetchIsFollowing(), blockUser(), createReport(), followUser(), getBlockedUsers() (+7 more)
+Cohesion: 0.22
+Nodes (9): trust, description, item1Body, item1Title, item2Body, item2Title, item3Body, item3Title (+1 more)
 
 ### Community 72 - "Community 72"
 Cohesion: 0.17
@@ -516,56 +514,56 @@ Cohesion: 0.18
 Nodes (11): onboarding, avatarChange, avatarError, avatarHint, avatarSize, avatarType, complete, error (+3 more)
 
 ### Community 79 - "Community 79"
-Cohesion: 0.18
-Nodes (11): noBuy, noCondition, noEscrow, noGuarantee, noOwn, noSell, userResponsibility, safety (+3 more)
+Cohesion: 0.11
+Nodes (18): meetPublic, noBuy, noCondition, noEscrow, noGuarantee, noOwn, noSell, userResponsibility (+10 more)
 
 ### Community 80 - "Community 80"
 Cohesion: 0.18
 Nodes (11): onboarding, avatarChange, avatarError, avatarHint, avatarSize, avatarType, complete, error (+3 more)
 
 ### Community 81 - "Community 81"
-Cohesion: 0.18
-Nodes (11): noBuy, noCondition, noEscrow, noGuarantee, noOwn, noSell, userResponsibility, safety (+3 more)
+Cohesion: 0.11
+Nodes (18): meetPublic, noBuy, noCondition, noEscrow, noGuarantee, noOwn, noSell, userResponsibility (+10 more)
 
 ### Community 82 - "Community 82"
 Cohesion: 0.18
 Nodes (10): compilerOptions, baseUrl, paths, strict, extends, include, @swap/api, @swap/config (+2 more)
 
 ### Community 83 - "Community 83"
-Cohesion: 0.21
-Nodes (9): CountryCitySelector(), SelectInput, ActiveFilters, ListingFilters(), RegisterForm(), Values, citiesByCountry(), COUNTRIES (+1 more)
+Cohesion: 0.07
+Nodes (29): CategoryCard(), CategoryIcon(), ICON_MAP, CategoryPill(), FeaturedCard(), FeedTabs(), Hero(), softEdge (+21 more)
 
 ### Community 85 - "Community 85"
-Cohesion: 0.20
-Nodes (10): suspend, confirm, d1, d30, d7, duration, indefinite, reason (+2 more)
+Cohesion: 0.27
+Nodes (12): ListingGrid(), ProfileActions(), ProfileHeader(), ReviewsList(), fetchPublicProfile(), fetchUserListings(), fetchUserReviews(), fetchIsBlocked() (+4 more)
 
 ### Community 86 - "Community 86"
 Cohesion: 0.20
 Nodes (10): category, cars, clothing, electronics, furniture, home-appliances, other, sports (+2 more)
 
 ### Community 87 - "Community 87"
-Cohesion: 0.20
-Nodes (10): suspend, confirm, d1, d30, d7, duration, indefinite, reason (+2 more)
+Cohesion: 0.18
+Nodes (11): countriesPage, addBtn, addTitle, currencyCode, isoCode, nameAr, nameEn, phoneCode (+3 more)
 
 ### Community 88 - "Community 88"
 Cohesion: 0.20
 Nodes (10): category, cars, clothing, electronics, furniture, home-appliances, other, sports (+2 more)
 
 ### Community 89 - "Community 89"
-Cohesion: 0.14
-Nodes (13): Agent Instructions for Updating This File, Known Issues / Blockers, Phase 1 — Foundation, Phase 2 — Core Listing & Discovery, Phase 3 — Proposals & Chat   ← **current focus**, Phase 4 — Trust, Safety & Profiles, Phase 5 — Admin Panel, Phase 6 — Polish & Web Launch (+5 more)
+Cohesion: 0.25
+Nodes (8): Phase 1 — Foundation, Phase 2 — Core Listing & Discovery, Phase 3 — Proposals & Chat   ← **current focus**, Phase 4 — Trust, Safety & Profiles, Phase 5 — Admin Panel, Phase 6 — Polish & Web Launch, Phase 7 — Mobile Applications, Phase Checklist
 
 ### Community 90 - "Community 90"
-Cohesion: 0.18
-Nodes (6): COUNTRY_BY_ISO_MAP, DEMO_LISTINGS, owners, Spec, specs, PublicProfile
+Cohesion: 0.22
+Nodes (9): trust, description, item1Body, item1Title, item2Body, item2Title, item3Body, item3Title (+1 more)
 
 ### Community 91 - "Community 91"
-Cohesion: 0.22
-Nodes (9): chat, disclaimerBeforeChat, empty, placeholder, reminder, reportConversation, send, title (+1 more)
+Cohesion: 0.20
+Nodes (10): chat, disclaimerBeforeChat, empty, placeholder, reminder, reportConversation, send, sendError (+2 more)
 
 ### Community 92 - "Community 92"
-Cohesion: 0.22
-Nodes (9): chat, disclaimerBeforeChat, empty, placeholder, reminder, reportConversation, send, title (+1 more)
+Cohesion: 0.20
+Nodes (10): chat, disclaimerBeforeChat, empty, placeholder, reminder, reportConversation, send, sendError (+2 more)
 
 ### Community 93 - "Community 93"
 Cohesion: 0.19
@@ -576,16 +574,16 @@ Cohesion: 0.25
 Nodes (7): extends, compilerOptions, noEmit, paths, include, @swap/types, @swap/validation
 
 ### Community 95 - "Community 95"
-Cohesion: 0.25
-Nodes (8): auditTable, action, admin, empty, notes, searchPlaceholder, target, when
+Cohesion: 0.18
+Nodes (11): countriesPage, addBtn, addTitle, currencyCode, isoCode, nameAr, nameEn, phoneCode (+3 more)
 
 ### Community 96 - "Community 96"
 Cohesion: 0.25
 Nodes (8): status, agreed, awaiting_confirmation, cancelled, completed, countered, disputed, pending
 
 ### Community 97 - "Community 97"
-Cohesion: 0.25
-Nodes (8): auditTable, action, admin, empty, notes, searchPlaceholder, target, when
+Cohesion: 0.33
+Nodes (6): terms, eyebrow, sections, subtitle, title, updated
 
 ### Community 98 - "Community 98"
 Cohesion: 0.25
@@ -596,20 +594,20 @@ Cohesion: 0.29
 Nodes (6): compilerOptions, noEmit, paths, extends, include, @swap/types
 
 ### Community 100 - "Community 100"
-Cohesion: 0.29
-Nodes (7): message, note, request_edits, update_listing, update_report, update_user, actionType
+Cohesion: 0.39
+Nodes (6): SelectInput, ListingFilters(), SearchBar(), citiesByCountry(), COUNTRIES, COUNTRY_BY_ID
 
 ### Community 101 - "Community 101"
-Cohesion: 0.29
-Nodes (7): listingsTable, empty, featured, owner, reports, searchPlaceholder, views
+Cohesion: 0.33
+Nodes (6): terms, eyebrow, sections, subtitle, title, updated
 
 ### Community 102 - "Community 102"
 Cohesion: 0.29
-Nodes (7): message, note, request_edits, update_listing, update_report, update_user, actionType
+Nodes (7): listings, empty, featured, featuredOnly, filters, resultsCount, title
 
 ### Community 103 - "Community 103"
-Cohesion: 0.29
-Nodes (7): listingsTable, empty, featured, owner, reports, searchPlaceholder, views
+Cohesion: 0.33
+Nodes (6): notFound, browse, description, eyebrow, home, title
 
 ### Community 104 - "Community 104"
 Cohesion: 0.29
@@ -645,63 +643,59 @@ Nodes (6): userStatus, active, admin, all, banned, suspended
 
 ### Community 112 - "Community 112"
 Cohesion: 0.17
-Nodes (11): Architecture (Phase 1.5), Categories, Country & region support, Explicitly NOT in Phase 1, Language & localization, Monetization (future — no payment now), MVP scope (Phase 1 — this foundation), Platform responsibility (+3 more)
+Nodes (11): Architecture (Phase 1.5), Categories, Country & region support, Explicitly NOT in Phase 1, JustSwap — Product Requirements (Phase 1 foundation), Language & localization, Monetization (future — no payment now), MVP scope (Phase 1 — this foundation) (+3 more)
 
 ### Community 113 - "Community 113"
 Cohesion: 0.33
 Nodes (5): compilerOptions, noEmit, rootDir, extends, include
 
 ### Community 114 - "Community 114"
-Cohesion: 0.40
-Nodes (5): listings, empty, filters, resultsCount, title
+Cohesion: 0.20
+Nodes (10): charts, categoryTitle, cityTitle, completions, completionsTitle, dailyTitle, empty, funnelTitle (+2 more)
 
 ### Community 115 - "Community 115"
 Cohesion: 0.40
 Nodes (4): config, { getDefaultConfig }, path, workspaceRoot
 
 ### Community 117 - "Community 117"
-Cohesion: 0.50
-Nodes (4): listingsTabs, all, flagged, reported
+Cohesion: 0.33
+Nodes (7): ListingDetailsPage(), fetchIsSaved(), fetchSavedListings(), NotFound(), getSavedListings(), isListingSaved(), SavedPage()
 
 ### Community 118 - "Community 118"
-Cohesion: 0.50
-Nodes (4): message, placeholder, send, title
+Cohesion: 0.33
+Nodes (6): notFound, browse, description, eyebrow, home, title
 
 ### Community 119 - "Community 119"
-Cohesion: 0.18
-Nodes (10): 1. Install dependencies, 2. Run the web app (works even without Supabase), 3. Configure Supabase + env files, 5. Storage, 6. Run the backend API (NestJS), 7. Run the mobile skeleton, Prerequisites, Swap — Setup Guide (+2 more)
+Cohesion: 0.15
+Nodes (12): 1. Install dependencies, 2. Run the web app (works even without Supabase), 3. Configure Supabase + env files, 4. Run migrations + seed, 5. Storage, 6. Run the backend API (NestJS), 7. Run the mobile skeleton, Demo-data flag (+4 more)
 
 ### Community 120 - "Community 120"
-Cohesion: 0.50
-Nodes (4): requestEdits, placeholder, send, title
+Cohesion: 0.22
+Nodes (9): citiesPage, addBtn, addTitle, country, nameAr, nameEn, slug, sortOrder (+1 more)
 
 ### Community 121 - "Community 121"
-Cohesion: 0.50
-Nodes (4): warn, placeholder, send, title
+Cohesion: 0.22
+Nodes (9): citiesPage, addBtn, addTitle, country, nameAr, nameEn, slug, sortOrder (+1 more)
 
 ### Community 122 - "Community 122"
 Cohesion: 0.20
-Nodes (10): 3.1 Authentication, 3.2 Listings, 3.3 Discovery & Search, 3.4 Swap Proposal Flow ← Core loop, 3.5 Conversations / Chat, 3.6 User Profiles, 3.7 Notifications, 3.8 Reports & Safety (+2 more)
-
-### Community 123 - "Community 123"
-Cohesion: 0.50
-Nodes (4): listingsTabs, all, flagged, reported
+Nodes (10): charts, categoryTitle, cityTitle, completions, completionsTitle, dailyTitle, empty, funnelTitle (+2 more)
 
 ### Community 124 - "Community 124"
-Cohesion: 0.50
-Nodes (4): message, placeholder, send, title
+Cohesion: 0.25
+Nodes (7): No identity verification (GCC legal), Agent Instructions for Updating This File, Known Issues / Blockers, Open Decisions, ▶ RESUME HERE, Session Log, Swap — Build Plan & Session Tracker
 
 ### Community 125 - "Community 125"
-Cohesion: 0.50
-Nodes (4): note, placeholder, save, title
+Cohesion: 0.29
+Nodes (7): listings, empty, featured, featuredOnly, filters, resultsCount, title
 
 ### Community 126 - "Community 126"
-Cohesion: 0.50
-Nodes (4): requestEdits, placeholder, send, title
+Cohesion: 0.33
+Nodes (6): block, block, blockedEmpty, blockedNotice, blockedTitle, unblock
 
 ### Community 127 - "Community 127"
 Cohesion: 0.50
-Nodes (4): warn, placeholder, send, title
+Nodes (5): Deal Closing (dual photo confirmation), Trust & Reputation (completed-swaps + ratings), Migration 0006 deal closing + RPC, Migration 0007 ratings + recompute trigger, profiles.completed_swaps_count trust counter
 
 ### Community 129 - "Community 129"
 Cohesion: 0.33
@@ -709,31 +703,27 @@ Nodes (5): connectSrc, csp, nextConfig, securityHeaders, withNextIntl
 
 ### Community 137 - "Community 137"
 Cohesion: 0.22
-Nodes (8): Monetization (introduced in Phase 2), Phase 1.5 — Backend API + polish ✅, Phase 1.6 — Live database integration ✅, Phase 1.7 — Proposals foundation + trust model ✅ (this repo), Phase 1 — Base MVP foundation ✅, Phase 2 — Depth & trust, Phase 3 — Scale & native, Swap — Roadmap
+Nodes (8): JustSwap — Roadmap, Monetization (introduced in Phase 2), Phase 1.5 — Backend API + polish ✅, Phase 1.6 — Live database integration ✅, Phase 1.7 — Proposals foundation + trust model ✅ (this repo), Phase 1 — Base MVP foundation ✅, Phase 2 — Depth & trust, Phase 3 — Scale & native
 
 ### Community 138 - "Community 138"
-Cohesion: 0.22
-Nodes (8): Architecture: backend API vs Supabase, Documentation, Environment variables, Folder structure, Repository, Roadmap (short), Swap — بدّل ما لديك بما تحتاجه, Tech stack
+Cohesion: 0.18
+Nodes (10): Architecture: backend API vs Supabase, Database-first, Documentation, Environment variables, Folder structure, JustSwap — بدّل ما لديك بما تحتاجه, Quick start, Repository (+2 more)
 
 ### Community 139 - "Community 139"
-Cohesion: 0.25
-Nodes (8): 7. Build Phases, Phase 1 — Foundation, Phase 2 — Core Listing & Discovery, Phase 3 — Proposals & Chat, Phase 4 — Trust, Safety & Profiles, Phase 5 — Admin Panel, Phase 6 — Polish, Performance & Web Launch, Phase 7 — Mobile Applications
+Cohesion: 0.14
+Nodes (14): BlockedUsersPage(), UnblockButton(), fetchBlockedUsers(), blockUser(), createReport(), followUser(), getBlockedUsers(), isBlocked() (+6 more)
 
 ### Community 140 - "Community 140"
 Cohesion: 0.25
-Nodes (7): Backend API vs Supabase (security model), Catalog (categories, countries, cities), Key relationships, RLS summary, Swap — Database Schema, Tables, Triggers / functions
+Nodes (7): Backend API vs Supabase (security model), Catalog (categories, countries, cities), JustSwap — Database Schema, Key relationships, RLS summary, Tables, Triggers / functions
 
 ### Community 141 - "Community 141"
 Cohesion: 0.25
 Nodes (7): graphify reference: extra exports and benchmark, Step 6b - Wiki (only if --wiki flag), Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag), Step 7b - SVG export (only if --svg flag), Step 7c - GraphML export (only if --graphml flag), Step 7d - MCP server (only if --mcp flag), Step 8 - Token reduction benchmark (only if total_words > 5000)
 
 ### Community 142 - "Community 142"
-Cohesion: 0.29
-Nodes (7): 6. Architecture Rules, Backend (NestJS), Database, Frontend (Next.js), Shared Packages, pnpm workspace config, @swap/api typed REST client
-
-### Community 143 - "Community 143"
-Cohesion: 0.40
-Nodes (5): flattenProposal(), getProposalByConversationId(), ProposalRow, subscribeToProposal(), ListingWithImages
+Cohesion: 0.28
+Nodes (9): Architecture rules (thin controllers, services own logic), Swap never handles money/escrow/shipping, Shared Packages, Product Requirements doc, GCC country/city support, pnpm workspace config, Backend API vs Supabase dual-path architecture, Swap README (+1 more)
 
 ### Community 144 - "Community 144"
 Cohesion: 0.40
@@ -742,18 +732,6 @@ Nodes (3): baseUrl, disallow, PRIVATE
 ### Community 145 - "Community 145"
 Cohesion: 0.40
 Nodes (3): baseUrl, locales, staticPaths
-
-### Community 146 - "Community 146"
-Cohesion: 0.40
-Nodes (5): listings, empty, filters, resultsCount, title
-
-### Community 147 - "Community 147"
-Cohesion: 0.50
-Nodes (4): states, errorBody, errorTitle, retry
-
-### Community 148 - "Community 148"
-Cohesion: 0.50
-Nodes (4): states, errorBody, errorTitle, retry
 
 ### Community 149 - "Community 149"
 Cohesion: 0.50
@@ -771,25 +749,29 @@ Nodes (3): For /graphify explain, For /graphify path, graphify reference: query,
 Cohesion: 0.50
 Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphify reference: incremental update and cluster-only
 
+### Community 170 - "Community 170"
+Cohesion: 0.33
+Nodes (6): block, block, blockedEmpty, blockedNotice, blockedTitle, unblock
+
 ## Knowledge Gaps
-- **1430 isolated node(s):** `PreToolUse`, `name`, `version`, `private`, `description` (+1425 more)
+- **1469 isolated node(s):** `PreToolUse`, `allow`, `name`, `version`, `private` (+1464 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `admin` connect `Community 61` to `Community 97`, `Community 35`, `Community 68`, `Community 102`, `Community 103`, `Community 39`, `Community 42`, `Community 109`, `Community 110`, `Community 111`, `Community 87`, `Listings i18n Strings`, `Community 123`, `Community 124`, `Community 125`, `Community 126`, `Community 127`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
-- **Why does `Locale` connect `App Shell & UI Primitives` to `Admin Pages & URL Controls`, `Community 66`, `Web UI Components`, `Proposals API`, `Admin Analytics Charts`, `Chat & Feed UI`, `Admin Service & API Client`, `Community 83`, `Community 58`, `Messaging Pages & Auth`, `Community 30`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
-- **Why does `admin` connect `Community 59` to `Community 33`, `Community 34`, `Community 67`, `Community 100`, `Community 101`, `Community 37`, `Community 41`, `Community 106`, `Community 107`, `Community 108`, `Community 117`, `Community 118`, `Community 85`, `Community 120`, `Community 121`, `Community 95`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
-- **What connects `PreToolUse`, `name`, `version` to the rest of the system?**
-  _1437 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `Locale` connect `Web UI Components` to `Admin Pages & URL Controls`, `Admin Analytics Charts`, `Chat & Feed UI`, `Community 139`, `Admin Service & API Client`, `App Shell & UI Primitives`, `Community 18`, `Messaging Pages & Auth`, `NestJS Module Wiring`, `Community 30`, `Community 36`, `Community 37`, `Community 39`, `Community 58`, `Community 64`, `Community 66`, `Community 83`, `Community 85`, `Community 100`, `Community 117`?**
+  _High betweenness centrality (0.022) - this node is a cross-community bridge._
+- **Why does `admin` connect `Community 59` to `Community 33`, `Community 34`, `Community 41`, `Community 106`, `Community 107`, `Community 108`, `Community 87`, `Community 120`?**
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+- **Why does `admin` connect `Community 61` to `Community 121`, `Community 35`, `Community 42`, `Community 109`, `Community 110`, `Community 111`, `Listings i18n Strings`, `Community 95`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **What connects `PreToolUse`, `allow`, `name` to the rest of the system?**
+  _1476 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Swap/Proposal i18n Strings` be split into smaller, more focused modules?**
   _Cohesion score 0.029411764705882353 - nodes in this community are weakly interconnected._
 - **Should `Swap/Proposal i18n Strings (alt locale)` be split into smaller, more focused modules?**
   _Cohesion score 0.029411764705882353 - nodes in this community are weakly interconnected._
 - **Should `Admin Pages & URL Controls` be split into smaller, more focused modules?**
-  _Cohesion score 0.058115025594700394 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07067307692307692 - nodes in this community are weakly interconnected._

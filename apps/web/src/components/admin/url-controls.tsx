@@ -49,7 +49,7 @@ export function UrlTabs({
             aria-current={active ? "page" : undefined}
             className={cn(
               "rounded-pill px-3 py-1.5 text-sm font-medium transition-colors",
-              active ? "bg-navy text-white" : "border border-line text-ink hover:bg-canvas",
+              active ? "bg-accent text-white" : "border border-linestrong text-ink hover:bg-elevated",
             )}
           >
             {o.label}
@@ -107,7 +107,7 @@ export function UrlSearch({
             submit("");
           }}
           aria-label={placeholder}
-          className="absolute inset-y-0 my-auto flex h-6 w-6 items-center justify-center rounded-full text-muted hover:bg-canvas ltr:right-2 rtl:left-2"
+          className="absolute inset-y-0 my-auto flex h-6 w-6 items-center justify-center rounded-full text-muted hover:bg-elevated ltr:right-2 rtl:left-2"
         >
           <X className="h-4 w-4" aria-hidden />
         </button>
@@ -132,10 +132,10 @@ export function AdminPagination({
   if (pageCount <= 1) return null;
 
   const Btn = ({ to, disabled, children }: { to: number; disabled: boolean; children: React.ReactNode }) => {
-    const cls = "rounded-pill border border-line px-3 py-1.5 text-sm font-medium";
+    const cls = "rounded-pill border border-linestrong px-3 py-1.5 text-sm font-medium";
     if (disabled) return <span className={cn(cls, "cursor-not-allowed text-muted opacity-50")}>{children}</span>;
     return (
-      <Link href={`${pathname}${buildQs({ page: String(to) })}`} className={cn(cls, "text-ink hover:bg-canvas")}>
+      <Link href={`${pathname}${buildQs({ page: String(to) })}`} className={cn(cls, "text-ink hover:bg-elevated")}>
         {children}
       </Link>
     );

@@ -13,6 +13,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 type AdminNavKey =
@@ -43,10 +44,10 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col gap-1 bg-navy p-4 text-white md:flex">
-      <div className="mb-6 flex items-center gap-2 rounded-card bg-white/10 px-3 py-2">
-        <Logo withText={false} />
-        <span className="font-bold">{t("title")}</span>
+    <aside className="hidden w-60 shrink-0 flex-col gap-1 border-e border-line bg-navy p-4 text-onnavy md:flex">
+      <div className="mb-6 flex items-center gap-2 rounded-card border border-white/5 bg-white/[0.04] px-3 py-2.5">
+        <Logo withText={false} tone="dark" />
+        <span className="font-bold text-onnavy">{t("title")}</span>
       </div>
       {ITEMS.map(({ href, key, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
@@ -54,9 +55,12 @@ export function AdminSidebar() {
           <Link
             key={key}
             href={href}
+            aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-              active ? "bg-green text-white" : "text-white/70 hover:bg-white/10",
+              "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors",
+              active
+                ? "bg-accent text-white shadow-[0_4px_14px_rgba(24,182,106,0.35)]"
+                : "text-onnavy/70 hover:bg-white/[0.06] hover:text-onnavy",
             )}
           >
             <Icon className="h-4 w-4" aria-hidden />
@@ -64,6 +68,9 @@ export function AdminSidebar() {
           </Link>
         );
       })}
+      <div className="mt-auto pt-4">
+        <ThemeToggle />
+      </div>
     </aside>
   );
 }

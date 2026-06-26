@@ -30,10 +30,10 @@ const DAY_MS = 86_400_000;
 export type Tone = "default" | "green" | "danger" | "navy";
 
 const TONE: Record<Tone, string> = {
-  default: "border border-line text-ink hover:bg-canvas",
-  green: "bg-green-light text-green-dark hover:bg-green hover:text-white",
-  danger: "bg-red-100 text-red-700 hover:bg-red-600 hover:text-white",
-  navy: "bg-navy text-white hover:bg-navy/90",
+  default: "border border-linestrong text-ink hover:bg-elevated",
+  green: "bg-green-light text-green-dark hover:bg-accent hover:text-white",
+  danger: "bg-red-100 text-red-700 hover:bg-red-600 hover:text-white dark:bg-red-500/15 dark:text-red-300",
+  navy: "bg-elevated text-ink border border-linestrong hover:border-line",
 };
 
 /** True when the backend API is available (actions are hidden otherwise). */
@@ -116,13 +116,13 @@ export function ConfirmActionButton({
       {open ? (
         <Sheet title={title} onClose={close} closeLabel={closeLabel}>
           <div className="space-y-4 p-5">
-            <p className="text-sm text-ink-muted">{message}</p>
+            <p className="text-sm text-muted">{message}</p>
             <DialogError show={failed} />
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={close}
-                className="rounded-pill border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-canvas"
+                className="rounded-pill border border-linestrong px-4 py-2 text-sm font-semibold text-ink hover:bg-elevated"
               >
                 {closeLabel}
               </button>
@@ -144,7 +144,7 @@ export function ConfirmActionButton({
                 }}
                 className={cn(
                   "rounded-pill px-4 py-2 text-sm font-semibold disabled:opacity-50",
-                  tone === "danger" ? "bg-danger text-white" : "bg-navy text-white",
+                  tone === "danger" ? "bg-danger text-white" : "bg-accent text-white hover:bg-accent-hover",
                 )}
               >
                 {busy ? "…" : confirmLabel}
@@ -166,6 +166,7 @@ export function TextActionButton({
   submitLabel,
   closeLabel,
   onSubmit,
+  successMessage,
 }: {
   label: React.ReactNode;
   tone?: Tone;
@@ -174,14 +175,17 @@ export function TextActionButton({
   submitLabel: string;
   closeLabel: string;
   onSubmit: (text: string) => Promise<unknown>;
+  successMessage?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [success, setSuccess] = useState(false);
   const close = () => {
     setOpen(false);
     setFailed(false);
+    setSuccess(false);
   };
   return (
     <>
@@ -193,13 +197,20 @@ export function TextActionButton({
           <form
             onSubmit={async (e) => {
               e.preventDefault();
-              if (!text.trim()) return;
+              if (success || !text.trim()) return;
               setBusy(true);
               setFailed(false);
               try {
                 await onSubmit(text.trim());
                 setText("");
-                close();
+                if (successMessage) {
+                  setSuccess(true);
+                  setTimeout(() => {
+                    close();
+                  }, 1500);
+                } else {
+                  close();
+                }
               } catch (err) {
                 console.error("[admin] text action failed:", err);
                 setFailed(true);
@@ -215,13 +226,22 @@ export function TextActionButton({
               placeholder={placeholder}
               autoFocus
               maxLength={2000}
+              disabled={success}
             />
+            {success && successMessage && (
+              <div className="rounded-lg bg-green-50 p-4 text-sm text-green-800 dark:bg-green-950/20 dark:text-green-300 border border-green-200 dark:border-green-800/30 flex items-center gap-2">
+                <svg className="h-5 w-5 flex-shrink-0 text-green-600 dark:text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>{successMessage}</span>
+              </div>
+            )}
             <DialogError show={failed} />
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={busy || !text.trim()}
-                className="rounded-pill bg-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                disabled={busy || !text.trim() || success}
+                className="rounded-pill bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-hover disabled:opacity-50"
               >
                 {busy ? "…" : submitLabel}
               </button>

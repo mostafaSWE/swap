@@ -30,7 +30,7 @@ export default async function MessagesPage({ params: { locale } }: { params: { l
   return (
     <>
       {/* Mobile: full conversation list (the desktop sidebar is in the layout). */}
-      <div className="md:hidden">
+      <div className="md:hidden pb-[calc(5.25rem+env(safe-area-inset-bottom))]">
         <h1 className="px-4 py-3 text-xl font-bold text-ink">{t("title")}</h1>
         <ConversationList conversations={conversations} />
       </div>

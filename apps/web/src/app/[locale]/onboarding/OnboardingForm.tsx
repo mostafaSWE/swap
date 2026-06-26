@@ -80,13 +80,13 @@ export function OnboardingForm({ profile }: { profile: Profile }) {
 
         {error ? <p role="alert" className="text-sm text-danger">{error}</p> : null}
 
-        <CTAButton type="submit" disabled={isSubmitting}>
+        <CTAButton type="submit" disabled={isSubmitting} className="w-full">
           {t("complete")}
         </CTAButton>
         <button
           type="button"
           onClick={() => router.push("/")}
-          className="w-full rounded-pill py-2 text-sm font-semibold text-muted hover:bg-canvas"
+          className="w-full rounded-pill py-2 text-sm font-semibold text-muted hover:bg-elevated"
         >
           {t("skip")}
         </button>

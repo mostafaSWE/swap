@@ -11,21 +11,28 @@ import { cn } from "@/lib/utils";
 
 /**
  * Save / unsave a listing. Writes to the DB through the backend API (with a
- * direct-Supabase fallback). `variant="icon"` renders a compact bookmark.
+ * direct-Supabase fallback). The label is action/state aware — "Save" → "Saved"
+ * — and the accessible name flips to "Remove from saved" once saved, so the
+ * control never shows the misleading "Saved" nav-label as a button.
+ * `variant="icon"` renders a compact round bookmark for the header / sticky bar.
  */
 export function SaveButton({
   listingId,
   initialSaved = false,
   variant = "button",
+  className,
 }: {
   listingId: string;
   initialSaved?: boolean;
   variant?: "button" | "icon";
+  className?: string;
 }) {
-  const t = useTranslations("nav");
+  const t = useTranslations("listing");
   const router = useRouter();
   const [saved, setSaved] = useState(initialSaved);
   const [busy, setBusy] = useState(false);
+
+  const accessibleName = saved ? t("unsave") : t("save");
 
   async function toggle() {
     setBusy(true);
@@ -62,22 +69,35 @@ export function SaveButton({
         type="button"
         onClick={toggle}
         disabled={busy}
-        aria-label={t("saved")}
+        aria-label={accessibleName}
         aria-pressed={saved}
+        title={accessibleName}
         className={cn(
-          "flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white transition-colors active:scale-95",
-          saved ? "text-green" : "text-muted hover:text-ink",
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-surface transition-colors active:scale-90 motion-safe:transition-transform",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas",
+          saved ? "border-accent/40 text-accent" : "border-line text-muted hover:text-ink hover:border-linestrong",
+          className,
         )}
       >
-        <Bookmark className={cn("h-5 w-5", saved && "fill-green")} aria-hidden />
+        <Bookmark
+          className={cn("h-5 w-5 transition-transform", saved && "fill-accent scale-110")}
+          aria-hidden
+        />
       </button>
     );
   }
 
   return (
-    <button type="button" onClick={toggle} disabled={busy} aria-pressed={saved} className="btn-secondary w-full">
-      <Bookmark className={cn("h-5 w-5", saved && "fill-green text-green")} aria-hidden />
-      {t("saved")}
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={busy}
+      aria-label={accessibleName}
+      aria-pressed={saved}
+      className={cn("btn-secondary w-full active:scale-[0.97]", className)}
+    >
+      <Bookmark className={cn("h-5 w-5 transition-transform", saved && "fill-accent text-accent")} aria-hidden />
+      {saved ? t("saved") : t("save")}
     </button>
   );
 }

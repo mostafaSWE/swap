@@ -66,6 +66,9 @@ on conflict (id) do update set
   icon = excluded.icon,
   sort_order = excluded.sort_order;
 
+update public.categories set is_active = false where slug = 'open-exchange';
+
+
 -- ── Additional curated GCC cities (IDs 32+; originals 1-31 come from seed) ─
 insert into public.cities (id, country_id, name_ar, name_en, slug, sort_order) values
   -- Saudi Arabia

@@ -28,8 +28,8 @@ export default function GlobalError({
         style={{
           margin: 0,
           fontFamily: "system-ui, -apple-system, sans-serif",
-          background: "#F7F4EE",
-          color: "#1A1713",
+          background: "#0A0E1A",
+          color: "#E9EDF6",
         }}
       >
         <main
@@ -50,7 +50,7 @@ export default function GlobalError({
               Something went wrong
             </span>
           </h1>
-          <p style={{ maxWidth: "28rem", margin: 0, color: "#5C564E" }}>
+          <p style={{ maxWidth: "28rem", margin: 0, color: "#97A1B7" }}>
             <span>تعذّر تحميل التطبيق. حاول مجدداً.</span>
             <span lang="en" dir="ltr" style={{ display: "block" }}>
               We couldn’t load the app. Please try again.
@@ -64,7 +64,7 @@ export default function GlobalError({
               padding: "0.625rem 1.25rem",
               borderRadius: "9999px",
               border: "none",
-              background: "#E8572A",
+              background: "#18B66A",
               color: "#ffffff",
               fontWeight: 600,
               cursor: "pointer",

@@ -2,15 +2,25 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
-import { Cairo } from "next/font/google";
+import { IBM_Plex_Sans_Arabic, Inter } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import type { Locale } from "@swap/types";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "../globals.css";
 
-const cairo = Cairo({
+/** Arabic-first display + body face — also carries a clean Latin set. */
+const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-arabic",
+  display: "swap",
+});
+
+/** Latin / numerals — used as the primary face on the English locale. */
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-latin",
   display: "swap",
 });
 
@@ -34,6 +44,12 @@ export function generateMetadata({ params: { locale } }: { params: { locale: str
       icon: [
         { url: "/favicon.ico", sizes: "32x32" },
         { url: "/brand/justswap-favicon-32.png", sizes: "32x32", type: "image/png" },
+        {
+          url: "/brand/justswap-favicon-dark-32.png",
+          sizes: "32x32",
+          type: "image/png",
+          media: "(prefers-color-scheme: dark)",
+        },
         { url: "/brand/justswap-app-icon.png", type: "image/png" },
         { url: "/brand/justswap-mark.png", type: "image/png" },
       ],
@@ -75,9 +91,11 @@ export default async function LocaleLayout({
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
-    <html lang={locale} dir={dir} className={cairo.variable}>
-      <body className="font-sans">
-        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+    <html lang={locale} dir={dir} className={`${plexArabic.variable} ${inter.variable}`} suppressHydrationWarning>
+      <body className={locale === "ar" ? "font-sans" : "font-latin"}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+          <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

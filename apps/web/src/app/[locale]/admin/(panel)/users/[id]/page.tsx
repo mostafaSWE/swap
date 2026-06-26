@@ -25,7 +25,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-card border border-line bg-white p-4">
+    <section className="rounded-card border border-line bg-surface p-4">
       <h2 className="mb-3 text-sm font-bold text-ink">
         {title}
         {typeof count === "number" ? <span className="ms-2 text-muted">({count})</span> : null}
@@ -81,7 +81,7 @@ export default async function AdminUserDetailPage({
       </Link>
 
       {/* Header + actions */}
-      <div className="rounded-card border border-line bg-white p-4">
+      <div className="rounded-card border border-line bg-surface p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -94,7 +94,7 @@ export default async function AdminUserDetailPage({
         </div>
 
         {(suspended || p.is_banned) && p.suspension_reason ? (
-          <p className="mt-3 rounded-card bg-red-50 px-3 py-2 text-sm text-red-700">{p.suspension_reason}</p>
+          <p className="mt-3 rounded-card border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300">{p.suspension_reason}</p>
         ) : null}
 
         <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -109,7 +109,7 @@ export default async function AdminUserDetailPage({
           />
           <Fact label={t("userDetail.listingsCount")} value={p.listings_count} />
         </dl>
-        {p.bio ? <p className="mt-3 text-sm text-ink-muted">{p.bio}</p> : null}
+        {p.bio ? <p className="mt-3 text-sm text-muted">{p.bio}</p> : null}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -156,21 +156,21 @@ export default async function AdminUserDetailPage({
             {ratings.map((r) => (
               <li key={r.id} className="py-2 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-amber-500" aria-label={`${r.stars}/5`}>
+                  <span className="text-amber-400" aria-label={`${r.stars}/5`}>
                     {"★".repeat(r.stars)}
-                    <span className="text-line">{"★".repeat(5 - r.stars)}</span>
+                    <span className="text-faint">{"★".repeat(5 - r.stars)}</span>
                   </span>
                   <span className="text-xs text-muted">
                     {r.rater_username ? t("userDetail.by", { name: r.rater_username }) : null}
                   </span>
                 </div>
-                {r.comment ? <p className="mt-1 text-ink-muted">{r.comment}</p> : null}
+                {r.comment ? <p className="mt-1 text-muted">{r.comment}</p> : null}
               </li>
             ))}
           </ul>
         </Section>
 
-        <section className="rounded-card border border-line bg-white p-4 lg:col-span-2">
+        <section className="rounded-card border border-line bg-surface p-4 lg:col-span-2">
           <h2 className="mb-3 text-sm font-bold text-ink">
             {t("userDetail.tabActivity")}
             <span className="ms-2 text-muted">({actions.length})</span>
@@ -189,7 +189,7 @@ export default async function AdminUserDetailPage({
                       {a.admin_username ? `@${a.admin_username}` : "—"} · {formatDate(a.created_at, locale)}
                     </span>
                   </div>
-                  {a.notes ? <p className="mt-0.5 whitespace-pre-wrap text-ink-muted">{a.notes}</p> : null}
+                  {a.notes ? <p className="mt-0.5 whitespace-pre-wrap text-muted">{a.notes}</p> : null}
                 </li>
               ))}
             </ul>

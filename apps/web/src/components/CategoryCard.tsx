@@ -22,14 +22,15 @@ export function CategoryCard({
     <Link
       href={href}
       className={cn(
-        "group flex h-full min-h-[132px] flex-col justify-between rounded-card border border-line bg-white p-4 text-start shadow-card transition-all hover:-translate-y-0.5 hover:border-green/40 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/40",
+        "group relative flex h-full min-h-[104px] flex-col justify-between overflow-hidden rounded-card border border-line bg-surface p-3.5 text-start shadow-card transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 sm:min-h-[124px] sm:p-4",
         className,
       )}
     >
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-light text-green-dark transition-colors group-hover:bg-green group-hover:text-white">
-        <CategoryIcon icon={category.icon} className="h-6 w-6" />
+      <span className="pointer-events-none absolute -end-8 -top-8 h-20 w-20 rounded-full bg-accent/5 transition-transform duration-300 group-hover:scale-125" />
+      <span className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-accent/15 text-accent transition-all duration-200 group-hover:bg-accent group-hover:text-white sm:h-12 sm:w-12">
+        <CategoryIcon icon={category.icon} className="h-5 w-5 sm:h-6 sm:w-6" />
       </span>
-      <span className="mt-4 text-sm font-bold leading-5 text-ink">{localizedName(category, locale)}</span>
+      <span className="relative mt-3 text-sm font-bold leading-5 text-ink sm:mt-4">{localizedName(category, locale)}</span>
     </Link>
   );
 }

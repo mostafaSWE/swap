@@ -52,7 +52,7 @@ export function RatingBadge({
     <span
       aria-label={ariaLabel}
       className={cn(
-        "inline-flex items-center gap-1 whitespace-nowrap rounded-pill bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-700",
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-pill bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
         className,
       )}
     >
@@ -63,25 +63,32 @@ export function RatingBadge({
   );
 }
 
+const AMBER = "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300";
+const RED = "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300";
+const BLUE = "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300";
+const VIOLET = "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300";
+const NEUTRAL = "bg-elevated text-muted";
+const POSITIVE = "bg-green-light text-green-dark";
+
 const STATUS_STYLES: Record<string, string> = {
-  active: "bg-green-light text-green-dark",
-  hidden: "bg-amber-100 text-amber-700",
-  removed: "bg-red-100 text-red-700",
-  completed: "bg-gray-100 text-gray-600",
-  pending: "bg-amber-100 text-amber-700",
-  reviewed: "bg-blue-100 text-blue-700",
-  resolved: "bg-green-light text-green-dark",
-  rejected: "bg-red-100 text-red-700",
+  active: POSITIVE,
+  hidden: AMBER,
+  removed: RED,
+  completed: NEUTRAL,
+  pending: AMBER,
+  reviewed: BLUE,
+  resolved: POSITIVE,
+  rejected: RED,
 };
 
 const PROPOSAL_STATUS_STYLES: Record<SwapProposalStatus, string> = {
-  pending: "bg-amber-100 text-amber-700",
-  countered: "bg-blue-100 text-blue-700",
-  agreed: "bg-green-light text-green-dark",
-  awaiting_confirmation: "bg-violet-100 text-violet-700",
-  completed: "bg-green-light text-green-dark",
-  disputed: "bg-red-100 text-red-700",
-  cancelled: "bg-gray-100 text-gray-600",
+  pending: AMBER,
+  countered: BLUE,
+  agreed: POSITIVE,
+  awaiting_confirmation: VIOLET,
+  completed: POSITIVE,
+  disputed: RED,
+  cancelled: NEUTRAL,
 };
 
 /** Swap-proposal lifecycle pill — shown on conversation rows + the chat context card. */
@@ -114,7 +121,7 @@ export function StatusBadge({ status, label }: { status: string; label?: string 
     <span
       className={cn(
         "inline-flex items-center rounded-pill px-2.5 py-1 text-xs font-semibold",
-        STATUS_STYLES[status] ?? "bg-gray-100 text-gray-600",
+        STATUS_STYLES[status] ?? "bg-elevated text-muted",
       )}
     >
       {label ?? status}

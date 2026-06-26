@@ -43,6 +43,8 @@
   "common": {
     "search": "Search for an item...",
     "searchAction": "Search",
+    "location": "Location",
+    "allLocations": "All locations",
     "country": "Country",
     "city": "City",
     "category": "Category",
@@ -109,6 +111,7 @@
     "heroSubtitle": "JustSwap helps people trade items directly with each other. No buying, no selling, just clear offers and community exchange.",
     "heroBadge": "A marketplace built for direct exchange",
     "heroTrustNote": "Add listing is available after sign-in so every listing is tied to a real account.",
+    "heroVisualAlt": "Examples of items people exchange on JustSwap — a phone, a laptop and sneakers linked by swap arrows",
     "heroPreviewLabel": "Wanted in exchange",
     "heroPreviewTrust": "Browse real listings from the marketplace.",
     "heroPreviewSafety": "Agree on the final handover directly with the other user.",
@@ -182,13 +185,27 @@
     "postedIn": "{city}, {country}",
     "editListing": "Edit listing",
     "share": "Share",
-    "linkCopied": "Link copied"
+    "linkCopied": "Link copied",
+    "save": "Save",
+    "saved": "Saved",
+    "unsave": "Remove from saved",
+    "openToOffers": "Open to offers",
+    "openToAnyExchange": "Open to Any Exchange",
+    "aboutSeller": "About the seller",
+    "viewProfile": "View profile",
+    "postedOn": "Posted {date}",
+    "featured": "Featured",
+    "prevImage": "Previous image",
+    "nextImage": "Next image",
+    "galleryLabel": "Listing images"
   },
   "listings": {
     "title": "Listings",
     "resultsCount": "{count} results",
     "empty": "No matching listings",
-    "filters": "Filters"
+    "filters": "Filters",
+    "featured": "Featured Status",
+    "featuredOnly": "Featured only"
   },
   "newListing": {
     "title": "Add New Listing",
@@ -199,6 +216,8 @@
     "fieldCountry": "Country",
     "fieldCity": "City",
     "fieldWanted": "What do you want in exchange?",
+    "fieldOpenToAny": "Open to any exchange",
+    "fieldOpenToAnyHint": "Tick if you don't have a specific item in mind and are open to any offer.",
     "fieldLocation": "Location",
     "images": "Images",
     "imagesHint": "Up to {max} images on the free plan",
@@ -207,6 +226,7 @@
     "step": "Step {current} of {total}",
     "swapPreview": "Exchange preview",
     "yourItem": "Your item",
+    "previewWanted": "In exchange",
     "cover": "Cover",
     "removeImage": "Remove image",
     "addImage": "Add image",
@@ -229,6 +249,15 @@
   "auth": {
     "loginTitle": "Login",
     "registerTitle": "Create Account",
+    "tagline": "Exchange what you have for what you need.",
+    "loginSubtitle": "Welcome back — sign in to continue.",
+    "registerSubtitle": "Join JustSwap and start exchanging.",
+    "secPersonal": "Personal info",
+    "secContact": "Contact",
+    "secLocation": "Location",
+    "secSecurity": "Security",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "fullName": "Full name",
     "username": "Username",
     "email": "Email",
@@ -295,7 +324,8 @@
     "you": "You",
     "reportConversation": "Report conversation",
     "disclaimerBeforeChat": "JustSwap is only a communication platform. The agreement and item handover are the users' responsibility.",
-    "reminder": "Reminder: the agreement and handover are your responsibility. Don't share sensitive data."
+    "reminder": "Reminder: the agreement and handover are your responsibility. Don't share sensitive data.",
+    "sendError": "Message couldn't be sent. Check your connection and try again."
   },
   "report": {
     "title": "Report Issue",
@@ -390,9 +420,23 @@
     }
   },
   "safety": {
-    "title": "Safety & Responsibility",
+    "eyebrow": "Safety",
+    "title": "Swap safely",
+    "subtitle": "Swapping in person is safe when you take a few sensible precautions. Here's how to protect yourself and your things.",
+    "updated": "Last updated 20 June 2026",
+    "noticeTitle": "Platform notice",
+    "notesTitle": "Important safety notes",
+    "sections": [
+      { "heading": "Meet in a safe, public place", "body": ["Arrange handovers in a busy public spot during daylight — a mall, a café, or a designated 'safe exchange zone' where one is available. Avoid private homes and isolated locations, and bring a friend along when you can."] },
+      { "heading": "Inspect before you swap", "body": ["Check that each item matches its listing and actually works before you hand anything over. Power it on, test the important functions, and look it over carefully. If something feels off, it's always fine to walk away."] },
+      { "heading": "Keep it a swap — never send money", "body": ["JustSwap is barter only. Money, deposits, gift cards, and bank transfers should never be part of a deal. Anyone who asks you to pay, to 'reserve' an item, or to move to an outside payment app is almost certainly trying to scam you."] },
+      { "heading": "Check who you're dealing with", "body": ["Look at the other person's profile — their completed-swap count, rating, and reviews give you a sense of their track record. Keep the whole conversation inside JustSwap so there's a record if anything goes wrong."] },
+      { "heading": "Protect your account and privacy", "body": ["Use a strong, unique password and never share verification codes with anyone. Don't put sensitive personal details in listings or chats, and be careful about revealing your exact home address."] },
+      { "heading": "Report anything suspicious", "body": ["If a user or listing looks fraudulent, pressures you, or breaks the rules, use the report button. Reports are confidential — and when enough people report the same listing, it's automatically hidden from the marketplace."] }
+    ],
     "disclaimerTitle": "Important notice",
     "points": {
+      "meetPublic": "Meet in a safe, public place and inspect the item before you swap.",
       "noOwn": "JustSwap does not own the listed items.",
       "noBuy": "JustSwap does not buy products.",
       "noSell": "JustSwap does not sell products.",
@@ -404,14 +448,25 @@
   },
   "terms": {
     "eyebrow": "Legal",
-    "title": "Terms & Conditions",
-    "intro": "These terms describe the basic rules for using JustSwap.",
-    "marketplace": "JustSwap is a listing and communication marketplace for direct item exchange. It is not a buying, selling, payment, delivery, escrow, or ownership-transfer service.",
-    "conduct": "Users are responsible for posting accurate listings, communicating respectfully, and complying with applicable laws.",
-    "handover": "Users are responsible for inspecting items, agreeing on terms, and arranging any handover directly with each other."
+    "title": "Terms of Service",
+    "subtitle": "The agreement between you and JustSwap when you use the marketplace. Please read it alongside our Disclaimer and Privacy Policy.",
+    "updated": "Last updated 20 June 2026",
+    "sections": [
+      { "heading": "1. Acceptance of these terms", "body": ["By creating an account or using JustSwap, you agree to these Terms of Service, our Privacy Policy, and our Disclaimer. If you don't agree with them, please don't use the platform."] },
+      { "heading": "2. Who can use JustSwap", "body": ["You must be old enough to enter a binding agreement in your country and able to comply with these terms. You're responsible for keeping your login details secure and for all activity that happens under your account."] },
+      { "heading": "3. A barter marketplace — no payments", "body": ["JustSwap is a listing and communication platform for direct item exchange. It is not a buying, selling, payment, delivery, escrow, or ownership-transfer service.", "No money should change hands through JustSwap. Requests for payments, deposits, or fees are a red flag and should be reported."] },
+      { "heading": "4. Your listings and content", "body": ["You're responsible for making sure your listings are accurate, lawful, and cover items you actually have the right to exchange. You keep ownership of your content and grant JustSwap a license to host and display it so the marketplace can function."] },
+      { "heading": "5. Acceptable use", "body": ["When using JustSwap, you agree not to:"], "list": ["List illegal, stolen, counterfeit, recalled, or otherwise prohibited items — including weapons, drugs, and regulated goods.", "Harass, threaten, deceive, or spam other users.", "Post misleading listings or impersonate another person or business.", "Solicit payments, or try to move a deal off-platform in order to defraud someone.", "Disrupt, scrape, or attempt to breach the security of the service."] },
+      { "heading": "6. Swaps and handovers", "body": ["Any exchange is a private agreement between users. You are responsible for inspecting items, agreeing terms, meeting safely, and completing the handover yourselves. JustSwap is not a party to these agreements and does not guarantee any outcome."] },
+      { "heading": "7. Reports, suspension & termination", "body": ["We may review reported content and, where our rules are broken, hide listings or warn, suspend, or ban accounts. You can stop using JustSwap at any time and ask us to close your account."] },
+      { "heading": "8. Disclaimers & liability", "body": ["The service is provided 'as is', and JustSwap's liability is limited as described in our Disclaimer. We are not responsible for the conduct of users or for the outcome of any swap."] },
+      { "heading": "9. Changes to these terms", "body": ["We may update these terms from time to time and will revise the date above when we do. Continuing to use JustSwap after a change means you accept the updated terms."] },
+      { "heading": "10. Contact", "body": ["Questions about these terms? Email support@justswap.app."] }
+    ]
   },
   "admin": {
     "title": "Admin",
+    "status": "Status",
     "dashboard": "Dashboard",
     "users": "Users",
     "listings": "Listings",
@@ -420,6 +475,28 @@
     "countries": "Countries",
     "cities": "Cities",
     "audit": "Audit Log",
+    "countriesPage": {
+      "addBtn": "Add Country",
+      "addTitle": "Add New Country",
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "isoCode": "ISO Code (2 letters)",
+      "phoneCode": "Phone Code (e.g. +966)",
+      "currencyCode": "Currency Code (e.g. SAR)",
+      "timezone": "Timezone (e.g. Asia/Riyadh)",
+      "sortOrder": "Sort Order",
+      "submit": "Add Country"
+    },
+    "citiesPage": {
+      "addBtn": "Add City",
+      "addTitle": "Add New City",
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "slug": "Slug",
+      "country": "Country",
+      "sortOrder": "Sort Order",
+      "submit": "Add City"
+    },
     "metrics": {
       "totalUsers": "Total users",
       "activeListings": "Active listings",
@@ -523,7 +600,8 @@
     "requestEdits": {
       "title": "Request edits",
       "placeholder": "What needs to change?",
-      "send": "Send request"
+      "send": "Send request",
+      "success": "Request sent successfully!"
     },
     "userDetail": {
       "back": "Back to users",
@@ -559,7 +637,8 @@
       "reports": "Reports",
       "searchPlaceholder": "Search listings by title",
       "empty": "No listings match",
-      "featured": "Featured"
+      "featured": "Featured",
+      "editsRequested": "Edits Requested"
     },
     "reportsTable": {
       "sortSeverity": "By severity",
@@ -613,9 +692,24 @@
     "generic": "Nothing here yet"
   },
   "legal": {
-    "eyebrow": "Legal",
-    "disclaimerTitle": "Platform disclaimer",
-    "disclaimerIntro": "JustSwap is a marketplace for people to discover exchange opportunities and communicate. The platform does not own listed items or complete exchanges for users."
+    "eyebrow": "Legal center",
+    "title": "Legal & policies",
+    "subtitle": "Everything that governs how JustSwap works — what the platform does, how your data is handled, the rules you agree to, and how to swap safely.",
+    "updated": "Last updated 20 June 2026",
+    "principlesTitle": "How JustSwap works, in short",
+    "principles": [
+      "JustSwap is a place to list items and message other people — not a shop. Nothing is bought or sold through us.",
+      "We never take payment, hold items in escrow, or handle delivery. Every swap is arranged directly between users.",
+      "We don't take ownership of listed items and can't guarantee their condition or that a swap will complete.",
+      "You stay in control of your data and can ask us to access or delete it at any time."
+    ],
+    "docsTitle": "The documents",
+    "docs": {
+      "disclaimer": { "title": "Disclaimer", "description": "What JustSwap is responsible for — and the things it deliberately isn't." },
+      "privacy": { "title": "Privacy Policy", "description": "What data we collect, how we use it, and the choices you have." },
+      "terms": { "title": "Terms of Service", "description": "The rules you agree to when you create an account and use the marketplace." },
+      "safety": { "title": "Safety guide", "description": "Practical steps for meeting, inspecting items, and avoiding scams." }
+    }
   },
   "footer": {
     "description": "JustSwap is a consumer marketplace for direct item exchange. List what you have, find what you need, and arrange swaps directly with other people.",
@@ -632,8 +726,62 @@
   "privacy": {
     "eyebrow": "Legal",
     "title": "Privacy Policy",
-    "intro": "JustSwap uses account, listing, message, and marketplace activity data to operate the service and keep user-facing features working.",
-    "data": "Do not share sensitive personal information in public listings. Messages and reports may be reviewed when needed for safety, support, or moderation.",
-    "contact": "For privacy or support questions, contact support@justswap.app."
+    "subtitle": "How JustSwap collects, uses, and protects your information — and the control you have over it.",
+    "updated": "Last updated 20 June 2026",
+    "sections": [
+      { "heading": "Information you provide", "body": ["When you create an account we collect details such as your name, username, and email, and optionally a phone number, city, and profile photo.", "As you use the marketplace you also provide listing content (titles, descriptions, photos, and what you want in exchange), messages to other users, swap proposals, ratings, and any reports you file."] },
+      { "heading": "Information collected automatically", "body": ["To keep the service running and secure, we process technical data such as your IP address, device and browser information, and basic usage activity — for example, which listings are viewed."] },
+      { "heading": "How we use your information", "body": ["We use your information to:"], "list": ["Operate core features — accounts, listings, search, messaging, proposals, and ratings.", "Keep the community safe — detect abuse, review reports, and enforce our rules.", "Provide support and respond to your requests.", "Improve the product and understand how it's used.", "Send service emails such as verification and password resets."] },
+      { "heading": "What other people can see", "body": ["Your listings and public profile — name, username, photo, city, completed-swap count, and ratings — are visible to other users. Messages are visible to the people in that conversation.", "Please don't put sensitive personal information, such as ID numbers or financial details, into public listings or chats."] },
+      { "heading": "How we share information", "body": ["We do not sell your personal data. We share it only with the service providers that operate the platform on our behalf (such as our hosting and database provider), and where required by law or to protect the safety of our users."] },
+      { "heading": "Cookies and local storage", "body": ["We use cookies and your browser's local storage for essential things — keeping you signed in, remembering your language, and remembering your light or dark theme. We don't use them for third-party advertising."] },
+      { "heading": "Data retention", "body": ["We keep your information for as long as your account is active and as needed to provide the service, comply with legal obligations, resolve disputes, and enforce our agreements."] },
+      { "heading": "Your rights and choices", "body": ["You can view and update most of your information from your profile and settings. You can also ask us to export or delete your data, or to close your account, by contacting support."] },
+      { "heading": "Security", "body": ["We use industry-standard safeguards, including encryption in transit, to protect your information. No method of transmission or storage is completely secure, so we can't guarantee absolute security."] },
+      { "heading": "Children", "body": ["JustSwap is not directed to children. You must meet the minimum age required in your country to create an account."] },
+      { "heading": "Changes & contact", "body": ["We may update this policy and will revise the date above whenever we do. For any privacy question or request, email support@justswap.app."] }
+    ]
+  },
+  "disclaimer": {
+    "eyebrow": "Legal",
+    "title": "Disclaimer",
+    "subtitle": "JustSwap is a venue that helps people find and arrange exchanges — it is never a party to a swap. Here's what that means for you.",
+    "updated": "Last updated 20 June 2026",
+    "sections": [
+      { "heading": "JustSwap is a marketplace, not a trader", "body": ["JustSwap provides a platform where people can publish listings, browse what others offer, and message each other to arrange a direct exchange.", "We do not own, buy, sell, import, store, inspect, or ship any of the items you see. Every listing is created by a user."] },
+      { "heading": "We are not part of your exchange", "body": ["Every agreement is made directly between the two people involved. JustSwap does not negotiate on your behalf, hold items or money in escrow, process payments, or mediate, complete, or guarantee any swap."] },
+      { "heading": "No guarantee on items or users", "body": ["We can't verify that an item matches its description, works as claimed, is authentic, is legally owned, or is in any particular condition. We also can't guarantee that another user will follow through, behave honestly, or show up.", "Trust signals such as completed-swap counts and ratings are there to help you decide — they are not a promise of any outcome."] },
+      { "heading": "The service is provided 'as is'", "body": ["JustSwap is offered on an 'as is' and 'as available' basis, without warranties of any kind. We work hard to keep the platform running, but we don't guarantee it will be uninterrupted, error-free, or secure against every risk."] },
+      { "heading": "User-generated content", "body": ["Listings, photos, messages, and profile details are created by users and do not represent the views of JustSwap. If you see something that breaks our rules, please report it."] },
+      { "heading": "Limitation of liability", "body": ["To the fullest extent permitted by law, JustSwap is not liable for any loss, damage, dispute, or injury arising from a listing, a swap, an item's condition, or your dealings with other users. You use the platform — and arrange any exchange — at your own risk."] },
+      { "heading": "Related policies", "body": ["This disclaimer works alongside our Terms of Service, Privacy Policy, and Safety guide."] }
+    ]
+  },
+  "support": {
+    "eyebrow": "Help",
+    "title": "Contact support",
+    "subtitle": "We're here to help with your account, listings, swaps, safety concerns, and privacy requests.",
+    "email": "support@justswap.app",
+    "emailTitle": "Email us",
+    "emailNote": "The fastest way to reach us. Include your username and as much detail as you can — screenshots help us help you faster.",
+    "emailCta": "Email support",
+    "topicsTitle": "What we can help with",
+    "topics": [
+      { "title": "Account & sign-in", "description": "Verification emails, password resets, and your profile or settings." },
+      { "title": "Listings", "description": "Editing, pausing, or removing a listing, and image or category issues." },
+      { "title": "Swaps & messages", "description": "Proposals, the chat, counter-offers, and closing a deal." },
+      { "title": "Trust & safety", "description": "Reporting a user or listing, blocking someone, and suspicious activity." },
+      { "title": "Privacy requests", "description": "Accessing, exporting, or deleting your data, or closing your account." }
+    ],
+    "reportTitle": "Reporting a user or listing",
+    "reportNote": "To flag something specific, use the report button on that listing or profile — it reaches our moderation team directly, and your report stays confidential.",
+    "selfServeTitle": "Before you write",
+    "selfServeNote": "A few quick answers may already be in our guides:"
+  },
+  "legalCommon": {
+    "onThisPage": "On this page",
+    "helpTitle": "Still have questions?",
+    "helpBody": "Our team can help with accounts, listings, swaps, safety, and privacy requests.",
+    "helpCta": "Contact support"
   }
 }

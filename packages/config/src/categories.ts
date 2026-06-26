@@ -84,7 +84,7 @@ export const CATEGORIES: Category[] = seeds.map((s, i) => ({
   slug: s.slug,
   icon: s.icon,
   sort_order: i + 1,
-  is_active: true,
+  is_active: s.slug !== "open-exchange",
   created_at: "2024-01-01T00:00:00Z",
 }));
 
@@ -98,8 +98,9 @@ export const CATEGORY_BY_SLUG: Record<string, Category> = Object.fromEntries(
 
 /** Top-level categories only (parent_id === null). */
 export const TOP_LEVEL_CATEGORIES: Category[] = CATEGORIES.filter(
-  (c) => c.parent_id === null,
+  (c) => c.parent_id === null && c.is_active,
 );
+
 
 /** Direct subcategories of a given category id. */
 export const subcategoriesOf = (parentId: string): Category[] =>

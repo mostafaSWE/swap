@@ -4,6 +4,8 @@ import { AdminTable, type Column } from "@/components/AdminTable";
 import { StatusBadge } from "@/components/badges";
 import { fetchAdminCategories } from "@/lib/admin";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminCategoriesPage({ params: { locale } }: { params: { locale: Locale } }) {
   setRequestLocale(locale);
   const t = await getTranslations("admin");
@@ -13,7 +15,7 @@ export default async function AdminCategoriesPage({ params: { locale } }: { para
     { key: "ar", header: "AR", render: (c) => c.name_ar },
     { key: "en", header: "EN", render: (c) => c.name_en },
     { key: "slug", header: "slug", render: (c) => <span className="text-muted">{c.slug}</span> },
-    { key: "status", header: "•", render: (c) => <StatusBadge status={c.is_active ? "active" : "removed"} /> },
+    { key: "status", header: t("status"), render: (c) => <StatusBadge status={c.is_active ? "active" : "removed"} /> },
   ];
 
   return (

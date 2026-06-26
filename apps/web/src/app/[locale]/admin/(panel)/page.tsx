@@ -25,10 +25,15 @@ function MetricCard({
   color: string;
 }) {
   return (
-    <div className="rounded-card border border-line bg-white p-4">
-      <div className="text-2xl font-extrabold text-navy">{value.toLocaleString()}</div>
-      <div className="mb-2 text-sm text-muted">{label}</div>
-      <Sparkline data={spark} color={color} />
+    <div className="relative overflow-hidden rounded-card border border-line bg-surface p-5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:border-linestrong transition-all duration-300 hover:-translate-y-0.5 cursor-default group">
+      <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: color }} />
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-semibold text-muted tracking-wider uppercase group-hover:text-ink transition-colors duration-300">{label}</span>
+        <span className="text-3xl font-extrabold text-ink tracking-tight">{value.toLocaleString()}</span>
+      </div>
+      <div className="mt-4 pt-2 border-t border-line/30">
+        <Sparkline data={spark} color={color} />
+      </div>
     </div>
   );
 }
@@ -43,9 +48,11 @@ function ChartCard({
   full?: boolean;
 }) {
   return (
-    <div className={full ? "rounded-card border border-line bg-white p-4 lg:col-span-2" : "rounded-card border border-line bg-white p-4"}>
-      <h2 className="mb-3 text-sm font-bold text-ink">{title}</h2>
-      {children}
+    <div className={`rounded-card border border-line bg-surface p-5 hover:border-linestrong/70 transition-all duration-300 ${full ? "lg:col-span-2" : ""}`}>
+      <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-muted border-b border-line/30 pb-2">{title}</h2>
+      <div>
+        {children}
+      </div>
     </div>
   );
 }
@@ -67,10 +74,10 @@ export default async function AdminDashboardPage({
 
   const cards = [
     { label: t("metrics.totalUsers"), value: a.cards.totalUsers, spark: a.sparklines.users, color: "#18B66A" },
-    { label: t("metrics.activeListings"), value: a.cards.activeListings, spark: a.sparklines.listings, color: "#0B1324" },
-    { label: t("metrics.completedSwaps"), value: a.cards.completedSwaps, spark: a.sparklines.completions, color: "#3B82F6" },
+    { label: t("metrics.activeListings"), value: a.cards.activeListings, spark: a.sparklines.listings, color: "#6EA8FE" },
+    { label: t("metrics.completedSwaps"), value: a.cards.completedSwaps, spark: a.sparklines.completions, color: "#E8B45E" },
     { label: t("metrics.openProposals"), value: a.cards.openProposals, spark: a.sparklines.proposals, color: "#F59E0B" },
-    { label: t("metrics.pendingReports"), value: a.cards.pendingReports, spark: a.sparklines.reports, color: "#EF4444" },
+    { label: t("metrics.pendingReports"), value: a.cards.pendingReports, spark: a.sparklines.reports, color: "#F87171" },
   ];
 
   const cat = localize(a.categoryBreakdown, locale);
@@ -79,9 +86,12 @@ export default async function AdminDashboardPage({
   const emptyNote = <p className="py-10 text-center text-sm text-muted">{t("analytics.charts.empty")}</p>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold text-ink">{t("dashboard")}</h1>
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-line">
+        <div>
+          <h1 className="text-3xl font-extrabold text-ink tracking-tight">{t("dashboard")}</h1>
+          <p className="text-xs text-muted mt-1 uppercase tracking-wider font-semibold">Activity Overview</p>
+        </div>
         <DateRangePicker
           from={a.range.from}
           to={a.range.to}

@@ -240,7 +240,7 @@ export function ProposalContextCard({
   }
 
   return (
-    <div className="border-b border-line bg-white px-4 py-3">
+    <div className="border-b border-line bg-surface px-4 py-3">
       <div className="mb-2 flex items-center justify-between gap-2">
         <span className="text-sm font-bold text-ink">{t("contextTitle")}</span>
         <ProposalStatusBadge status={proposal.status} label={t(`status.${proposal.status}`)} />
@@ -307,7 +307,7 @@ export function ProposalContextCard({
                 type="button"
                 onClick={() => run("decline", (api) => api.declineProposal(proposal.id))}
                 disabled={!!busy}
-                className="rounded-pill px-3 py-2 text-sm font-semibold text-danger hover:bg-red-50"
+                className="rounded-pill px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
               >
                 {t("decline")}
               </button>
@@ -317,7 +317,7 @@ export function ProposalContextCard({
               type="button"
               onClick={() => run("cancel", (api) => api.cancelProposal(proposal.id))}
               disabled={!!busy}
-              className="rounded-pill px-3 py-2 text-sm font-semibold text-danger hover:bg-red-50"
+              className="rounded-pill px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
             >
               {t("withdraw")}
             </button>
@@ -351,7 +351,7 @@ export function ProposalContextCard({
                   setDisputeOpen(true);
                 }}
                 disabled={!!busy}
-                className="rounded-pill px-3 py-2 text-sm font-semibold text-danger hover:bg-red-50"
+                className="rounded-pill px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
               >
                 {t("dispute")}
               </button>
@@ -374,7 +374,7 @@ export function ProposalContextCard({
                   setDisputeOpen(true);
                 }}
                 disabled={!!busy}
-                className="rounded-pill px-3 py-2 text-sm font-semibold text-danger hover:bg-red-50"
+                className="rounded-pill px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
               >
                 {t("dispute")}
               </button>
