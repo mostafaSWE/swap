@@ -1,0 +1,31 @@
+# Reinstalled fresh inside the image
+**/node_modules
+
+# VCS / tooling
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# Build outputs / caches
+**/.next
+**/dist
+**/out
+**/.turbo
+**/web-build
+graphify-out
+**/*.tsbuildinfo
+
+# Logs
+**/*.log
+
+# Secrets — the API reads config from platform env vars, never from files
+.env
+.env.local
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Keep apps/web/public — the web image needs it. .next is already excluded above
+# (**/.next) and is rebuilt inside the image.

@@ -68,9 +68,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api/docs", app, document);
 
-  const port = Number(process.env.API_PORT ?? 4000);
-  await app.listen(port);
-  new Logger("Bootstrap").log(`JustSwap API listening on http://localhost:${port}/api/v1  (docs: /api/docs)`);
+  // Cloud hosts (Render/Railway/Fly/etc.) inject the listen port via PORT; honor
+  // it first, then the local API_PORT, then the dev default. Bind 0.0.0.0 so the
+  // platform's router + health check can reach the container.
+  const port = Number(process.env.PORT ?? process.env.API_PORT ?? 4000);
+  await app.listen(port, "0.0.0.0");
+  new Logger("Bootstrap").log(`JustSwap API listening on port ${port} (prefix /api/v1, docs /api/docs)`);
 }
 
 void bootstrap();
