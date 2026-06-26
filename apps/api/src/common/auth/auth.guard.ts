@@ -10,7 +10,7 @@ import type { Profile } from "@swap/types";
 import { SupabaseService } from "../supabase/supabase.service";
 
 export interface AuthenticatedRequest extends Request {
-  user: { id: string; email?: string };
+  user: { id: string; email?: string; emailVerified: boolean };
   profile: Profile;
 }
 
@@ -49,7 +49,14 @@ export class AuthGuard implements CanActivate {
       throw new ForbiddenException("Account suspended");
     }
 
-    req.user = { id: user.id, email: user.email };
+    // Email-confirmation status comes from Supabase Auth (not the profile row):
+    // `email_confirmed_at` is set the moment the user verifies. `EmailVerifiedGuard`
+    // reads this flag to gate actions that require a confirmed email.
+    req.user = {
+      id: user.id,
+      email: user.email,
+      emailVerified: Boolean(user.email_confirmed_at ?? user.confirmed_at),
+    };
     req.profile = profile as Profile;
     return true;
   }

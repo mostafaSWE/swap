@@ -13,6 +13,7 @@ import type {
 } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
 import { getApi } from "@/lib/api";
+import { isEmailNotVerifiedError } from "@/lib/api-errors";
 import { Link, useRouter } from "@/i18n/navigation";
 import { ChatBubble } from "@/components/ChatBubble";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
@@ -37,6 +38,7 @@ export function ChatRoom({
   initialMyRating: Rating | null;
 }) {
   const t = useTranslations("chat");
+  const tAuth = useTranslations("auth");
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [body, setBody] = useState("");
@@ -102,11 +104,11 @@ export function ChatRoom({
         });
       }
       router.refresh();
-    } catch {
+    } catch (err) {
       // Don't lose what the user typed (a network/CORS/auth failure must never
       // silently swallow the message) — restore it and surface the error.
       setBody(text);
-      setError(t("sendError"));
+      setError(isEmailNotVerifiedError(err) ? tAuth("verifyRequired") : t("sendError"));
     } finally {
       setSending(false);
     }

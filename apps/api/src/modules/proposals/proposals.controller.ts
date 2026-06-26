@@ -18,6 +18,7 @@ import {
   type SignConfirmationInput,
 } from "@swap/validation";
 import { AuthGuard } from "../../common/auth/auth.guard";
+import { EmailVerifiedGuard } from "../../common/auth/email-verified.guard";
 import { CurrentUserId } from "../../common/auth/current-user.decorator";
 import { ZodBody } from "../../common/pipes/zod-validation.pipe";
 import { ProposalsService } from "./proposals.service";
@@ -42,7 +43,9 @@ export class ProposalsController {
     return this.proposals.get(id, userId);
   }
 
+  // Proposing a swap (new offer or a counter-offer) requires a confirmed email.
   @Post()
+  @UseGuards(EmailVerifiedGuard)
   create(
     @CurrentUserId() userId: string,
     @Body(new ZodBody(createProposalSchema)) input: CreateProposalInput,
@@ -51,6 +54,7 @@ export class ProposalsController {
   }
 
   @Post(":id/counter")
+  @UseGuards(EmailVerifiedGuard)
   counter(
     @Param("id") id: string,
     @CurrentUserId() userId: string,
@@ -59,7 +63,9 @@ export class ProposalsController {
     return this.proposals.counter(id, userId, input);
   }
 
+  // Accepting commits you to a swap (parallel to create/counter) — verified email.
   @Post(":id/accept")
+  @UseGuards(EmailVerifiedGuard)
   accept(@Param("id") id: string, @CurrentUserId() userId: string) {
     return this.proposals.accept(id, userId);
   }
@@ -107,7 +113,9 @@ export class ProposalsController {
 
   /* ── Ratings (post-swap reviews, spec §3.4/§3.6) ── */
 
+  // Ratings are public review content — verified email required.
   @Post(":id/rating")
+  @UseGuards(EmailVerifiedGuard)
   rate(
     @Param("id") id: string,
     @CurrentUserId() userId: string,

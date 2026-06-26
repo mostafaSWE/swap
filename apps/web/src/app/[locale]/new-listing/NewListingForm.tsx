@@ -14,6 +14,7 @@ import { localizedName } from "@swap/ui";
 import type { Category, ListingCondition, Locale } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
 import { getApi } from "@/lib/api";
+import { isEmailNotVerifiedError } from "@/lib/api-errors";
 import { useRouter } from "@/i18n/navigation";
 import { FormInput, FormTextarea, FormCheckbox } from "@/components/forms";
 import { CountryCitySelector } from "@/components/CountryCitySelector";
@@ -179,6 +180,7 @@ export function NewListingForm() {
   const tc = useTranslations("common");
   const tCond = useTranslations("condition");
   const tListing = useTranslations("listing");
+  const tAuth = useTranslations("auth");
   const locale = useLocale() as Locale;
   const router = useRouter();
 
@@ -322,9 +324,9 @@ export function NewListingForm() {
           });
         }
       }
-    } catch {
+    } catch (err) {
       setSubmitting(false);
-      setError(t("title"));
+      setError(isEmailNotVerifiedError(err) ? tAuth("verifyRequired") : t("title"));
       return;
     }
 

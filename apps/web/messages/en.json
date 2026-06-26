@@ -294,7 +294,13 @@
     "termsRequired": "You must accept the Terms of Service and Privacy Policy to create an account.",
     "confirmEmailTitle": "Confirm your email",
     "confirmEmailBody": "We've sent a confirmation link to your email. Tap it to activate your account.",
-    "linkExpired": "That link is invalid or has expired. Please sign in or request a new one."
+    "linkExpired": "That link is invalid or has expired. Please sign in or request a new one.",
+    "verifyBannerText": "Confirm your email to list items, propose swaps, and message others.",
+    "verifyBannerResend": "Resend email",
+    "verifyBannerSending": "Sending…",
+    "verifyBannerSent": "Confirmation email sent — check your inbox.",
+    "verifyBannerError": "Couldn't send right now. Please try again shortly.",
+    "verifyRequired": "Please confirm your email address first — check your inbox for the link."
   },
   "onboarding": {
     "title": "Welcome to JustSwap",

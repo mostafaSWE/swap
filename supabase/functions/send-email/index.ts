@@ -75,17 +75,27 @@ Deno.serve(async (req) => {
     `${base}/auth/confirm?token_hash=${encodeURIComponent(email_data.token_hash)}` +
     `&type=${encodeURIComponent(email_data.email_action_type)}&next=${encodeURIComponent(next)}`;
 
-  const { subject, html } = renderEmail({
+  // The confirm link, hosted logo, and footer legal links all hang off `base`.
+  // If PUBLIC_APP_URL is unset we fall back to site_url, which on a misconfigured
+  // project is localhost or *.supabase.co — log loudly so it's caught before users
+  // get an unusable link. (We still send: a wrong-but-present link beats no email.)
+  if (/localhost|127\.0\.0\.1|\.supabase\.co/.test(base)) {
+    console.warn(`[send-email] link base looks non-production: "${base}". Set the PUBLIC_APP_URL secret to the production origin.`);
+  }
+
+  const { subject, html, text } = renderEmail({
     action: email_data.email_action_type,
     url: confirmUrl,
     token: email_data.token,
     locale,
+    appUrl: base,
   });
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: FROM, to: [user.email], subject, html }),
+    // `text` ships a plain-text MIME part alongside the HTML (deliverability + a11y).
+    body: JSON.stringify({ from: FROM, to: [user.email], subject, html, text }),
   });
 
   if (!res.ok) {

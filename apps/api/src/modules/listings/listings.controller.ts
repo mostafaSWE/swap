@@ -27,6 +27,7 @@ import {
 } from "@swap/validation";
 import { z } from "zod";
 import { AuthGuard } from "../../common/auth/auth.guard";
+import { EmailVerifiedGuard } from "../../common/auth/email-verified.guard";
 import { CurrentUserId } from "../../common/auth/current-user.decorator";
 import { ZodBody } from "../../common/pipes/zod-validation.pipe";
 import { ListingsService } from "./listings.service";
@@ -52,7 +53,8 @@ export class ListingsController {
 
   @Post()
   @ApiBearerAuth("supabase-jwt")
-  @UseGuards(AuthGuard)
+  // Creating a listing requires a confirmed email (spec: verification gate).
+  @UseGuards(AuthGuard, EmailVerifiedGuard)
   create(
     @CurrentUserId() userId: string,
     @Body(new ZodBody(createListingSchema)) input: CreateListingInput,
@@ -100,7 +102,8 @@ export class ListingsController {
 
   @Post(":id/start-conversation")
   @ApiBearerAuth("supabase-jwt")
-  @UseGuards(AuthGuard)
+  // Opening a chat = initiating contact; gated behind a confirmed email.
+  @UseGuards(AuthGuard, EmailVerifiedGuard)
   startConversation(
     @Param("id") id: string,
     @CurrentUserId() userId: string,

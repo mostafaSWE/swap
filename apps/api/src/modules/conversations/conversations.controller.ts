@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { sendMessageSchema, type SendMessageInput } from "@swap/validation";
 import { AuthGuard } from "../../common/auth/auth.guard";
+import { EmailVerifiedGuard } from "../../common/auth/email-verified.guard";
 import { CurrentUserId } from "../../common/auth/current-user.decorator";
 import { ZodBody } from "../../common/pipes/zod-validation.pipe";
 import { ConversationsService } from "./conversations.service";
@@ -23,7 +24,9 @@ export class ConversationsController {
     return this.conversations.messages(id, userId);
   }
 
+  // Sending a message requires a confirmed email (spec: verification gate).
   @Post(":id/messages")
+  @UseGuards(EmailVerifiedGuard)
   send(
     @Param("id") id: string,
     @CurrentUserId() userId: string,

@@ -7,6 +7,7 @@ import { SwapApiError } from "@swap/api";
 import { MAX_PROPOSAL_ITEMS } from "@swap/validation";
 import { createClient } from "@/lib/supabase/client";
 import { getApi } from "@/lib/api";
+import { isEmailNotVerifiedError } from "@/lib/api-errors";
 import { useRouter } from "@/i18n/navigation";
 import { ListingPicker } from "./ListingPicker";
 import { FormTextarea } from "./forms";
@@ -30,6 +31,7 @@ export function ProposeSwapDrawer({
 }) {
   const t = useTranslations("proposal");
   const tc = useTranslations("common");
+  const tAuth = useTranslations("auth");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -71,7 +73,9 @@ export function ProposeSwapDrawer({
       });
       router.push(proposal.conversation_id ? `/messages/${proposal.conversation_id}` : "/messages");
     } catch (e) {
-      setError(e instanceof SwapApiError ? e.message : t("error"));
+      setError(
+        isEmailNotVerifiedError(e) ? tAuth("verifyRequired") : e instanceof SwapApiError ? e.message : t("error"),
+      );
       setSaving(false);
     }
   }
