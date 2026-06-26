@@ -1,4 +1,4 @@
-import { Pencil, Settings, ShieldCheck } from "lucide-react";
+import { Bookmark, Pencil, Settings, ShieldCheck } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale, PublicProfile } from "@swap/types";
 import { AppShell } from "@/components/AppShell";
@@ -50,7 +50,11 @@ export default async function ProfilePage({ params: { locale } }: { params: { lo
                   <Pencil className="h-4 w-4" aria-hidden />
                   {t("edit")}
                 </Link>
-                <Link href="/settings" className="btn-secondary">
+                <Link href="/saved" className="btn-secondary">
+                  <Bookmark className="h-4 w-4" aria-hidden />
+                  {tn("saved")}
+                </Link>
+                <Link href="/settings" className="btn-secondary col-span-2">
                   <Settings className="h-4 w-4" aria-hidden />
                   {tn("settings")}
                 </Link>
