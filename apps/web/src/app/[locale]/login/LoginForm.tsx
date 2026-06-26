@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { isAuthApiError } from "@supabase/supabase-js";
+import type { Locale } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
 import { AuthShell } from "@/components/AuthShell";
@@ -17,24 +19,53 @@ interface Values {
 
 export function LoginForm({ linkError = false }: { linkError?: boolean }) {
   const t = useTranslations("auth");
+  const locale = useLocale() as Locale;
   const router = useRouter();
   const [error, setError] = useState<string | null>(linkError ? t("linkExpired") : null);
+  // An expired confirmation link, or a sign-in blocked by an unconfirmed email, both
+  // mean the user needs a fresh confirmation link — so show the resend affordance.
+  const [needsConfirm, setNeedsConfirm] = useState(linkError);
+  const [resend, setResend] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const {
     register,
     handleSubmit,
+    watch,
     formState: { isSubmitting, errors },
   } = useForm<Values>();
 
   async function onSubmit(values: Values) {
     setError(null);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword(values);
+    const { error } = await createClient().auth.signInWithPassword(values);
     if (error) {
-      setError(t("errorInvalid"));
+      // Supabase returns a stable code for an unverified account — surface that
+      // clearly (with a resend option) instead of a misleading "wrong credentials".
+      if (isAuthApiError(error) && error.code === "email_not_confirmed") {
+        setNeedsConfirm(true);
+        setError(t("errorEmailUnconfirmed"));
+      } else {
+        setError(t("errorInvalid"));
+      }
       return;
     }
     router.push("/");
     router.refresh();
+  }
+
+  async function resendConfirmation() {
+    if (resend === "sending" || resend === "sent") return;
+    const email = (watch("email") || "").trim();
+    if (!email) {
+      setError(t("errorEmailUnconfirmed"));
+      return;
+    }
+    setResend("sending");
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
+    const { error } = await createClient().auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${base}/${locale}/onboarding` },
+    });
+    setResend(error ? "error" : "sent");
   }
 
   return (
@@ -69,6 +100,26 @@ export function LoginForm({ linkError = false }: { linkError?: boolean }) {
         </div>
 
         {error ? <FormAlert>{error}</FormAlert> : null}
+
+        {needsConfirm ? (
+          <div className="rounded-xl border border-warning/30 bg-warning/10 px-3 py-2.5 text-sm">
+            {resend === "sent" ? (
+              <p className="font-medium text-success">{t("verifyBannerSent")}</p>
+            ) : (
+              <button
+                type="button"
+                onClick={resendConfirmation}
+                disabled={resend === "sending"}
+                className="font-bold text-accent hover:underline disabled:opacity-60"
+              >
+                {resend === "sending" ? t("verifyBannerSending") : t("resendConfirmation")}
+              </button>
+            )}
+            {resend === "error" ? (
+              <p className="mt-1 text-xs font-medium text-danger">{t("verifyBannerError")}</p>
+            ) : null}
+          </div>
+        ) : null}
 
         <CTAButton type="submit" disabled={isSubmitting} className="w-full">
           {t("loginButton")}

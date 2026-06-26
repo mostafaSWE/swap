@@ -5,14 +5,20 @@ import { redirect } from "@/i18n/navigation";
 import { getCurrentProfile } from "@/lib/auth";
 import { OnboardingForm } from "./OnboardingForm";
 
-export default async function OnboardingPage({ params: { locale } }: { params: { locale: Locale } }) {
+export default async function OnboardingPage({
+  params: { locale },
+  searchParams,
+}: {
+  params: { locale: Locale };
+  searchParams: { confirmed?: string };
+}) {
   setRequestLocale(locale);
   const profile = await getCurrentProfile();
   if (!profile) redirect({ href: "/login", locale });
 
   return (
     <AppShell hideNav>
-      <OnboardingForm profile={profile!} />
+      <OnboardingForm profile={profile!} confirmed={searchParams.confirmed} />
     </AppShell>
   );
 }

@@ -32,7 +32,13 @@ export async function GET(request: NextRequest) {
     const supabase = createClient();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
-      return NextResponse.redirect(new URL(next, origin));
+      // Signal a successful confirmation to the destination so it can show a status.
+      // (recovery lands on the reset-password form, which is its own status surface.)
+      const target = new URL(next, origin);
+      if (type === "signup" || type === "email_change" || type === "invite") {
+        target.searchParams.set("confirmed", type === "email_change" ? "email_change" : "1");
+      }
+      return NextResponse.redirect(target);
     }
   }
   // Invalid or expired link → back to login with a flag the page can surface.

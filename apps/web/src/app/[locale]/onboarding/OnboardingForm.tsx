@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { CheckCircle2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { updateProfile } from "@swap/api";
 import type { Profile } from "@swap/types";
@@ -15,7 +16,7 @@ import { AvatarUpload } from "@/components/AvatarUpload";
 import { CTAButton } from "@/components/CTAButton";
 
 /** Post-signup onboarding: confirm display name, pick a city, add an avatar. */
-export function OnboardingForm({ profile }: { profile: Profile }) {
+export function OnboardingForm({ profile, confirmed }: { profile: Profile; confirmed?: string }) {
   const t = useTranslations("onboarding");
   const ta = useTranslations("auth");
   const tc = useTranslations("common");
@@ -52,6 +53,15 @@ export function OnboardingForm({ profile }: { profile: Profile }) {
 
   return (
     <div className="app-container px-6 py-8">
+      {confirmed ? (
+        <p
+          role="status"
+          className="mb-5 flex items-center gap-2 rounded-xl border border-success/30 bg-success/10 px-3 py-2.5 text-sm font-medium text-success"
+        >
+          <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
+          <span>{confirmed === "email_change" ? t("emailChangedBanner") : t("emailConfirmedBanner")}</span>
+        </p>
+      ) : null}
       <div className="mb-6 flex flex-col items-center gap-1 text-center">
         <Logo priority />
         <h1 className="mt-2 text-2xl font-bold text-ink">{t("title")}</h1>

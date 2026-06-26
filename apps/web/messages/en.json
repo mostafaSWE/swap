@@ -300,7 +300,9 @@
     "verifyBannerSending": "Sending…",
     "verifyBannerSent": "Confirmation email sent — check your inbox.",
     "verifyBannerError": "Couldn't send right now. Please try again shortly.",
-    "verifyRequired": "Please confirm your email address first — check your inbox for the link."
+    "verifyRequired": "Please confirm your email address first — check your inbox for the link.",
+    "errorEmailUnconfirmed": "Your email isn't confirmed yet. Check your inbox for the confirmation link.",
+    "resendConfirmation": "Resend confirmation email"
   },
   "onboarding": {
     "title": "Welcome to JustSwap",
@@ -312,7 +314,9 @@
     "avatarChange": "Change photo",
     "avatarType": "Please choose a JPG, PNG, or WebP image.",
     "avatarSize": "That image is too large (max 5 MB).",
-    "avatarError": "Upload failed. Please try again."
+    "avatarError": "Upload failed. Please try again.",
+    "emailConfirmedBanner": "Your email is confirmed — welcome aboard! Finish setting up your profile below.",
+    "emailChangedBanner": "Your new email address is confirmed."
   },
   "profile": {
     "title": "Profile",
