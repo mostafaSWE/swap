@@ -287,6 +287,11 @@
     "resetExpired": "This reset link is invalid or has expired.",
     "passwordMismatch": "Passwords don't match.",
     "passwordTooShort": "Use at least 6 characters.",
+    "termsAgreePrefix": "I agree to the",
+    "termsAgreeMiddle": "and",
+    "termsLink": "Terms of Service",
+    "privacyLink": "Privacy Policy",
+    "termsRequired": "You must accept the Terms of Service and Privacy Policy to create an account.",
     "confirmEmailTitle": "Confirm your email",
     "confirmEmailBody": "We've sent a confirmation link to your email. Tap it to activate your account.",
     "linkExpired": "That link is invalid or has expired. Please sign in or request a new one."

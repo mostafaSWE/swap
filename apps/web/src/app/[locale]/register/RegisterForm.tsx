@@ -10,7 +10,7 @@ import { updateProfile } from "@swap/api";
 import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
 import { AuthShell } from "@/components/AuthShell";
-import { FormAlert, FormInput, FormSection } from "@/components/forms";
+import { FieldError, FormAlert, FormInput, FormSection } from "@/components/forms";
 import { PasswordInput } from "@/components/PasswordInput";
 import { CountryCitySelector } from "@/components/CountryCitySelector";
 import { CTAButton } from "@/components/CTAButton";
@@ -21,6 +21,7 @@ interface Values {
   email: string;
   phone: string;
   password: string;
+  terms_accepted: boolean;
 }
 
 export function RegisterForm() {
@@ -147,6 +148,35 @@ export function RegisterForm() {
             {...register("password", { required: true, minLength: 6 })}
           />
         </FormSection>
+
+        <div className="rounded-card border border-line bg-surface p-3">
+          <div className="flex items-start gap-2.5">
+            <input
+              id="terms_accepted"
+              type="checkbox"
+              aria-invalid={errors.terms_accepted ? true : undefined}
+              aria-describedby={errors.terms_accepted ? "terms_accepted_error" : undefined}
+              className="mt-0.5 h-4 w-4 rounded border-linestrong text-accent focus:ring-2 focus:ring-accent/25"
+              {...register("terms_accepted", { required: t("termsRequired") })}
+            />
+            <p className="text-sm font-medium leading-6 text-ink">
+              <label htmlFor="terms_accepted" className="cursor-pointer">
+                {t("termsAgreePrefix")}
+              </label>{" "}
+              <Link href="/terms" className="font-bold text-accent hover:underline">
+                {t("termsLink")}
+              </Link>{" "}
+              {t("termsAgreeMiddle")}{" "}
+              <Link href="/privacy" className="font-bold text-accent hover:underline">
+                {t("privacyLink")}
+              </Link>
+              .
+            </p>
+          </div>
+          <div id="terms_accepted_error">
+            <FieldError error={errors.terms_accepted?.message} />
+          </div>
+        </div>
 
         {error ? <FormAlert>{error}</FormAlert> : null}
 
