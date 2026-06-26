@@ -7,7 +7,18 @@ import { createClient } from "@/lib/supabase/server";
 type EmailOtpType = "signup" | "recovery" | "magiclink" | "email_change" | "invite" | "email";
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
+  const url = new URL(request.url);
+  const { searchParams } = url;
+  // Behind a reverse proxy (Railway), url.origin is the container's INTERNAL bind
+  // (e.g. http://localhost:3000), so redirects built from it send users to localhost.
+  // Use the PUBLIC origin instead: the host the proxy forwards, then the configured
+  // app URL, then (local dev) the request's own origin.
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") ?? url.protocol.replace(":", "");
+  const origin =
+    (forwardedHost ? `${forwardedProto}://${forwardedHost}` : "") ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    url.origin;
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   // Same-origin relative paths only — reject absolute ("http…") and
