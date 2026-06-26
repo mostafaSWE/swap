@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
+import { getSiteUrl } from "@/lib/site-url";
 
 // Computed per-request (never at build time) so `next build` needs no DB env.
 export const dynamic = "force-dynamic";
 
-const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+const baseUrl = getSiteUrl();
 const locales = ["ar", "en"] as const;
 
 // Public, indexable static routes (mirrored per locale).

@@ -6,6 +6,7 @@ import { IBM_Plex_Sans_Arabic, Inter } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import type { Locale } from "@swap/types";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { getSiteUrl } from "@/lib/site-url";
 import "../globals.css";
 
 /** Arabic-first display + body face — also carries a clean Latin set. */
@@ -25,7 +26,7 @@ const inter = Inter({
 });
 
 const SITE_NAME = "JustSwap";
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const SITE_URL = getSiteUrl();
 
 export function generateMetadata({ params: { locale } }: { params: { locale: string } }): Metadata {
   const isAr = locale === "ar";

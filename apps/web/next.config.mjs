@@ -53,7 +53,7 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   // Transpile the shared workspace packages (they ship raw TS).
-  transpilePackages: ["@swap/types", "@swap/config", "@swap/api", "@swap/ui"],
+  transpilePackages: ["@swap/types", "@swap/config", "@swap/api", "@swap/ui", "@swap/validation"],
   images: {
     // Prefer AVIF (much cleaner on smooth gradients than WebP — avoids banding on
     // the hero backgrounds), falling back to WebP.
@@ -67,6 +67,22 @@ const nextConfig = {
   },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
+  },
+  webpack(config) {
+    // @supabase/supabase-js reads process.version to build its X-Client-Info
+    // telemetry header. It is defensively guarded (typeof process !== "undefined"
+    // ? process.version?.replace(...) : undefined), so in the Edge middleware
+    // runtime it is a harmless no-op — the known, benign warning emitted by the
+    // official @supabase/ssr middleware pattern. Suppress ONLY this exact
+    // third-party warning so it can't mask a real Edge-runtime violation in our code.
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings ?? []),
+      {
+        module: /@supabase[\\/]supabase-js/,
+        message: /A Node\.js API is used \(process\.version/,
+      },
+    ];
+    return config;
   },
 };
 

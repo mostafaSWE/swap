@@ -37,3 +37,6 @@ supabase/.temp/
 
 # TypeScript
 *.tsbuildinfo
+
+# Local scratch / throwaway scripts — never commit (may hold keys/credentials)
+scratch/

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/site-url";
 
-const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+const baseUrl = getSiteUrl();
 
 // Private / auth-gated areas that should never be indexed (both locales).
 const PRIVATE = ["admin", "messages", "settings", "onboarding", "saved", "my-listings", "profile"];
