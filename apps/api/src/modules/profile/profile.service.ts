@@ -41,6 +41,8 @@ export class ProfileService {
       .from("profiles")
       .select(PUBLIC_PROFILE_COLUMNS)
       .eq("username", username)
+      // Admins are back-office only — never surfaced as a public marketplace user.
+      .eq("is_admin", false)
       .maybeSingle<PublicProfile>();
     if (error) throw error;
     if (!data) throw new NotFoundException("User not found");

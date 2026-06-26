@@ -25,6 +25,8 @@ export async function getPublicProfileByUsername(
     .from("profiles")
     .select(PUBLIC_PROFILE_COLUMNS)
     .eq("username", username)
+    // Admins are back-office only — they never appear as a public marketplace user.
+    .eq("is_admin", false)
     .maybeSingle<PublicProfile>();
   if (error) throw error;
   return data;
