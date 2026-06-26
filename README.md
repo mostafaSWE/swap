@@ -100,7 +100,7 @@ Current migrations:
 
 Requirements:
 
-- Node.js 20+
+- Node.js 22.13+ (CI uses Node 24)
 - pnpm 11.2.2+
 - Supabase project or local Supabase stack
 - Expo Go or a simulator if working on `apps/mobile`

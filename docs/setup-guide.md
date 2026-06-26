@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- **Node.js ≥ 20**
-- **pnpm ≥ 9** (`npm i -g pnpm`)
+- **Node.js ≥ 22.13** (CI uses Node 24)
+- **pnpm 11.2.2** (`corepack enable` or `npm i -g pnpm@11.2.2`)
 - A **Supabase** project (free tier is fine) — optional for first run
 - For mobile: the **Expo Go** app, or an iOS/Android simulator
 
