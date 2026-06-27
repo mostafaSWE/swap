@@ -1,11 +1,11 @@
 "use client";
 
-import { Grid2x2, Home, LogIn, MessageCircle, PackageSearch, Plus, User, UserPlus } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { Grid2x2, Home, LogIn, MessageCircle, PackageSearch, Plus, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-type TabKey = "home" | "categories" | "browseListings" | "add" | "messages" | "account" | "login" | "register";
+type TabKey = "home" | "categories" | "browseListings" | "add" | "messages" | "account" | "login";
 
 type Tab = {
   href: string;
@@ -19,7 +19,6 @@ const PUBLIC_TABS: Tab[] = [
   { href: "/categories", icon: Grid2x2, key: "categories" },
   { href: "/listings", icon: PackageSearch, key: "browseListings" },
   { href: "/login", icon: LogIn, key: "login" },
-  { href: "/register", icon: UserPlus, key: "register" },
 ];
 
 const USER_TABS: Tab[] = [
@@ -33,14 +32,12 @@ const USER_TABS: Tab[] = [
 export function MobileBottomNav({ isAuthenticated }: { isAuthenticated: boolean }) {
   const t = useTranslations("nav");
   const listings = useTranslations("listings");
-  const locale = useLocale();
   const pathname = usePathname();
   const tabs = isAuthenticated ? USER_TABS : PUBLIC_TABS;
 
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
   const labelFor = (key: TabKey) => {
     if (key === "browseListings") return listings("title");
-    if (key === "register" && locale === "en") return "Sign up";
     return t(key);
   };
 

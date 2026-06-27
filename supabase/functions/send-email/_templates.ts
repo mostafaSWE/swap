@@ -181,10 +181,10 @@ function layout(opts: {
   const dir = locale === "ar" ? "rtl" : "ltr";
   const align = locale === "ar" ? "right" : "left";
   const safeUrl = escapeHtml(url);
-  // Use the 32px mark (not the 1024px source): some mobile email clients ignore an
-  // <img>'s width/height and render at intrinsic size — a small source can't blow up
-  // the header. The dark-mode favicon is the same green mark, transparent (RGBA).
-  const logoUrl = escapeHtml(`${appUrl.replace(/\/$/, "")}/brand/justswap-favicon-dark-32.png`);
+  // A 96px mark (downscaled from the 1024px source): small enough that a client which
+  // ignores the <img> width/height can't blow up the header, but high-res/vibrant
+  // enough to stay crisp at the 40px display size (unlike the washed-out 32px favicon).
+  const logoUrl = escapeHtml(`${appUrl.replace(/\/$/, "")}/brand/justswap-mark-email.png`);
   const f = FOOTER[locale];
   // Hidden inbox-preview text (improves the list preview without showing in body).
   const preheader = body.slice(0, 110);
@@ -220,7 +220,7 @@ function layout(opts: {
           <tr><td style="background:${BRAND.navy};padding:24px 32px;" class="pad" dir="${dir}" align="${align}">
             <table role="presentation" dir="${dir}" align="${align}" cellpadding="0" cellspacing="0"><tr>
               <td style="vertical-align:middle;padding-${align === "right" ? "left" : "right"}:10px;">
-                <img src="${logoUrl}" width="36" height="36" alt="JustSwap" style="display:block;width:36px;height:36px;max-width:36px;border:0;outline:none;" />
+                <img src="${logoUrl}" width="40" height="40" alt="JustSwap" style="display:block;width:40px;height:40px;max-width:40px;border:0;outline:none;" />
               </td>
               <td style="vertical-align:middle;font-size:22px;font-weight:700;letter-spacing:-0.2px;font-family:${FONT_STACK};">
                 <span style="color:${BRAND.green};">Just</span><span style="color:${BRAND.text};">Swap</span>

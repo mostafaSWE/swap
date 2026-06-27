@@ -9,6 +9,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { AuthShell } from "@/components/AuthShell";
 import { FormAlert } from "@/components/forms";
 import { PasswordInput } from "@/components/PasswordInput";
+import { PasswordStrength, passwordMeetsRules } from "@/components/PasswordStrength";
 import { CTAButton } from "@/components/CTAButton";
 
 interface Values {
@@ -26,6 +27,7 @@ export function ResetPasswordForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { isSubmitting, errors },
   } = useForm<Values>();
 
@@ -78,12 +80,18 @@ export function ResetPasswordForm() {
         </div>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-          <PasswordInput
-            label={t("newPassword")}
-            autoComplete="new-password"
-            error={errors.password && t("passwordTooShort")}
-            {...register("password", { required: true, minLength: 6 })}
-          />
+          <div>
+            <PasswordInput
+              label={t("newPassword")}
+              autoComplete="new-password"
+              error={errors.password ? t("passwordWeak") : undefined}
+              {...register("password", {
+                required: true,
+                validate: (v) => passwordMeetsRules(v) || t("passwordWeak"),
+              })}
+            />
+            <PasswordStrength value={watch("password") ?? ""} />
+          </div>
           <PasswordInput
             label={t("confirmPassword")}
             autoComplete="new-password"
