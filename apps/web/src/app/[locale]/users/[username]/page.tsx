@@ -11,22 +11,31 @@ import { ReviewsList } from "@/components/ReviewsList";
 import { fetchPublicProfile, fetchUserListings, fetchUserReviews } from "@/lib/data";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchIsBlocked, fetchIsFollowing } from "@/lib/social";
+import { altLinks } from "@/lib/seo";
 
 export async function generateMetadata({
-  params: { username },
+  params: { locale, username },
 }: {
   params: { locale: Locale; username: string };
 }): Promise<Metadata> {
   const profile = await fetchPublicProfile(username);
   if (!profile) return {};
+  const isAr = locale === "ar";
   const name = profile.full_name || `@${profile.username}`;
-  const description = (profile.bio ?? "").slice(0, 160) || undefined;
+  const title = isAr ? `${name} · إعلانات للتبادل` : `${name} · items for exchange`;
+  const description = (
+    (profile.bio ?? "").trim() ||
+    (isAr
+      ? `تصفّح إعلانات ${name} المتاحة للتبادل على JustSwap.`
+      : `Browse ${name}'s items available for exchange on JustSwap — just swap what you have for what you need.`)
+  ).slice(0, 160);
   const images = profile.avatar_url ? [profile.avatar_url] : undefined;
   return {
-    title: name,
+    title,
     description,
-    openGraph: { title: name, description, images, type: "profile" },
-    twitter: { card: "summary", title: name, description, images },
+    alternates: altLinks(locale, `/users/${username}`),
+    openGraph: { title, description, images, type: "profile", url: `/${locale}/users/${username}` },
+    twitter: { card: "summary", title, description, images },
   };
 }
 

@@ -21,6 +21,8 @@ import { fetchListing } from "@/lib/data";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchIsSaved } from "@/lib/saved";
 import { fetchIsFollowing } from "@/lib/social";
+import { JsonLd } from "@/components/JsonLd";
+import { altLinks, productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 
 export async function generateMetadata({
   params: { locale, id },
@@ -32,14 +34,24 @@ export async function generateMetadata({
     const t = await getTranslations({ locale, namespace: "notFound" });
     return { title: t("title") };
   }
-  const description = (listing.description || listing.wanted_exchange || "").slice(0, 160);
+  const isAr = locale === "ar";
+  const city = localizedName(listing.city, locale);
+  const country = localizedName(listing.country, locale);
+  const title = isAr ? `${listing.title} للتبادل في ${city}` : `${listing.title} for exchange in ${city}`;
+  const snippet = (listing.description || listing.wanted_exchange || "").replace(/\s+/g, " ").trim();
+  const description = (
+    isAr
+      ? `${listing.title} للتبادل في ${city}، ${country} على JustSwap. ${snippet}`
+      : `${listing.title} available for exchange in ${city}, ${country} on JustSwap. ${snippet}`
+  ).slice(0, 160);
   const cover = listing.images?.[0]?.image_url;
   const images = cover ? [cover] : undefined;
   return {
-    title: listing.title,
+    title,
     description,
-    openGraph: { title: listing.title, description, images, type: "website" },
-    twitter: { card: images ? "summary_large_image" : "summary", title: listing.title, description, images },
+    alternates: altLinks(locale, `/listings/${id}`),
+    openGraph: { title, description, images, type: "website", url: `/${locale}/listings/${id}` },
+    twitter: { card: images ? "summary_large_image" : "summary", title, description, images },
   };
 }
 
@@ -55,6 +67,7 @@ export default async function ListingDetailsPage({
   const activeLocale = (await getLocale()) as Locale;
   const t = await getTranslations("listing");
   const tCond = await getTranslations("condition");
+  const tNav = await getTranslations("nav");
 
   const user = await getCurrentUser();
   const isOwner = user?.id === listing.owner_id;
@@ -79,8 +92,26 @@ export default async function ListingDetailsPage({
     </>
   );
 
+  const listingPath = `/${activeLocale}/listings/${listing.id}`;
+  const structuredData = [
+    productJsonLd({
+      name: listing.title,
+      description: listing.description || listing.wanted_exchange || undefined,
+      images: (listing.images ?? []).map((im) => im.image_url),
+      category: localizedName(listing.category, activeLocale),
+      condition: listing.condition === "new" ? "new" : "used",
+      path: listingPath,
+    }),
+    breadcrumbJsonLd([
+      { name: tNav("home"), path: `/${activeLocale}` },
+      { name: tNav("browseListings"), path: `/${activeLocale}/listings` },
+      { name: listing.title, path: listingPath },
+    ]),
+  ];
+
   return (
     <AppShell hideNav>
+      <JsonLd data={structuredData} />
       {!isOwner && <ListingViewTracker listingId={listing.id} />}
       <div className={cn("mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8", !isOwner && "pb-28 md:pb-8")}>
         <div className="md:grid md:grid-cols-2 md:gap-8 lg:gap-10">

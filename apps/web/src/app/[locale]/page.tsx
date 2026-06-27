@@ -13,6 +13,8 @@ import { Reveal, RotatingSwap } from "@/components/motion";
 import { Link } from "@/i18n/navigation";
 import { fetchFeaturedListings, fetchListings } from "@/lib/data";
 import { getCurrentUser } from "@/lib/auth";
+import { JsonLd } from "@/components/JsonLd";
+import { websiteJsonLd, organizationJsonLd } from "@/lib/seo";
 
 const HOME_LISTING_LIMIT = 5;
 
@@ -55,6 +57,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
 
   return (
     <AppShell>
+      <JsonLd data={[websiteJsonLd(locale), organizationJsonLd()]} />
       <Hero isAuthenticated={Boolean(user)} />
 
       <div className="mx-auto w-full max-w-[1440px] space-y-8 px-4 py-5 sm:space-y-12 sm:px-6 sm:py-10 lg:space-y-16 lg:px-8 lg:py-12">

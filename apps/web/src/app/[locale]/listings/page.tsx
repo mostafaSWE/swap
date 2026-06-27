@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CATEGORY_BY_SLUG } from "@swap/config";
 import { localizedName } from "@swap/ui";
 import type { ListingCondition, Locale, SortOption } from "@swap/types";
+import { altLinks } from "@/lib/seo";
 
 export async function generateMetadata({
   params: { locale },
@@ -13,14 +14,31 @@ export async function generateMetadata({
   searchParams: ActiveFilters;
 }): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "listings" });
+  const isAr = locale === "ar";
   let title = t("title");
+  let path = "/listings"; // free-text search variants canonicalize to the base browse page
+  let description = isAr
+    ? "تصفّح آلاف الأغراض المتاحة للمقايضة في الخليج على JustSwap — بادل ما لديك بما تحتاجه."
+    : "Browse thousands of items available for barter across the GCC on JustSwap — just swap what you have for what you need.";
   if (searchParams.search) {
-    title = `“${searchParams.search}”`;
+    title = isAr ? `نتائج البحث: ${searchParams.search}` : `Search: ${searchParams.search}`;
   } else if (searchParams.category) {
     const cat = CATEGORY_BY_SLUG[searchParams.category];
-    if (cat) title = localizedName(cat, locale);
+    if (cat) {
+      const name = localizedName(cat, locale);
+      title = isAr ? `${name} للتبادل` : `${name} for exchange`;
+      path = `/listings?category=${searchParams.category}`;
+      description = isAr
+        ? `تصفّح إعلانات ${name} المتاحة للتبادل في الخليج على JustSwap.`
+        : `Browse ${name} listings available for exchange across the GCC on JustSwap.`;
+    }
   }
-  return { title, openGraph: { title } };
+  return {
+    title,
+    description,
+    alternates: altLinks(locale, path),
+    openGraph: { title, description, type: "website", url: `/${locale}${path}` },
+  };
 }
 import { AppShell } from "@/components/AppShell";
 import { SearchBar } from "@/components/SearchBar";

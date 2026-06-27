@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
+import { TOP_LEVEL_CATEGORIES } from "@swap/config";
 import { getSiteUrl } from "@/lib/site-url";
 
 // Computed per-request (never at build time) so `next build` needs no DB env.
@@ -8,7 +9,8 @@ export const dynamic = "force-dynamic";
 const baseUrl = getSiteUrl();
 const locales = ["ar", "en"] as const;
 
-// Public, indexable static routes (mirrored per locale).
+// Public, indexable static routes (mirrored per locale). Auth/utility pages
+// (login/register) are crawlable but intentionally kept out of the sitemap.
 const staticPaths = [
   "",
   "/listings",
@@ -19,8 +21,6 @@ const staticPaths = [
   "/privacy",
   "/terms",
   "/support",
-  "/login",
-  "/register",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -34,15 +34,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: path === "" ? 1 : 0.6,
       });
     }
+    // Category browse pages (filters on /listings — there's no dedicated route).
+    for (const cat of TOP_LEVEL_CATEGORIES) {
+      entries.push({
+        url: `${baseUrl}/${locale}/listings?category=${cat.slug}`,
+        changeFrequency: "weekly",
+        priority: 0.6,
+      });
+    }
   }
 
-  // Dynamic listing URLs — best-effort. A missing key or a DB hiccup must never
-  // break the sitemap, so we fall back to the static routes already collected.
+  // Dynamic URLs — best-effort. A missing key or DB hiccup must never break the
+  // sitemap, so each block falls back to whatever has already been collected.
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (url && anonKey) {
+    const supabase = createClient(url, anonKey, { auth: { persistSession: false } });
+
+    // Active listing detail pages.
     try {
-      const supabase = createClient(url, anonKey, { auth: { persistSession: false } });
       const { data } = await supabase
         .from("listings")
         .select("id, updated_at")
@@ -60,7 +70,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }
       }
     } catch {
-      // Swallow — the static routes above are already in `entries`.
+      /* keep what we have */
+    }
+
+    // Public user profiles (skip banned / suspended accounts).
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("username, updated_at")
+        .eq("is_banned", false)
+        .eq("is_suspended", false)
+        .order("updated_at", { ascending: false })
+        .limit(5000);
+      for (const row of data ?? []) {
+        if (!row.username) continue;
+        for (const locale of locales) {
+          entries.push({
+            url: `${baseUrl}/${locale}/users/${row.username}`,
+            lastModified: row.updated_at ? new Date(row.updated_at as string) : undefined,
+            changeFrequency: "weekly",
+            priority: 0.5,
+          });
+        }
+      }
+    } catch {
+      /* keep what we have */
     }
   }
 

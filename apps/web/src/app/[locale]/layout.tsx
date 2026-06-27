@@ -7,6 +7,7 @@ import { routing } from "@/i18n/routing";
 import type { Locale } from "@swap/types";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getSiteUrl } from "@/lib/site-url";
+import { altLinks, OG_DEFAULT } from "@/lib/seo";
 import "../globals.css";
 
 /** Arabic-first display + body face — also carries a clean Latin set. */
@@ -32,8 +33,8 @@ export function generateMetadata({ params: { locale } }: { params: { locale: str
   const isAr = locale === "ar";
   const title = isAr ? "JustSwap - بدّل ما لديك بما تحتاجه" : "JustSwap - Exchange what you have for what you need";
   const description = isAr
-    ? "JustSwap سوق مقايضة في الخليج. بدّل ما لديك بما تحتاجه دون بيع أو شراء."
-    : "JustSwap is a barter marketplace for the GCC. Exchange what you have for what you need without buying or selling.";
+    ? "JustSwap سوق المقايضة في الخليج — بدّل ما لديك بما تحتاجه دون بيع أو شراء. تصفّح آلاف الإعلانات أو أضِف إعلانك."
+    : "JustSwap is the GCC's barter marketplace — the place to just swap what you have for what you need. No buying, no selling, just direct exchange.";
 
   return {
     metadataBase: new URL(SITE_URL),
@@ -56,17 +57,18 @@ export function generateMetadata({ params: { locale } }: { params: { locale: str
       ],
       apple: [{ url: "/brand/justswap-app-icon.png", type: "image/png" }],
     },
-    alternates: { languages: { ar: "/ar", en: "/en" } },
+    alternates: altLinks(locale as Locale, ""),
     openGraph: {
       type: "website",
       siteName: SITE_NAME,
       locale: isAr ? "ar_AR" : "en_US",
+      alternateLocale: isAr ? "en_US" : "ar_AR",
       url: `/${locale}`,
       title,
       description,
-      images: [{ url: "/brand/justswap-app-icon.png", width: 1024, height: 1024, alt: SITE_NAME }],
+      images: [{ url: OG_DEFAULT, width: 1200, height: 630, alt: SITE_NAME }],
     },
-    twitter: { card: "summary_large_image", title, description, images: ["/brand/justswap-app-icon.png"] },
+    twitter: { card: "summary_large_image", title, description, images: [OG_DEFAULT] },
     robots: { index: true, follow: true },
   };
 }
