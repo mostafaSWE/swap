@@ -8,6 +8,7 @@ import { COUNTRY_BY_ID } from "@swap/config";
 import type { Locale } from "@swap/types";
 import { updateProfile } from "@swap/api";
 import { createClient } from "@/lib/supabase/client";
+import { buildPhone } from "@/lib/phone";
 import { Link, useRouter } from "@/i18n/navigation";
 import { AuthShell } from "@/components/AuthShell";
 import { FieldError, FormAlert, FormInput, FormSection } from "@/components/forms";
@@ -45,9 +46,18 @@ export function RegisterForm() {
   async function onSubmit(values: Values) {
     setError(null);
     const supabase = createClient();
-    // Phone is stored with the selected country's dial code.
+    // Phone needs the country's dial code; normalize to a single +<code><national>
+    // so a typed "+"/country code/leading zeros can't produce a malformed number.
     const dial = countryId ? COUNTRY_BY_ID[countryId]?.phone_code ?? "" : "";
-    const phone = values.phone ? `${dial}${values.phone.replace(/^0+/, "")}` : null;
+    if (!dial) {
+      setError(t("phoneCountryRequired"));
+      return;
+    }
+    const phone = buildPhone(values.phone, dial);
+    if (!phone) {
+      setError(t("phoneInvalid"));
+      return;
+    }
     const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
 
     // Reject an already-taken username/phone up front with a clear, field-specific
@@ -55,7 +65,7 @@ export function RegisterForm() {
     // open if the RPC isn't available yet, leaving the DB constraints as the guard.
     const { data: taken } = await supabase.rpc("signup_identifier_taken", {
       uname: values.username,
-      uphone: phone ?? "",
+      uphone: phone,
     });
     if (taken === "username") {
       setError(t("usernameTaken"));
@@ -142,7 +152,7 @@ export function RegisterForm() {
         <FormSection title={t("secContact")}>
           <div className="grid gap-3 sm:grid-cols-2">
             <FormInput type="email" label={t("email")} autoComplete="email" error={errors.email && t("errorGeneric")} {...register("email", { required: true })} />
-            <FormInput type="tel" label={t("phone")} error={errors.phone && t("errorGeneric")} inputMode="tel" autoComplete="tel" {...register("phone", { required: true })} />
+            <FormInput type="tel" label={t("phone")} hint={countryId ? COUNTRY_BY_ID[countryId]?.phone_code : t("phoneHint")} placeholder="5XXXXXXXX" error={errors.phone && t("phoneInvalid")} inputMode="tel" autoComplete="tel" {...register("phone", { required: true })} />
           </div>
         </FormSection>
 
