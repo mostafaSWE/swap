@@ -50,6 +50,22 @@ export function RegisterForm() {
     const phone = values.phone ? `${dial}${values.phone.replace(/^0+/, "")}` : null;
     const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
 
+    // Reject an already-taken username/phone up front with a clear, field-specific
+    // message (the DB also enforces both — this just avoids a generic error). Fails
+    // open if the RPC isn't available yet, leaving the DB constraints as the guard.
+    const { data: taken } = await supabase.rpc("signup_identifier_taken", {
+      uname: values.username,
+      uphone: phone ?? "",
+    });
+    if (taken === "username") {
+      setError(t("usernameTaken"));
+      return;
+    }
+    if (taken === "phone") {
+      setError(t("phoneTaken"));
+      return;
+    }
+
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
@@ -119,7 +135,7 @@ export function RegisterForm() {
         <FormSection title={t("secPersonal")}>
           <div className="grid gap-3 sm:grid-cols-2">
             <FormInput label={t("fullName")} autoComplete="name" error={errors.full_name && t("errorGeneric")} {...register("full_name", { required: true })} />
-            <FormInput label={t("username")} autoComplete="username" error={errors.username && t("errorGeneric")} {...register("username", { required: true })} />
+            <FormInput label={t("username")} autoComplete="username" error={errors.username && t("usernameInvalid")} {...register("username", { required: true, minLength: 3, maxLength: 30, pattern: /^[a-zA-Z0-9_.]+$/ })} />
           </div>
         </FormSection>
 
@@ -167,17 +183,17 @@ export function RegisterForm() {
           />
         </FormSection>
 
-        <div className="rounded-card border border-line bg-surface p-3">
-          <div className="flex items-start gap-2.5">
+        <div className="rounded-card border border-line bg-surface p-2.5 sm:p-3">
+          <div className="flex items-center gap-2">
             <input
               id="terms_accepted"
               type="checkbox"
               aria-invalid={errors.terms_accepted ? true : undefined}
               aria-describedby={errors.terms_accepted ? "terms_accepted_error" : undefined}
-              className="mt-0.5 h-4 w-4 rounded border-linestrong text-accent focus:ring-2 focus:ring-accent/25"
+              className="h-3.5 w-3.5 shrink-0 rounded border-linestrong text-accent focus:ring-2 focus:ring-accent/25 sm:h-4 sm:w-4"
               {...register("terms_accepted", { required: t("termsRequired") })}
             />
-            <p className="text-sm font-medium leading-6 text-ink">
+            <p className="min-w-0 whitespace-nowrap text-[10.5px] font-medium leading-5 text-ink min-[360px]:text-[11px] min-[390px]:text-xs sm:text-sm sm:leading-6">
               <label htmlFor="terms_accepted" className="cursor-pointer">
                 {t("termsAgreePrefix")}
               </label>{" "}

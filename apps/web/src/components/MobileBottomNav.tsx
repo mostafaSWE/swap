@@ -46,7 +46,12 @@ export function MobileBottomNav({ isAuthenticated }: { isAuthenticated: boolean 
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 shadow-[0_-12px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl md:hidden"
       aria-label={t("mobileNav")}
     >
-      <ul className="mx-auto flex w-full max-w-app items-end justify-around px-2 pb-[calc(0.375rem+env(safe-area-inset-bottom))] pt-1.5">
+      <ul
+        className={cn(
+          "mx-auto w-full max-w-app px-2 pb-[calc(0.375rem+env(safe-area-inset-bottom))] pt-1.5",
+          isAuthenticated ? "flex items-end justify-around" : "grid grid-cols-4 items-end gap-1",
+        )}
+      >
         {tabs.map(({ href, icon: Icon, key, primary }) => {
           if (primary) {
             return (
@@ -63,11 +68,11 @@ export function MobileBottomNav({ isAuthenticated }: { isAuthenticated: boolean 
           }
           const active = isActive(href);
           return (
-            <li key={key} className="min-w-0 flex-1">
+            <li key={key} className={cn("min-w-0", isAuthenticated && "flex-1")}>
               <Link
                 href={href}
                 className={cn(
-                  "flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-1 text-center text-[10px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/40",
+                  "flex min-h-[3.25rem] w-full flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-1 text-center text-[10px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/40",
                   active ? "bg-accent-soft text-accent shadow-sm" : "text-muted hover:bg-elevated hover:text-ink",
                 )}
                 >

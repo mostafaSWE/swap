@@ -37,6 +37,8 @@ export default async function ProfilePage({ params: { locale } }: { params: { lo
     fetchUserReviews(profile.id),
   ]);
   const publicProfile = profile as unknown as PublicProfile;
+  const profileActionClass =
+    "flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-linestrong bg-elevated px-3 py-2 text-sm font-semibold leading-tight text-ink transition-all hover:bg-line/50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30";
 
   return (
     <AppShell>
@@ -46,17 +48,17 @@ export default async function ProfilePage({ params: { locale } }: { params: { lo
             profile={publicProfile}
             action={
               <div className="grid grid-cols-2 gap-2">
-                <Link href="/profile/edit" className="btn-secondary">
+                <Link href="/profile/edit" className={profileActionClass}>
                   <Pencil className="h-4 w-4" aria-hidden />
-                  {t("edit")}
+                  <span className="whitespace-nowrap">{t("edit")}</span>
                 </Link>
-                <Link href="/saved" className="btn-secondary">
+                <Link href="/saved" className={profileActionClass}>
                   <Bookmark className="h-4 w-4" aria-hidden />
-                  {tn("saved")}
+                  <span className="whitespace-nowrap">{tn("saved")}</span>
                 </Link>
-                <Link href="/settings" className="btn-secondary col-span-2">
+                <Link href="/settings" className={`${profileActionClass} col-span-2`}>
                   <Settings className="h-4 w-4" aria-hidden />
-                  {tn("settings")}
+                  <span className="whitespace-nowrap">{tn("settings")}</span>
                 </Link>
               </div>
             }

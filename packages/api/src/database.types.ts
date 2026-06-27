@@ -76,6 +76,11 @@ export interface Database {
         Args: { uname: string };
         Returns: string | null;
       };
+      /** Returns 'username' | 'phone' for the first sign-up identifier already taken, else null. */
+      signup_identifier_taken: {
+        Args: { uname: string; uphone: string };
+        Returns: string | null;
+      };
       /**
        * Atomically record a deal-closing confirmation for one party and, once
        * both parties have confirmed, complete the swap and increment each
