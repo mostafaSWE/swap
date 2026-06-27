@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MailCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -14,6 +14,7 @@ import { AuthShell } from "@/components/AuthShell";
 import { FieldError, FormAlert, FormInput, FormSection } from "@/components/forms";
 import { PasswordInput } from "@/components/PasswordInput";
 import { PasswordStrength, passwordMeetsRules } from "@/components/PasswordStrength";
+import { PhoneInput } from "@/components/PhoneInput";
 import { CountryCitySelector } from "@/components/CountryCitySelector";
 import { CTAButton } from "@/components/CTAButton";
 
@@ -34,6 +35,14 @@ export function RegisterForm() {
   const router = useRouter();
   const [countryId, setCountryId] = useState("");
   const [cityId, setCityId] = useState("");
+  // Dial code for the phone field's country-code dropdown (defaults to Saudi).
+  const [dialCode, setDialCode] = useState("+966");
+  // Choosing a country (above) auto-sets the phone's dial code; the dropdown still
+  // lets the user override it for a number from a different country.
+  useEffect(() => {
+    const code = countryId ? COUNTRY_BY_ID[countryId]?.phone_code : undefined;
+    if (code) setDialCode(code);
+  }, [countryId]);
   const [error, setError] = useState<string | null>(null);
   const [emailSent, setEmailSent] = useState(false);
   const {
@@ -46,14 +55,9 @@ export function RegisterForm() {
   async function onSubmit(values: Values) {
     setError(null);
     const supabase = createClient();
-    // Phone needs the country's dial code; normalize to a single +<code><national>
-    // so a typed "+"/country code/leading zeros can't produce a malformed number.
-    const dial = countryId ? COUNTRY_BY_ID[countryId]?.phone_code ?? "" : "";
-    if (!dial) {
-      setError(t("phoneCountryRequired"));
-      return;
-    }
-    const phone = buildPhone(values.phone, dial);
+    // The phone field has its own dial-code dropdown, so the country code is always
+    // known; normalize to a single +<code><national> (no double-prefix / leading zeros).
+    const phone = buildPhone(values.phone, dialCode);
     if (!phone) {
       setError(t("phoneInvalid"));
       return;
@@ -149,13 +153,6 @@ export function RegisterForm() {
           </div>
         </FormSection>
 
-        <FormSection title={t("secContact")}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <FormInput type="email" label={t("email")} autoComplete="email" error={errors.email && t("errorGeneric")} {...register("email", { required: true })} />
-            <FormInput type="tel" label={t("phone")} hint={countryId ? COUNTRY_BY_ID[countryId]?.phone_code : t("phoneHint")} placeholder="5XXXXXXXX" error={errors.phone && t("phoneInvalid")} inputMode="tel" autoComplete="tel" {...register("phone", { required: true })} />
-          </div>
-        </FormSection>
-
         <FormSection title={t("secLocation")}>
           <CountryCitySelector
             countryId={countryId}
@@ -167,6 +164,13 @@ export function RegisterForm() {
             countryPlaceholder={tc("selectCountry")}
             cityPlaceholder={tc("selectCity")}
           />
+        </FormSection>
+
+        <FormSection title={t("secContact")}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FormInput type="email" label={t("email")} autoComplete="email" error={errors.email && t("errorGeneric")} {...register("email", { required: true })} />
+            <PhoneInput label={t("phone")} hint={t("phoneHint")} placeholder="5XXXXXXXX" autoComplete="tel" dialCode={dialCode} onDialCodeChange={setDialCode} error={errors.phone && t("phoneInvalid")} {...register("phone", { required: true })} />
+          </div>
         </FormSection>
 
         <FormSection title={t("secSecurity")}>
