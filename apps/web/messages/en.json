@@ -110,7 +110,6 @@
     "heroTitle": "Exchange what you have for what you need",
     "heroSubtitle": "JustSwap helps people trade items directly with each other. No buying, no selling, just clear offers and community exchange.",
     "heroBadge": "A marketplace built for direct exchange",
-    "heroTrustNote": "Add listing is available after sign-in so every listing is tied to a real account.",
     "heroVisualAlt": "Examples of items people exchange on JustSwap — a phone, a laptop and sneakers linked by swap arrows",
     "heroPreviewLabel": "Wanted in exchange",
     "heroPreviewTrust": "Browse real listings from the marketplace.",
@@ -124,7 +123,6 @@
     "categoriesDescription": "Start from a category and find items people are ready to exchange.",
     "featured": "Featured Listings",
     "featuredEyebrow": "Marketplace",
-    "featuredDescription": "Highlighted listings come from the live database. If none are featured yet, we show an empty state instead of sample items.",
     "featuredEmpty": "No featured listings yet",
     "featuredEmptyHint": "Feature real listings from the database or add the first listing to start the marketplace.",
     "latest": "Latest Listings",
@@ -139,7 +137,6 @@
     "how": {
       "eyebrow": "How it works",
       "title": "A simple way to swap directly",
-      "description": "JustSwap keeps the marketplace focused on exchange, not buying or selling.",
       "step1Title": "List what you have",
       "step1Body": "Add photos, condition, location, and what you would like in return.",
       "step2Title": "Discover items you want",
@@ -149,7 +146,6 @@
     },
     "trust": {
       "title": "Trust and safety are part of the experience",
-      "description": "The interface keeps responsibility clear while helping users make informed decisions before they meet or exchange items.",
       "item1Title": "Clear item details",
       "item1Body": "Condition, photos, location, and wanted-exchange details are visible before users start a conversation.",
       "item2Title": "Direct agreement",
@@ -302,7 +298,17 @@
     "verifyBannerError": "Couldn't send right now. Please try again shortly.",
     "verifyRequired": "Please confirm your email address first — check your inbox for the link.",
     "errorEmailUnconfirmed": "Your email isn't confirmed yet. Check your inbox for the confirmation link.",
-    "resendConfirmation": "Resend confirmation email"
+    "resendConfirmation": "Resend confirmation email",
+    "emailOrUsername": "Email or username",
+    "passwordWeak": "Use at least 8 characters with a letter and a number.",
+    "reqMinLength": "At least 8 characters",
+    "reqLetter": "A letter",
+    "reqNumber": "A number",
+    "strength": "Password strength",
+    "strengthWeak": "Weak",
+    "strengthFair": "Fair",
+    "strengthGood": "Good",
+    "strengthStrong": "Strong"
   },
   "onboarding": {
     "title": "Welcome to JustSwap",

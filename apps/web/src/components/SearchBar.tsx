@@ -76,16 +76,16 @@ export function SearchBar({
 
   return (
     <form onSubmit={submit} className="relative">
-      <div className="flex items-stretch gap-1 rounded-2xl border border-line bg-field p-1 shadow-sm transition-colors focus-within:border-accent">
+      <div className="grid grid-cols-[minmax(0,1fr)_3.25rem] gap-2 rounded-2xl border border-line bg-field p-2 shadow-sm transition-colors focus-within:border-accent sm:flex sm:items-stretch sm:gap-1 sm:p-1">
         {/* Location filter */}
-        <div className="relative shrink-0" ref={locRef}>
+        <div className="relative order-3 col-span-2 min-w-0 sm:order-none sm:col-span-auto sm:shrink-0" ref={locRef}>
           <button
             type="button"
             onClick={() => setLocOpen((o) => !o)}
             aria-haspopup="dialog"
             aria-expanded={locOpen}
             aria-label={t("location")}
-            className="flex h-full max-w-[8.5rem] items-center gap-1.5 rounded-xl px-2.5 text-sm font-semibold text-ink transition-colors hover:bg-elevated sm:max-w-[11rem] sm:px-3"
+            className="flex h-11 w-full max-w-none items-center justify-center gap-1.5 rounded-xl bg-canvas/45 px-3 text-sm font-semibold text-ink transition-colors hover:bg-elevated sm:h-full sm:max-w-[11rem] sm:justify-start sm:bg-transparent"
           >
             <MapPin className="h-4 w-4 shrink-0 text-accent" aria-hidden />
             <span className="truncate">{locationLabel}</span>
@@ -142,10 +142,10 @@ export function SearchBar({
           ) : null}
         </div>
 
-        <span className="my-1.5 w-px shrink-0 bg-line" aria-hidden />
+        <span className="my-1.5 hidden w-px shrink-0 bg-line sm:block" aria-hidden />
 
         {/* Search text */}
-        <div className="relative min-w-0 flex-1">
+        <div className="relative order-1 min-w-0 sm:order-none sm:flex-1">
           <Search
             className="pointer-events-none absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted"
             aria-hidden
@@ -156,14 +156,14 @@ export function SearchBar({
             onChange={(e) => setValue(e.target.value)}
             placeholder={t("search")}
             aria-label={t("searchAction")}
-            className="w-full border-0 bg-transparent py-2.5 pe-2 ps-10 text-ink outline-none placeholder:text-muted"
+            className="h-12 w-full border-0 bg-transparent py-0 pe-2 ps-10 text-ink outline-none placeholder:text-muted sm:h-auto sm:py-2.5"
           />
         </div>
 
         {/* Submit */}
         <button
           type="submit"
-          className="flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-semibold text-white transition-colors hover:bg-accent-hover sm:px-4"
+          className="order-2 flex min-h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-semibold text-white transition-colors hover:bg-accent-hover sm:order-none sm:min-h-0 sm:px-4"
         >
           <Search className="h-4 w-4 sm:hidden" aria-hidden />
           <span className="hidden sm:inline">{t("searchAction")}</span>

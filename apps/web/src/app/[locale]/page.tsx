@@ -63,8 +63,8 @@ export default async function HomePage({ params: { locale } }: { params: { local
         </div>
 
         <Reveal as="section">
-          <SectionIntro eyebrow={t("how.eyebrow")} title={t("how.title")} description={t("how.description")} />
-          <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 no-scrollbar sm:-mx-6 sm:mt-5 sm:px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 md:pb-0">
+          <SectionIntro eyebrow={t("how.eyebrow")} title={t("how.title")} />
+          <div className="-mx-4 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 pt-2 no-scrollbar sm:-mx-6 sm:mt-4 sm:px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 md:pb-0 md:pt-0">
             {howSteps.map((step, index) => (
               <HowStep
                 key={step.title}
@@ -94,7 +94,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
 
         <Reveal as="section">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <SectionIntro eyebrow={t("featuredEyebrow")} title={t("featured")} description={t("featuredDescription")} />
+            <SectionIntro eyebrow={t("featuredEyebrow")} title={t("featured")} />
             <Link href="/listings?sort=most_viewed" className="inline-flex items-center gap-2 text-sm font-bold text-accent hover:underline">
               {tc("viewAll")}
               <ArrowRight className="rtl-flip h-4 w-4" aria-hidden />
@@ -145,7 +145,6 @@ export default async function HomePage({ params: { locale } }: { params: { local
                 <ShieldCheck className="h-5 w-5 md:h-6 md:w-6" aria-hidden />
               </span>
               <h2 className="mt-4 text-2xl font-bold tracking-tight text-ink md:mt-5 md:text-3xl">{t("trust.title")}</h2>
-              <p className="mt-3 max-w-xl text-sm leading-7 text-muted md:text-base">{t("trust.description")}</p>
             </div>
             <div className="grid gap-2.5 md:hidden">
               {trustItems.map((item) => (
@@ -227,7 +226,7 @@ function HowStep({ index, icon, title, body }: { index: number; icon: React.Reac
 function HomeListingRail({ listings }: { listings: ListingWithRelations[] }) {
   return (
     <>
-      <div className="-mx-4 overflow-x-auto pb-3 no-scrollbar sm:-mx-6 md:hidden">
+      <div className="-mx-4 overflow-x-auto pb-4 pt-2 no-scrollbar sm:-mx-6 md:hidden">
         <div className="flex snap-x snap-mandatory gap-3 px-4 sm:px-6">
           {listings.map((listing) => (
             <div key={listing.id} className="w-[82vw] max-w-[21.5rem] shrink-0 snap-center min-[420px]:w-[74vw] sm:w-[20rem]">

@@ -12,6 +12,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { AuthShell } from "@/components/AuthShell";
 import { FieldError, FormAlert, FormInput, FormSection } from "@/components/forms";
 import { PasswordInput } from "@/components/PasswordInput";
+import { PasswordStrength, passwordMeetsRules } from "@/components/PasswordStrength";
 import { CountryCitySelector } from "@/components/CountryCitySelector";
 import { CTAButton } from "@/components/CTAButton";
 
@@ -21,6 +22,7 @@ interface Values {
   email: string;
   phone: string;
   password: string;
+  confirm: string;
   terms_accepted: boolean;
 }
 
@@ -36,6 +38,7 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { isSubmitting, errors },
   } = useForm<Values>();
 
@@ -141,11 +144,26 @@ export function RegisterForm() {
         </FormSection>
 
         <FormSection title={t("secSecurity")}>
+          <div>
+            <PasswordInput
+              label={t("password")}
+              autoComplete="new-password"
+              error={errors.password ? t("passwordWeak") : undefined}
+              {...register("password", {
+                required: true,
+                validate: (v) => passwordMeetsRules(v) || t("passwordWeak"),
+              })}
+            />
+            <PasswordStrength value={watch("password") ?? ""} />
+          </div>
           <PasswordInput
-            label={t("password")}
+            label={t("confirmPassword")}
             autoComplete="new-password"
-            error={errors.password && (errors.password.type === "minLength" ? t("passwordTooShort") : t("errorGeneric"))}
-            {...register("password", { required: true, minLength: 6 })}
+            error={errors.confirm ? t("passwordMismatch") : undefined}
+            {...register("confirm", {
+              required: true,
+              validate: (v) => v === watch("password") || t("passwordMismatch"),
+            })}
           />
         </FormSection>
 

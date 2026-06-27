@@ -92,11 +92,6 @@ export function Hero({ isAuthenticated }: { isAuthenticated: boolean }) {
               </Link>
             </div>
           </StaggerItem>
-          <StaggerItem>
-            <p className="mx-auto mt-3 max-w-[32rem] text-xs leading-6 text-muted sm:text-sm md:mx-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
-              {t("home.heroTrustNote")}
-            </p>
-          </StaggerItem>
         </Stagger>
 
         {/* Hero visual — theme-swapped product-swap illustration. Its own backdrop

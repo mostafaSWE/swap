@@ -71,6 +71,11 @@ export interface Database {
         Args: { uid: string };
         Returns: boolean;
       };
+      /** Resolve a username to its account email for username-based login (case-insensitive). */
+      email_for_username: {
+        Args: { uname: string };
+        Returns: string | null;
+      };
       /**
        * Atomically record a deal-closing confirmation for one party and, once
        * both parties have confirmed, complete the swap and increment each

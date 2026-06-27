@@ -13,7 +13,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { CTAButton } from "@/components/CTAButton";
 
 interface Values {
-  email: string;
+  identifier: string;
   password: string;
 }
 
@@ -26,6 +26,9 @@ export function LoginForm({ linkError = false }: { linkError?: boolean }) {
   // mean the user needs a fresh confirmation link — so show the resend affordance.
   const [needsConfirm, setNeedsConfirm] = useState(linkError);
   const [resend, setResend] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  // The email we actually authenticated with (resolved from a username when needed),
+  // used to power the "resend confirmation" action.
+  const [resendEmail, setResendEmail] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -35,7 +38,20 @@ export function LoginForm({ linkError = false }: { linkError?: boolean }) {
 
   async function onSubmit(values: Values) {
     setError(null);
-    const { error } = await createClient().auth.signInWithPassword(values);
+    const supabase = createClient();
+    // Accept an email OR a username: resolve a username to its account email first
+    // (case-insensitive, server-side, via the email_for_username RPC).
+    let email = values.identifier.trim();
+    if (!email.includes("@")) {
+      const { data, error: lookupError } = await supabase.rpc("email_for_username", { uname: email });
+      if (lookupError || !data) {
+        setError(t("errorInvalid"));
+        return;
+      }
+      email = data;
+    }
+    setResendEmail(email);
+    const { error } = await supabase.auth.signInWithPassword({ email, password: values.password });
     if (error) {
       // Supabase returns a stable code for an unverified account — surface that
       // clearly (with a resend option) instead of a misleading "wrong credentials".
@@ -53,7 +69,8 @@ export function LoginForm({ linkError = false }: { linkError?: boolean }) {
 
   async function resendConfirmation() {
     if (resend === "sending" || resend === "sent") return;
-    const email = (watch("email") || "").trim();
+    const typed = (watch("identifier") || "").trim();
+    const email = resendEmail || (typed.includes("@") ? typed : "");
     if (!email) {
       setError(t("errorEmailUnconfirmed"));
       return;
@@ -77,11 +94,11 @@ export function LoginForm({ linkError = false }: { linkError?: boolean }) {
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <FormInput
-          type="email"
-          label={t("email")}
-          autoComplete="email"
-          error={errors.email && t("errorGeneric")}
-          {...register("email", { required: true })}
+          type="text"
+          label={t("emailOrUsername")}
+          autoComplete="username"
+          error={errors.identifier && t("errorGeneric")}
+          {...register("identifier", { required: true })}
         />
         <PasswordInput
           label={t("password")}
