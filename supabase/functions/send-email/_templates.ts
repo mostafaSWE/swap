@@ -4,7 +4,7 @@
 //
 // One shared base template — `layout()` — wraps EVERY email so they all look like
 // they came from the same product: deep-navy background matching the app theme
-// (packages/config/src/theme.ts), the JustSwap logo + wordmark, IBM Plex Sans
+// (packages/config/src/theme.ts), the JustSwap logo mark + live-text wordmark, IBM Plex Sans
 // Arabic (with a web-safe Arabic fallback), a single mobile-friendly column, and a
 // footer with the brand, legal links + a transactional notice. Per-email copy lives
 // in COPY; only the heading/body/cta/token differ between types.
@@ -181,9 +181,7 @@ function layout(opts: {
   const dir = locale === "ar" ? "rtl" : "ltr";
   const align = locale === "ar" ? "right" : "left";
   const safeUrl = escapeHtml(url);
-  // Inline CID attachment, not a remote URL. Gmail mobile can briefly show a
-  // broken placeholder while it fetches remote images through its proxy.
-  const logoUrl = "cid:justswap-logo";
+  const logoUrl = "cid:justswap-logo@justswap.email";
   const f = FOOTER[locale];
   // Hidden inbox-preview text (improves the list preview without showing in body).
   const preheader = body.slice(0, 110);
@@ -193,62 +191,72 @@ function layout(opts: {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="supported-color-schemes" content="dark" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
     <title>${escapeHtml(heading)}</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap');
-      :root { color-scheme: dark; supported-color-schemes: dark; }
+      :root { color-scheme: light dark; supported-color-schemes: light dark; }
       body { margin: 0; padding: 0; width: 100% !important; }
       a { text-decoration: none; }
       .btn:hover { background: ${BRAND.greenDark} !important; }
+      [data-ogsc] .body-bg, [data-ogsb] .body-bg { background-color: ${BRAND.canvas} !important; }
+      [data-ogsc] .card-bg, [data-ogsb] .card-bg { background-color: ${BRAND.surface} !important; }
+      [data-ogsc] .brand-bg, [data-ogsb] .brand-bg { background-color: ${BRAND.navy} !important; }
+      [data-ogsc] .surface-bg, [data-ogsb] .surface-bg { background-color: ${BRAND.elevated} !important; }
+      [data-ogsc] .accent-bg, [data-ogsb] .accent-bg { background-color: ${BRAND.green} !important; }
+      [data-ogsc] .border-color, [data-ogsb] .border-color { border-color: ${BRAND.border} !important; }
+      [data-ogsc] .text-main, [data-ogsb] .text-main { color: ${BRAND.text} !important; }
+      [data-ogsc] .text-muted, [data-ogsb] .text-muted { color: ${BRAND.textMuted} !important; }
+      [data-ogsc] .text-accent, [data-ogsb] .text-accent { color: ${BRAND.green} !important; }
+      [data-ogsc] .btn-text, [data-ogsb] .btn-text { color: #06210F !important; }
       @media only screen and (max-width: 600px) {
         .card { width: 100% !important; border-radius: 0 !important; }
         .pad { padding-left: 22px !important; padding-right: 22px !important; }
       }
     </style>
   </head>
-  <body style="margin:0;padding:0;background:${BRAND.canvas};">
+  <body class="body-bg" style="margin:0;padding:0;background:${BRAND.canvas};">
     <!-- Hidden inbox-preview text, padded so the real body doesn't leak into the snippet. -->
     <div style="display:none;mso-hide:all;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:${BRAND.canvas};">${escapeHtml(preheader)}${"&#8203;&nbsp;".repeat(40)}</div>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="${BRAND.canvas}" style="background:${BRAND.canvas};padding:32px 12px;font-family:${FONT_STACK};">
+    <table role="presentation" class="body-bg" width="100%" cellpadding="0" cellspacing="0" bgcolor="${BRAND.canvas}" style="background:${BRAND.canvas};padding:32px 12px;font-family:${FONT_STACK};">
       <tr><td align="center" bgcolor="${BRAND.canvas}">
-        <table role="presentation" class="card" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background:${BRAND.surface};border:1px solid ${BRAND.border};border-radius:20px;overflow:hidden;">
+        <table role="presentation" class="card card-bg border-color" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background:${BRAND.surface};border:1px solid ${BRAND.border};border-radius:20px;overflow:hidden;">
 
           <!-- Brand header -->
-          <tr><td style="background:${BRAND.navy};padding:24px 32px;" class="pad" dir="${dir}" align="${align}">
+          <tr><td style="background:${BRAND.navy};padding:24px 32px;" class="pad brand-bg" dir="${dir}" align="${align}">
             <table role="presentation" dir="${dir}" align="${align}" cellpadding="0" cellspacing="0"><tr>
-              <td style="vertical-align:middle;padding-${align === "right" ? "left" : "right"}:10px;">
-                <img src="${logoUrl}" width="40" height="40" alt="JustSwap" style="display:block;width:40px;height:40px;max-width:40px;border:0;outline:none;background:${BRAND.navy};" />
+              <td bgcolor="${BRAND.navy}" class="brand-bg" style="vertical-align:middle;background:${BRAND.navy};padding-${align === "right" ? "left" : "right"}:12px;">
+                <img src="${logoUrl}" width="40" height="40" alt="" style="display:block;width:40px;height:40px;max-width:40px;border:0;outline:none;background:${BRAND.navy};" />
               </td>
-              <td style="vertical-align:middle;font-size:22px;font-weight:700;letter-spacing:-0.2px;font-family:${FONT_STACK};">
-                <span style="color:${BRAND.green};">Just</span><span style="color:${BRAND.text};">Swap</span>
+              <td style="vertical-align:middle;font-size:24px;line-height:1;font-weight:700;letter-spacing:-0.2px;font-family:${FONT_STACK};">
+                <span class="text-accent" style="color:${BRAND.green};">Just</span><span class="text-main" style="color:${BRAND.text};">Swap</span>
               </td>
             </tr></table>
           </td></tr>
-          <tr><td style="height:3px;line-height:3px;font-size:0;background:${BRAND.green};">&nbsp;</td></tr>
+          <tr><td class="accent-bg" style="height:3px;line-height:3px;font-size:0;background:${BRAND.green};">&nbsp;</td></tr>
 
           <!-- Body -->
           <tr><td style="padding:32px 32px 8px;" class="pad" dir="${dir}" align="${align}">
-            <h1 style="margin:0 0 10px;font-size:22px;line-height:1.35;color:${BRAND.text};font-family:${FONT_STACK};">${escapeHtml(heading)}</h1>
-            <p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:${BRAND.textMuted};font-family:${FONT_STACK};">${escapeHtml(body)}</p>
+            <h1 class="text-main" style="margin:0 0 10px;font-size:22px;line-height:1.35;color:${BRAND.text};font-family:${FONT_STACK};">${escapeHtml(heading)}</h1>
+            <p class="text-muted" style="margin:0 0 24px;font-size:15px;line-height:1.7;color:${BRAND.textMuted};font-family:${FONT_STACK};">${escapeHtml(body)}</p>
             ${
               token
-                ? `<div style="margin:0 0 24px;font-size:30px;letter-spacing:8px;font-weight:700;color:${BRAND.text};background:${BRAND.elevated};border:1px solid ${BRAND.border};border-radius:12px;padding:16px;text-align:center;font-family:${FONT_STACK};">${escapeHtml(token)}</div>`
-                : `<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:9999px;background:${BRAND.green};">
-                    <a class="btn" href="${safeUrl}" style="display:inline-block;background:${BRAND.green};color:#06210F;text-decoration:none;font-size:15px;font-weight:700;padding:14px 30px;border-radius:9999px;font-family:${FONT_STACK};">${escapeHtml(cta)}</a>
+                ? `<div class="surface-bg border-color text-main" style="margin:0 0 24px;font-size:30px;letter-spacing:8px;font-weight:700;color:${BRAND.text};background:${BRAND.elevated};border:1px solid ${BRAND.border};border-radius:12px;padding:16px;text-align:center;font-family:${FONT_STACK};">${escapeHtml(token)}</div>`
+                : `<table role="presentation" cellpadding="0" cellspacing="0"><tr><td class="accent-bg" style="border-radius:9999px;background:${BRAND.green};">
+                    <a class="btn accent-bg btn-text" href="${safeUrl}" style="display:inline-block;background:${BRAND.green};color:#06210F;text-decoration:none;font-size:15px;font-weight:700;padding:14px 30px;border-radius:9999px;font-family:${FONT_STACK};">${escapeHtml(cta)}</a>
                    </td></tr></table>
-                   <p style="margin:24px 0 6px;font-size:12px;color:${BRAND.textMuted};font-family:${FONT_STACK};">${escapeHtml(FALLBACK[locale])}</p>
-                   <p dir="ltr" style="margin:0;font-size:12px;word-break:break-all;text-align:${align};font-family:${FONT_STACK};"><a href="${safeUrl}" style="color:${BRAND.green};text-decoration:underline;">${safeUrl}</a></p>`
+                   <p class="text-muted" style="margin:24px 0 6px;font-size:12px;color:${BRAND.textMuted};font-family:${FONT_STACK};">${escapeHtml(FALLBACK[locale])}</p>
+                   <p dir="ltr" style="margin:0;font-size:12px;word-break:break-all;text-align:${align};font-family:${FONT_STACK};"><a class="text-accent" href="${safeUrl}" style="color:${BRAND.green};text-decoration:underline;">${safeUrl}</a></p>`
             }
           </td></tr>
 
           <!-- Footer -->
           <tr><td style="padding:28px 32px 30px;" class="pad" dir="${dir}" align="${align}">
-            <hr style="border:none;border-top:1px solid ${BRAND.border};margin:0 0 18px;" />
-            <p style="margin:0 0 10px;font-size:13px;font-weight:600;color:${BRAND.text};font-family:${FONT_STACK};">${escapeHtml(f.tagline)}</p>
+            <hr class="border-color" style="border:none;border-top:1px solid ${BRAND.border};margin:0 0 18px;" />
+            <p class="text-main" style="margin:0 0 10px;font-size:13px;font-weight:600;color:${BRAND.text};font-family:${FONT_STACK};">${escapeHtml(f.tagline)}</p>
             <p style="margin:0 0 14px;font-size:13px;font-family:${FONT_STACK};">${footerLinks(appUrl, locale)}</p>
-            <p style="margin:0 0 8px;font-size:11px;line-height:1.7;color:${BRAND.textMuted};font-family:${FONT_STACK};">${escapeHtml(f.notice)}</p>
+            <p class="text-muted" style="margin:0 0 8px;font-size:11px;line-height:1.7;color:${BRAND.textMuted};font-family:${FONT_STACK};">${escapeHtml(f.notice)}</p>
             <p style="margin:0;font-size:11px;color:${BRAND.textMuted};font-family:${FONT_STACK};">© JustSwap. ${escapeHtml(f.rights)}</p>
           </td></tr>
 

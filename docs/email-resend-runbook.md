@@ -23,7 +23,7 @@ directly; in-app notifications (migration `0008`) are in-app only and never emai
 
 All six render through the shared branded base template in
 [`_templates.ts`](../supabase/functions/send-email/_templates.ts) (dark navy theme,
-JustSwap logo + wordmark, IBM Plex Sans Arabic w/ web-safe fallback, single column,
+JustSwap logo mark + live-text wordmark, IBM Plex Sans Arabic w/ web-safe fallback, single column,
 legal footer) and now ship with a **plain-text part** for deliverability.
 
 ---
@@ -88,12 +88,13 @@ npx supabase secrets set \
 ```
 - `RESEND_FROM` must be on the **verified** domain from Part A.
 - `PUBLIC_APP_URL` = the **production origin, no trailing slash**. This is the single
-  most important value — it sets the confirm-link origin, the email logo, and the
-  footer legal links. (The function logs a warning if the base looks like
+  most important value — it sets the confirm-link origin and footer legal links.
+  (The function logs a warning if the base looks like
   localhost/`*.supabase.co`.)
-- The email header logo is sent as a CID inline attachment sourced from
-  `${PUBLIC_APP_URL}/brand/justswap-mark-email-solid.png`. Deploy the web asset
-  before redeploying/testing the `send-email` function.
+- The email header keeps the logo mark, but sends it as an opaque JPEG CID
+  attachment from `supabase/functions/send-email/justswap-logo-email.jpg`.
+  This avoids hosted-image loading delays and removes PNG transparency, which
+  Gmail/Outlook mobile dark mode can recolor unpredictably.
 - Enable the hook: **Authentication → Hooks → Send Email** → point it at `send-email`.
   Supabase generates `SEND_EMAIL_HOOK_SECRET` (`v1,whsec_…`) when you enable it —
   copy it back into the `secrets set` above.
