@@ -20,12 +20,16 @@ export function StickyActionBar({
 }) {
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur-md md:hidden">
-      <div className="mx-auto flex max-w-app items-center gap-2 px-4 pb-[calc(0.625rem+env(safe-area-inset-bottom))] pt-2.5">
-        <div className="flex-[1.3]">
-          <MessageButton ownerId={ownerId} listingId={listingId} />
+      <div className="mx-auto grid max-w-app grid-cols-[minmax(0,1fr)_minmax(0,1fr)_3.25rem] items-center gap-2 px-4 pb-[calc(0.625rem+env(safe-area-inset-bottom))] pt-2.5">
+        <div className="min-w-0">
+          <MessageButton ownerId={ownerId} listingId={listingId} className="min-h-12 rounded-2xl px-3 text-base" />
         </div>
-        <div className="flex-1">
-          <ProposeSwapDrawer targetListingId={listingId} />
+        <div className="min-w-0">
+          <ProposeSwapDrawer
+            targetListingId={listingId}
+            compactLabel
+            className="min-h-12 rounded-2xl px-3 text-base leading-tight"
+          />
         </div>
         <SaveButton variant="icon" listingId={listingId} initialSaved={initialSaved} />
       </div>

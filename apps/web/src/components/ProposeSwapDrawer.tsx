@@ -25,9 +25,11 @@ import { cn } from "@/lib/utils";
 export function ProposeSwapDrawer({
   targetListingId,
   className,
+  compactLabel = false,
 }: {
   targetListingId: string;
   className?: string;
+  compactLabel?: boolean;
 }) {
   const t = useTranslations("proposal");
   const tc = useTranslations("common");
@@ -83,8 +85,8 @@ export function ProposeSwapDrawer({
   return (
     <>
       <CTAButton variant="secondary" onClick={openDrawer} className={cn("w-full", className)}>
-        <Repeat2 className="h-5 w-5" aria-hidden />
-        {t("cta")}
+        <Repeat2 className="h-5 w-5 shrink-0" aria-hidden />
+        <span className="truncate">{compactLabel ? t("ctaShort") : t("cta")}</span>
       </CTAButton>
 
       {open && userId ? (

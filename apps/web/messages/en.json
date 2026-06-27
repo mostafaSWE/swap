@@ -370,6 +370,7 @@
   },
   "proposal": {
     "cta": "Propose a swap",
+    "ctaShort": "Swap",
     "title": "Propose a swap",
     "chooseItems": "Choose what you'll offer",
     "chooseItemsHint": "Pick one or more of your items",
