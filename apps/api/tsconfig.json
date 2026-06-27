@@ -24,7 +24,8 @@
   "ts-node": {
     "transpileOnly": false,
     "require": ["tsconfig-paths/register"],
-    "// note": "Force the shared @swap/* packages (which declare type:module) to compile as CJS so this CommonJS NestJS app can require() them.",
+    // Force the shared @swap/* packages (which declare type:module) to compile as
+    // CJS so this CommonJS NestJS app can require() them.
     "moduleTypes": {
       "../../packages/**/*.ts": "cjs"
     }

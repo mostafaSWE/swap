@@ -91,6 +91,9 @@ npx supabase secrets set \
   most important value — it sets the confirm-link origin, the email logo, and the
   footer legal links. (The function logs a warning if the base looks like
   localhost/`*.supabase.co`.)
+- The email header logo is sent as a CID inline attachment sourced from
+  `${PUBLIC_APP_URL}/brand/justswap-mark-email-solid.png`. Deploy the web asset
+  before redeploying/testing the `send-email` function.
 - Enable the hook: **Authentication → Hooks → Send Email** → point it at `send-email`.
   Supabase generates `SEND_EMAIL_HOOK_SECRET` (`v1,whsec_…`) when you enable it —
   copy it back into the `secrets set` above.

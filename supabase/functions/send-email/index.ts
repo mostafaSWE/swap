@@ -21,6 +21,7 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const HOOK_SECRET = (Deno.env.get("SEND_EMAIL_HOOK_SECRET") ?? "").replace("v1,whsec_", "");
 const FROM = Deno.env.get("RESEND_FROM") ?? "JustSwap <onboarding@resend.dev>";
 const APP_URL = (Deno.env.get("PUBLIC_APP_URL") ?? "").replace(/\/$/, "");
+const LOGO_CONTENT_ID = "justswap-logo";
 
 interface HookPayload {
   user: { id: string; email: string; user_metadata?: Record<string, unknown> };
@@ -91,11 +92,29 @@ Deno.serve(async (req) => {
     appUrl: base,
   });
 
+  const logoPath = `${base}/brand/justswap-mark-email-solid.png`;
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
     // `text` ships a plain-text MIME part alongside the HTML (deliverability + a11y).
-    body: JSON.stringify({ from: FROM, to: [user.email], subject, html, text }),
+    // The logo is sent as a CID inline attachment so Gmail mobile has it available
+    // when the email opens instead of fetching a remote image after first paint.
+    body: JSON.stringify({
+      from: FROM,
+      to: [user.email],
+      subject,
+      html,
+      text,
+      attachments: [
+        {
+          filename: "justswap-logo.png",
+          path: logoPath,
+          content_id: LOGO_CONTENT_ID,
+          content_type: "image/png",
+        },
+      ],
+    }),
   });
 
   if (!res.ok) {
