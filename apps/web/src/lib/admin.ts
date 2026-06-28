@@ -68,6 +68,10 @@ async function fetchTable<T>(table: string, order = "created_at"): Promise<T[]> 
       .from(table)
       .select("*")
       .order(order, { ascending: table === "categories" || table === "countries" || table === "cities" })
+      // Deterministic tiebreaker: the seeded rows share one `created_at`, so
+      // without this their order would be arbitrary. `id` keeps the original
+      // order stable and puts later-created rows after equal-timestamp ones.
+      .order("id", { ascending: true })
       .limit(300);
     if (error) throw error;
     return (data ?? []) as T[];
@@ -79,7 +83,9 @@ async function fetchTable<T>(table: string, order = "created_at"): Promise<T[]> 
 
 /* Catalog tables — read from the DB so the admin sees actual DB state. */
 export const fetchAdminCategories = () => fetchTable<Category>("categories", "sort_order");
-export const fetchAdminCountries = () => fetchTable<Country>("countries", "sort_order");
+// Countries are ordered by creation order (not a manual sort value), so a newly
+// added country always appears at the bottom of the list. See catalog.service.
+export const fetchAdminCountries = () => fetchTable<Country>("countries", "created_at");
 export const fetchAdminCities = () => fetchTable<City>("cities", "sort_order");
 
 /** Resolves a set of profile ids to usernames in one query. */

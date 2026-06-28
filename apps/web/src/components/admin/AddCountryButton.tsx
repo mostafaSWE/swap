@@ -33,7 +33,6 @@ export function AddCountryButton() {
       phone_code: "",
       currency_code: "",
       timezone: "",
-      sort_order: 0,
       is_active: true,
     },
   });
@@ -112,13 +111,6 @@ export function AddCountryButton() {
                 {...register("timezone")}
               />
             </div>
-            <FormInput
-              type="number"
-              label={t("sortOrder")}
-              error={errors.sort_order?.message}
-              {...register("sort_order", { valueAsNumber: true })}
-            />
-
             {error && (
               <p role="alert" className="text-sm text-danger font-medium">
                 {error}

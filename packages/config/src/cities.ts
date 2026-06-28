@@ -7,6 +7,8 @@ const QA = COUNTRY_BY_ISO["QA"]!.id;
 const KW = COUNTRY_BY_ISO["KW"]!.id;
 const BH = COUNTRY_BY_ISO["BH"]!.id;
 const OM = COUNTRY_BY_ISO["OM"]!.id;
+const EG = COUNTRY_BY_ISO["EG"]!.id;
+const SY = COUNTRY_BY_ISO["SY"]!.id;
 
 const cityId = (n: number) =>
   `22222222-2222-4222-8222-${n.toString().padStart(12, "0")}`;
@@ -142,7 +144,44 @@ const additionalSeeds: CitySeed[] = [
   { country_id: OM, name_ar: "قريات", name_en: "Quriyat", slug: "quriyat" },
 ];
 
-const seeds: CitySeed[] = [...originalSeeds, ...additionalSeeds];
+// Egypt + Syria (appended last so the positional IDs above stay stable —
+// existing demo listings/profiles keep their foreign keys). Cities are ordered
+// by population + commercial significance. IDs 99+ / sort_order 99+.
+const newSeeds: CitySeed[] = [
+  // Egypt
+  { country_id: EG, name_ar: "القاهرة", name_en: "Cairo", slug: "cairo" },
+  { country_id: EG, name_ar: "الإسكندرية", name_en: "Alexandria", slug: "alexandria" },
+  { country_id: EG, name_ar: "الجيزة", name_en: "Giza", slug: "giza" },
+  { country_id: EG, name_ar: "شبرا الخيمة", name_en: "Shubra El Kheima", slug: "shubra-el-kheima" },
+  { country_id: EG, name_ar: "بورسعيد", name_en: "Port Said", slug: "port-said" },
+  { country_id: EG, name_ar: "السويس", name_en: "Suez", slug: "suez" },
+  { country_id: EG, name_ar: "المحلة الكبرى", name_en: "El Mahalla El Kubra", slug: "el-mahalla-el-kubra" },
+  { country_id: EG, name_ar: "المنصورة", name_en: "Mansoura", slug: "mansoura" },
+  { country_id: EG, name_ar: "طنطا", name_en: "Tanta", slug: "tanta" },
+  { country_id: EG, name_ar: "أسيوط", name_en: "Asyut", slug: "asyut" },
+  { country_id: EG, name_ar: "الإسماعيلية", name_en: "Ismailia", slug: "ismailia" },
+  { country_id: EG, name_ar: "الفيوم", name_en: "Fayoum", slug: "fayoum" },
+  { country_id: EG, name_ar: "الزقازيق", name_en: "Zagazig", slug: "zagazig" },
+  { country_id: EG, name_ar: "أسوان", name_en: "Aswan", slug: "aswan" },
+  { country_id: EG, name_ar: "دمنهور", name_en: "Damanhur", slug: "damanhur" },
+  { country_id: EG, name_ar: "الأقصر", name_en: "Luxor", slug: "luxor" },
+  // Syria
+  { country_id: SY, name_ar: "دمشق", name_en: "Damascus", slug: "damascus" },
+  { country_id: SY, name_ar: "حلب", name_en: "Aleppo", slug: "aleppo" },
+  { country_id: SY, name_ar: "حمص", name_en: "Homs", slug: "homs" },
+  { country_id: SY, name_ar: "اللاذقية", name_en: "Latakia", slug: "latakia" },
+  { country_id: SY, name_ar: "حماة", name_en: "Hama", slug: "hama" },
+  { country_id: SY, name_ar: "الرقة", name_en: "Raqqa", slug: "raqqa" },
+  { country_id: SY, name_ar: "دير الزور", name_en: "Deir ez-Zor", slug: "deir-ez-zor" },
+  { country_id: SY, name_ar: "الحسكة", name_en: "Al-Hasakah", slug: "al-hasakah" },
+  { country_id: SY, name_ar: "القامشلي", name_en: "Qamishli", slug: "qamishli" },
+  { country_id: SY, name_ar: "طرطوس", name_en: "Tartus", slug: "tartus" },
+  { country_id: SY, name_ar: "منبج", name_en: "Manbij", slug: "manbij" },
+  { country_id: SY, name_ar: "إدلب", name_en: "Idlib", slug: "idlib" },
+  { country_id: SY, name_ar: "درعا", name_en: "Daraa", slug: "daraa" },
+];
+
+const seeds: CitySeed[] = [...originalSeeds, ...additionalSeeds, ...newSeeds];
 
 export const CITIES: City[] = seeds.map((s, i) => ({
   ...s,

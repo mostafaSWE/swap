@@ -80,6 +80,30 @@ export const COUNTRIES: Country[] = [
     sort_order: 6,
     created_at: "2024-01-01T00:00:00Z",
   },
+  {
+    id: "11111111-1111-4111-8111-000000000007",
+    name_ar: "مصر",
+    name_en: "Egypt",
+    iso_code: "EG",
+    phone_code: "+20",
+    currency_code: "EGP",
+    timezone: "Africa/Cairo",
+    is_active: true,
+    sort_order: 7,
+    created_at: "2024-01-01T00:00:00Z",
+  },
+  {
+    id: "11111111-1111-4111-8111-000000000008",
+    name_ar: "سوريا",
+    name_en: "Syria",
+    iso_code: "SY",
+    phone_code: "+963",
+    currency_code: "SYP",
+    timezone: "Asia/Damascus",
+    is_active: true,
+    sort_order: 8,
+    created_at: "2024-01-01T00:00:00Z",
+  },
 ];
 
 export const COUNTRY_BY_ID: Record<string, Country> = Object.fromEntries(

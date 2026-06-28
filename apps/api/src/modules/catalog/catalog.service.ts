@@ -22,11 +22,15 @@ export class CatalogService {
   }
 
   async countries(): Promise<Country[]> {
+    // Ordered by creation order (created_at, then id as a stable tiebreaker
+    // since the seeded rows share one timestamp) rather than a manual
+    // sort_order, so newly added countries appear at the bottom of the list.
     const { data, error } = await this.supabase.admin
       .from("countries")
       .select("*")
       .eq("is_active", true)
-      .order("sort_order");
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true });
     if (error) throw error;
     return data ?? [];
   }
