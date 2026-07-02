@@ -18,8 +18,8 @@ export async function generateMetadata({
   let title = t("title");
   let path = "/listings"; // free-text search variants canonicalize to the base browse page
   let description = isAr
-    ? "تصفّح آلاف الأغراض المتاحة للمقايضة في الخليج على JustSwap — بادل ما لديك بما تحتاجه."
-    : "Browse thousands of items available for barter across the GCC on JustSwap — just swap what you have for what you need.";
+    ? "تصفّح آلاف الأغراض المتاحة للمقايضة على JustSwap — بادل ما لديك بما تحتاجه مع من حولك."
+    : "Browse thousands of items available for barter near you on JustSwap — just swap what you have for what you need.";
   if (searchParams.search) {
     title = isAr ? `نتائج البحث: ${searchParams.search}` : `Search: ${searchParams.search}`;
   } else if (searchParams.category) {
@@ -29,8 +29,8 @@ export async function generateMetadata({
       title = isAr ? `${name} للتبادل` : `${name} for exchange`;
       path = `/listings?category=${searchParams.category}`;
       description = isAr
-        ? `تصفّح إعلانات ${name} المتاحة للتبادل في الخليج على JustSwap.`
-        : `Browse ${name} listings available for exchange across the GCC on JustSwap.`;
+        ? `تصفّح إعلانات ${name} المتاحة للتبادل على JustSwap.`
+        : `Browse ${name} listings available for exchange on JustSwap.`;
     }
   }
   return {

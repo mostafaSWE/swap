@@ -2,7 +2,7 @@
 
 > Exchange what you have for what you need.
 
-JustSwap is an Arabic-first barter marketplace for the GCC. People list items,
+JustSwap is an Arabic-first barter marketplace for local communities. People list items,
 message each other, propose direct exchanges, and arrange handover themselves.
 The platform is not a shop: it does not buy, sell, escrow, ship, or guarantee
 items.

@@ -1,7 +1,7 @@
 import type { Country } from "@swap/types";
 
 /**
- * Canonical GCC country list. These fixed UUIDs are the SAME ones used by
+ * Canonical supported-country list. These fixed UUIDs are the SAME ones used by
  * supabase/seed.sql, so the app, seed data, and constants never drift.
  *
  * To add a country later: append here AND in seed.sql (or, once the admin
@@ -102,6 +102,18 @@ export const COUNTRIES: Country[] = [
     timezone: "Asia/Damascus",
     is_active: true,
     sort_order: 8,
+    created_at: "2024-01-01T00:00:00Z",
+  },
+  {
+    id: "11111111-1111-4111-8111-000000000009",
+    name_ar: "المغرب",
+    name_en: "Morocco",
+    iso_code: "MA",
+    phone_code: "+212",
+    currency_code: "MAD",
+    timezone: "Africa/Casablanca",
+    is_active: true,
+    sort_order: 9,
     created_at: "2024-01-01T00:00:00Z",
   },
 ];

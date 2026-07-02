@@ -9,6 +9,7 @@ const BH = COUNTRY_BY_ISO["BH"]!.id;
 const OM = COUNTRY_BY_ISO["OM"]!.id;
 const EG = COUNTRY_BY_ISO["EG"]!.id;
 const SY = COUNTRY_BY_ISO["SY"]!.id;
+const MA = COUNTRY_BY_ISO["MA"]!.id;
 
 const cityId = (n: number) =>
   `22222222-2222-4222-8222-${n.toString().padStart(12, "0")}`;
@@ -16,11 +17,11 @@ const cityId = (n: number) =>
 type CitySeed = Omit<City, "id" | "is_active" | "sort_order" | "created_at">;
 
 /**
- * Curated bilingual (ar/en) GCC city dataset.
+ * Curated bilingual (ar/en) city dataset for the supported countries.
  *
  * Source/method: English city coverage cross-checked against the
  * `country-state-city` npm dataset (MIT); Arabic names curated by hand because
- * no open package ships reliable Arabic names for all GCC cities (see
+ * no open package ships reliable Arabic names for all of these cities (see
  * docs/database-schema.md → "Country/city data"). Extend by appending below —
  * the admin "Manage cities" screen can manage the rest later.
  *
@@ -181,7 +182,43 @@ const newSeeds: CitySeed[] = [
   { country_id: SY, name_ar: "درعا", name_en: "Daraa", slug: "daraa" },
 ];
 
-const seeds: CitySeed[] = [...originalSeeds, ...additionalSeeds, ...newSeeds];
+// Morocco (appended last so all earlier positional IDs stay stable — existing
+// demo listings/profiles keep their foreign keys). Cities ordered by population
+// + commercial significance. IDs 128+ / sort_order 128+.
+const moroccoSeeds: CitySeed[] = [
+  { country_id: MA, name_ar: "الدار البيضاء", name_en: "Casablanca", slug: "casablanca" },
+  { country_id: MA, name_ar: "الرباط", name_en: "Rabat", slug: "rabat" },
+  { country_id: MA, name_ar: "فاس", name_en: "Fes", slug: "fes" },
+  { country_id: MA, name_ar: "مراكش", name_en: "Marrakesh", slug: "marrakesh" },
+  { country_id: MA, name_ar: "طنجة", name_en: "Tangier", slug: "tangier" },
+  { country_id: MA, name_ar: "أكادير", name_en: "Agadir", slug: "agadir" },
+  { country_id: MA, name_ar: "مكناس", name_en: "Meknes", slug: "meknes" },
+  { country_id: MA, name_ar: "وجدة", name_en: "Oujda", slug: "oujda" },
+  { country_id: MA, name_ar: "القنيطرة", name_en: "Kenitra", slug: "kenitra" },
+  { country_id: MA, name_ar: "تطوان", name_en: "Tetouan", slug: "tetouan" },
+  { country_id: MA, name_ar: "سلا", name_en: "Sale", slug: "sale" },
+  { country_id: MA, name_ar: "تمارة", name_en: "Temara", slug: "temara" },
+  { country_id: MA, name_ar: "آسفي", name_en: "Safi", slug: "safi" },
+  { country_id: MA, name_ar: "المحمدية", name_en: "Mohammedia", slug: "mohammedia" },
+  { country_id: MA, name_ar: "الجديدة", name_en: "El Jadida", slug: "el-jadida" },
+  { country_id: MA, name_ar: "بني ملال", name_en: "Beni Mellal", slug: "beni-mellal" },
+  { country_id: MA, name_ar: "الناظور", name_en: "Nador", slug: "nador" },
+  { country_id: MA, name_ar: "خريبكة", name_en: "Khouribga", slug: "khouribga" },
+  { country_id: MA, name_ar: "تازة", name_en: "Taza", slug: "taza" },
+  { country_id: MA, name_ar: "سطات", name_en: "Settat", slug: "settat" },
+  { country_id: MA, name_ar: "العرائش", name_en: "Larache", slug: "larache" },
+  { country_id: MA, name_ar: "القصر الكبير", name_en: "Ksar El Kebir", slug: "ksar-el-kebir" },
+  { country_id: MA, name_ar: "الحسيمة", name_en: "Al Hoceima", slug: "al-hoceima" },
+  { country_id: MA, name_ar: "الصويرة", name_en: "Essaouira", slug: "essaouira" },
+  { country_id: MA, name_ar: "الرشيدية", name_en: "Errachidia", slug: "errachidia" },
+];
+
+const seeds: CitySeed[] = [
+  ...originalSeeds,
+  ...additionalSeeds,
+  ...newSeeds,
+  ...moroccoSeeds,
+];
 
 export const CITIES: City[] = seeds.map((s, i) => ({
   ...s,

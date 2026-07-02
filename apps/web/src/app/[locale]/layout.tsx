@@ -33,8 +33,8 @@ export function generateMetadata({ params: { locale } }: { params: { locale: str
   const isAr = locale === "ar";
   const title = isAr ? "JustSwap - بدّل ما لديك بما تحتاجه" : "JustSwap - Exchange what you have for what you need";
   const description = isAr
-    ? "JustSwap سوق المقايضة في الخليج — بدّل ما لديك بما تحتاجه دون بيع أو شراء. تصفّح آلاف الإعلانات أو أضِف إعلانك."
-    : "JustSwap is the GCC's barter marketplace — the place to just swap what you have for what you need. No buying, no selling, just direct exchange.";
+    ? "JustSwap سوق المقايضة المجتمعي — بدّل ما لديك بما تحتاجه مع من حولك دون بيع أو شراء. تصفّح آلاف الإعلانات أو أضِف إعلانك."
+    : "JustSwap is a community barter marketplace — the place to just swap what you have for what you need with people near you. No buying, no selling, just direct exchange.";
 
   return {
     metadataBase: new URL(SITE_URL),
