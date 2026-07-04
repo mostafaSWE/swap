@@ -7,8 +7,10 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
+    "icon": "./assets/icon.png",
     "splash": {
-      "backgroundColor": "#0B1324",
+      "image": "./assets/splash-icon.png",
+      "backgroundColor": "#0A0E1A",
       "resizeMode": "contain"
     },
     "ios": {
@@ -18,8 +20,12 @@
     "android": {
       "package": "com.swap.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0B1324"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0E1A"
       }
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
     },
     "plugins": ["expo-router"],
     "experiments": {

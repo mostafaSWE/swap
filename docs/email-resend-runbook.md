@@ -91,10 +91,9 @@ npx supabase secrets set \
   most important value — it sets the confirm-link origin and footer legal links.
   (The function logs a warning if the base looks like
   localhost/`*.supabase.co`.)
-- The email header keeps the logo mark, but sends it as an opaque JPEG CID
-  attachment from `supabase/functions/send-email/justswap-logo-email.jpg`.
-  This avoids hosted-image loading delays and removes PNG transparency, which
-  Gmail/Outlook mobile dark mode can recolor unpredictably.
+- The email header keeps the logo mark, embedded as a PNG CID attachment in
+  `supabase/functions/send-email/index.ts`. This avoids hosted-image loading
+  delays while keeping the deployed function self-contained.
 - Enable the hook: **Authentication → Hooks → Send Email** → point it at `send-email`.
   Supabase generates `SEND_EMAIL_HOOK_SECRET` (`v1,whsec_…`) when you enable it —
   copy it back into the `secrets set` above.

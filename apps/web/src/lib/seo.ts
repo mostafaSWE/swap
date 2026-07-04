@@ -15,7 +15,7 @@ export const BRAND = {
 } as const;
 
 /** Branded landscape fallback share image (1200×630) for pages without their own. */
-export const OG_DEFAULT = "/brand/og-default.png";
+export const OG_DEFAULT = "/brand/justswap-og-image.png";
 
 const LOCALES: Locale[] = ["ar", "en"];
 const DEFAULT_LOCALE: Locale = "ar";
@@ -70,7 +70,7 @@ export function organizationJsonLd() {
     name: BRAND.name,
     alternateName: BRAND.alternateName,
     url: site,
-    logo: `${site}/brand/justswap-mark.png`,
+    logo: `${site}/brand/justswap-app-icon-512.png`,
   };
 }
 

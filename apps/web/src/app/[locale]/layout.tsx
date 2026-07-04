@@ -45,17 +45,12 @@ export function generateMetadata({ params: { locale } }: { params: { locale: str
     icons: {
       icon: [
         { url: "/favicon.ico", sizes: "32x32" },
-        { url: "/brand/justswap-favicon-32.png", sizes: "32x32", type: "image/png" },
-        {
-          url: "/brand/justswap-favicon-dark-32.png",
-          sizes: "32x32",
-          type: "image/png",
-          media: "(prefers-color-scheme: dark)",
-        },
-        { url: "/brand/justswap-app-icon.png", type: "image/png" },
-        { url: "/brand/justswap-mark.png", type: "image/png" },
+        { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+        { url: "/brand/justswap-favicon.png", sizes: "32x32", type: "image/png" },
+        { url: "/brand/justswap-app-icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/brand/justswap-app-icon-512.png", sizes: "512x512", type: "image/png" },
       ],
-      apple: [{ url: "/brand/justswap-app-icon.png", type: "image/png" }],
+      apple: [{ url: "/brand/justswap-apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
     },
     alternates: altLinks(locale as Locale, ""),
     openGraph: {

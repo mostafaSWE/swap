@@ -11,28 +11,28 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#18B66A",
     icons: [
       {
-        src: "/brand/justswap-favicon-32.png",
+        src: "/brand/justswap-favicon.png",
         sizes: "32x32",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/brand/justswap-favicon-dark-32.png",
-        sizes: "32x32",
+        src: "/brand/justswap-app-icon-192.png",
+        sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/brand/justswap-app-icon.png",
-        sizes: "1024x1024",
+        src: "/brand/justswap-app-icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/brand/justswap-app-icon-512.png",
+        sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
-      },
-      {
-        src: "/brand/justswap-mark.png",
-        sizes: "1024x1024",
-        type: "image/png",
-        purpose: "any",
       },
     ],
   };
