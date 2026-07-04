@@ -7,7 +7,7 @@ import { Logo } from "./Logo";
 import { RotatingSwap } from "./motion";
 
 /**
- * Split-screen shell for the auth flows: a warm-dark brand panel on the lead
+ * Split-screen shell for the auth flows: a theme-aware brand panel on the lead
  * side (hidden on small screens) and the form on the trailing side. The form
  * column shows a compact logo on mobile, where the brand panel is collapsed.
  */
@@ -25,7 +25,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <Link href="/" aria-label="JustSwap home" className="relative w-fit">
-          <Logo priority tone="onDark" />
+          <Logo priority />
         </Link>
 
         <div className="relative max-w-md">
