@@ -1,3 +1,4 @@
+import { getLocales } from "expo-localization";
 import { DevSettings, I18nManager } from "react-native";
 import arBase from "./ar.json";
 import enBase from "./en.json";
@@ -8,21 +9,18 @@ declare const process: { env: Record<string, string | undefined> };
 export type Locale = "ar" | "en";
 
 /**
- * App locale — device locale via Intl (Hermes ships full ICU), with an optional
- * EXPO_PUBLIC_LOCALE override for testing RTL/LTR. **Arabic-first:** any device
- * locale that is neither `ar` nor `en` falls back to **ar** (matches the web
- * default). Device detection via expo-localization is a later refinement.
+ * App locale — the device locale via **expo-localization** (`getLocales()`), the
+ * correct, reliable cross-Android-version API (Hermes `Intl` device-locale is
+ * unreliable). An optional EXPO_PUBLIC_LOCALE override forces ar/en for testing.
+ * **Arabic-first:** any device locale that is neither `ar` nor `en` falls back
+ * to **ar** (matches the web default).
  */
 function detectLocale(): Locale {
   const override = process.env.EXPO_PUBLIC_LOCALE;
   if (override === "ar" || override === "en") return override;
-  try {
-    const tag = (Intl.DateTimeFormat().resolvedOptions().locale ?? "").toLowerCase();
-    if (tag.startsWith("ar")) return "ar";
-    if (tag.startsWith("en")) return "en";
-  } catch {
-    /* fall through to the Arabic-first default */
-  }
+  const code = getLocales()[0]?.languageCode?.toLowerCase();
+  if (code === "ar") return "ar";
+  if (code === "en") return "en";
   return "ar";
 }
 
