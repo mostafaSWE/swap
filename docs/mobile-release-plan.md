@@ -10,7 +10,7 @@
 
 ## ▶ RESUME HERE
 
-**Current phase:** **Phase M1 — Navigation, i18n/RTL & RN Component Kit (NEXT).** **Phase M0 is DONE — verified on the Android emulator (2026-07-22).**
+**Current phase:** **Phase M1 — Navigation, i18n/RTL & RN Component Kit (IN PROGRESS).** Nav shell + i18n foundation + core components landed & **verified rendering on the emulator**; per-screen content (M2/M3), the full i18n catalog, and `forceRTL` are next. **M0 DONE — verified on-device (2026-07-22).**
 
 **Dev runtime (locked 2026-07-22):** a **local development build on the Android emulator** (`expo run:android` + `expo-dev-client`) — **not Expo Go, not EAS cloud**. Android SDK/NDK/CMake/emulator + a local NestJS API are set up on this machine.
 
@@ -18,11 +18,13 @@
 
 **✅ M0 verified — the build works and the app reaches the live backend.** The local Android dev build succeeds and the M0 smoke passed **5/5** on `emulator-5554`: Supabase auth (`signin=ok`), **session persistence across a cold restart** (`boot-session=ahmed@swap.demo`), RLS read via `@swap/api` (`count=6`), Realtime (`SUBSCRIBED`), authenticated REST `/me` (`user=@ahmed`). The Windows path-length wall took **two** fixes: `LongPathsEnabled=1` (you, elevated) **+** upgrading the CMake-bundled **ninja 1.10.2 → 1.12.1** (long-path-aware — LongPaths alone wasn't enough because the old ninja isn't manifested for it).
 
-**Last worked on:** **Phase M0 CLOSED (Session 4, 2026-07-22)** — cleared the Windows New-Arch path-length wall (`LongPathsEnabled` + ninja 1.12.1), got a green local Android dev build (`expo run:android`), and **verified the M0 smoke 5/5** on the emulator (auth · persistence-across-restart · RLS · Realtime · REST). Reverted the temporary auto-smoke env vars (the harness is interactive again). (Session 3: toolchain + `nodeLinker: hoisted`. Session 2: M0 code — SDK 51→57, `createSupabaseClient` fix, `supabase.ts`/`api.ts`, polyfills, `app.json` identity, harness.)
+**Last worked on:** **Phase M1 nav shell (Session 5, 2026-07-22)** — expo-router Tabs (Home/Browse/Messages/Notifications/Profile), JS-only i18n (`Intl` device-locale, ar/en, replaced hardcoded `'ar'`), dark theme from `@swap/config`, core components (Screen/ListingCard/CategoryGrid/EmptyState), a real Home tab (categories + live featured listings), M0 harness → `/m0-check`. Typecheck 8/8; **verified rendering on emulator-5554** (Home + 5-tab bar, screenshot). Commit `fc05058`. (Session 4 closed M0: `LongPathsEnabled` + ninja 1.12.1 → green build + smoke 5/5.)
 
 **Next task (in order):**
-1. **Phase M1** — expo-router tabs (Home · Browse · Messages · Notifications · Profile) + nested stacks; i18n + RTL (replace the hardcoded `locale="ar"`); theme provider from `@swap/config`; the RN component kit (ListingCard, CategoryGrid, ChatBubble, BottomSheet, …). The build + emulator are live, so M1 screens can be run/verified on device as they land.
-2. Then M2 (browse) → M3 (auth + swap loop) → M4 (safety / Apple 1.2) → M5 (native) → M6 (EAS). iOS stays blocked until M5 (paid Apple account).
+1. **Finish M1:** full `next-intl` catalog port + `expo-localization` device-locale + a `forceRTL` toggle (Arabic layout mirroring); expand the component kit (ChatBubble, ProposalContextCard, BottomSheet, ImageGallery, RatingStars, Avatar, Skeleton, form primitives); nested stacks + auth screens outside the tabs.
+2. Then M2 (browse/detail/save) → M3 (auth + swap loop) → M4 (safety / Apple 1.2) → M5 (native) → M6 (EAS). iOS stays blocked until M5 (paid Apple account).
+
+> **Dev loop:** the Android emulator + a fresh Metro (`expo start --dev-client`, port 8081) + the local NestJS API (:4000) are running. `pnpm mobile` starts Metro; the installed dev build reconnects. The connectivity harness is at route `/m0-check` (set `EXPO_PUBLIC_M0_AUTOTEST=1` to auto-run it). Rebuild native only when adding a native module (`expo run:android`).
 
 > **Reality check:** M0 is done and **verified on the emulator** — the mobile app is a real, authenticated client with sessions that persist against the live backend, and local Android dev builds work (`expo run:android`). Still zero end-user feature parity (home is the M0 connectivity harness) — that's M1–M4. No developer account is needed until the **iOS hard stop at M5**.
 
@@ -36,6 +38,7 @@
 | 2 | **Phase M0 — toolchain & live-data baseline DONE.** Upgraded Expo **SDK 51→57** (RN 0.86 / React 19.2.3, New Arch on) via `expo install --fix`; added AsyncStorage + `react-native-url-polyfill` + `react-native-get-random-values`. **Fixed `createSupabaseClient`** to accept a storage adapter (additive, non-breaking — web unaffected). Rewrote mobile `supabase.ts` (AsyncStorage, `detectSessionInUrl:false`, non-null, AppState refresh) + new `api.ts` (`SwapApiClient` + `getToken`); polyfills at app entry; `app.json` → name "JustSwap", `me.justswap.app`, scheme `justswap`, removed `newArchEnabled`, migrated splash to the `expo-splash-screen` plugin; `.env`/`.env.example`; tsconfig `baseUrl` removed (TS 6.0 deprecation). Replaced the static home with an **M0 connectivity harness**. Resolved D-4; D-5 left open (no company assumed); D-2 deferred to M4. Reordered this plan (build-first; accounts/store → Phase S). **Typecheck 8/8 green, expo-doctor 19/20.** On-device smoke still to run (Android). | 2026-07-22 |
 | 3 | **Phase M0 build bring-up (Android local dev build).** Set ANDROID_HOME/PATH (User scope); installed NDK 27.1.12297006 / CMake 3.22.1 / platform-36 / build-tools 36; booted the Pixel_3a API-34 emulator from the terminal; started the local NestJS API (port 4000). Added `expo-dev-client`, ran `expo prebuild` (android/ + ios/ gitignored), limited the emulator build to x86_64. **Diagnosed + fixed** a pnpm path-length build failure via **`nodeLinker: hoisted`** (deep `.pnpm` paths blew past CMake's object-path limit) — all third-party native modules then compiled. Added an env-gated headless auto-smoke to the harness. **Hit a hard wall:** the New-Arch app-level codegen link produces a **373-char object path** > Windows' 260 limit; the fix (`LongPathsEnabled`) needs an elevated registry write that is **denied** to me. Typecheck 8/8 green under hoisted. **M0 on-device smoke pending the long-paths enablement (human/admin — see Known gaps).** | 2026-07-22 |
 | 4 | **Phase M0 CLOSED — verified on the Android emulator.** User enabled `LongPathsEnabled=1` (elevated); the build STILL failed at the New-Arch codegen link (`ninja: Filename longer than 260`) because the CMake-bundled **ninja 1.10.2 isn't long-path-aware** → **upgraded ninja to 1.12.1** (original saved as `ninja.exe.orig`). `expo run:android` then **BUILD SUCCESSFUL**; app installed + launched on `emulator-5554`. **M0 smoke 5/5 green:** auth `signin=ok`; **persistence across cold restart** `boot-session=ahmed@swap.demo`; RLS `count=6`; `realtime=SUBSCRIBED`; REST `/me` `user=@ahmed`. Reverted the temporary auto-smoke env vars. **M0 exit criterion MET.** | 2026-07-22 |
+| 5 | **Phase M1 — navigation shell + i18n/RTL + core components (verified on emulator).** expo-router **Tabs** (Home/Browse/Messages/Notifications/Profile — emoji icons, themed, localized); **JS-only i18n** via `Intl` device-locale (ar/en; replaced hardcoded `'ar'`; `allowRTL`); dark theme from `@swap/config`; components **Screen/ListingCard/CategoryGrid/EmptyState**; real **Home** tab (categories + live featured listings via `@swap/api`); M0 harness → `/m0-check` (root anchored on `(tabs)` via `unstable_settings`). Typecheck 8/8; **rendered + screenshotted on emulator-5554** (Home + 5-tab bar, dark theme, en locale). Commit `fc05058`. Stubs: Browse/Messages/Notifications/Profile (M2/M3). | 2026-07-22 |
 
 ---
 
@@ -78,13 +81,13 @@ Legend: `[x]` done · `[~]` partial · `[ ]` not started · `[!]` blocked-on-hum
 ---
 
 ### Phase M1 — Navigation, i18n/RTL & RN Component Kit `(me)`
-- [ ] `expo-router` tabs (Home · Browse · Messages · Notifications · Profile) + nested stacks; auth screens outside the tabs; typed routes on.
-- [ ] i18n + RTL: port the `next-intl` ar/en catalogs to an RN i18n lib (`i18n-js`/`expo-localization`); wire `I18nManager` for Arabic; replace the hardcoded `locale="ar"`. **Arabic is primary — RTL must be correct before any screenshots (Phase S).**
-- [ ] Theme provider (light/dark) from the shared `@swap/config` tokens (already re-exported in `src/theme.ts`).
-- [ ] RN component kit: `ListingCard`, `CategoryGrid`, `ChatBubble`, `ProposalContextCard`, `BottomSheet`, `ImageGallery`, `RatingStars`, `Avatar`, `EmptyState`, `Skeleton`, form primitives. Reuse `@swap/ui` formatters (platform-neutral).
-- [ ] Confirm **Decision D-1**: browse via the direct `@swap/api` RLS query layer (`getListings`, …), **not** the REST browse endpoint, which doesn't apply block-filtering (`BUILD_PLAN.md` Known-Issue). *(The M0 harness already uses the RLS path.)*
+- [~] **`expo-router` tabs** (Home · Browse · Messages · Notifications · Profile) — DONE (`app/(tabs)/`, emoji icons, themed, localized labels; root anchored on `(tabs)` via `unstable_settings`). Nested stacks + auth-screens-outside-tabs land with M2/M3.
+- [~] **i18n + RTL** — foundation DONE: JS-only device-locale detection via `Intl` (no native module), `ar`/`en` message dict, replaced the hardcoded `locale="ar"`, `I18nManager.allowRTL`. TODO: full `next-intl` catalog port + `expo-localization` + a `forceRTL` toggle (needs an app reload). **Arabic RTL must be fully correct before screenshots (Phase S).**
+- [x] **Theme** from shared `@swap/config` tokens (dark navy; `src/theme.ts`). *(Note: `@swap/config` ships a single dark palette — a light/dark toggle would need light tokens added there; deferred.)*
+- [~] **RN component kit** — started: `Screen`, `ListingCard`, `CategoryGrid`, `EmptyState`. TODO: `ChatBubble`, `ProposalContextCard`, `BottomSheet`, `ImageGallery`, `RatingStars`, `Avatar`, `Skeleton`, form primitives. Reuses `@swap/ui` formatters.
+- [x] **Decision D-1 confirmed:** browse uses the direct `@swap/api` RLS query layer (`getListings`) — Home already does — not the REST browse endpoint (which skips block-filtering).
 
-**Exit criterion:** Navigable shell, every route reachable (screens may be stubbed), Arabic RTL correct end-to-end, light/dark switching works.
+**Exit criterion:** Navigable shell, every route reachable (screens may be stubbed), Arabic RTL correct end-to-end, theme applied. **Nav shell + Home verified on `emulator-5554` (2026-07-22); full RTL + remaining screens ongoing.**
 
 ---
 
