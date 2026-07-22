@@ -1,24 +1,18 @@
 {
   "expo": {
     "name": "JustSwap",
-    "slug": "swap",
-    "scheme": "swap",
+    "slug": "justswap",
+    "scheme": "justswap",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
     "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "backgroundColor": "#0A0E1A",
-      "resizeMode": "contain"
-    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.swap.app"
+      "bundleIdentifier": "me.justswap.app"
     },
     "android": {
-      "package": "com.swap.app",
+      "package": "me.justswap.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0A0E1A"
@@ -27,14 +21,21 @@
     "web": {
       "favicon": "./assets/icon.png"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "backgroundColor": "#0A0E1A",
+          "resizeMode": "contain",
+          "imageWidth": 200
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
-    },
-    "extra": {
-      "supabaseUrl": "",
-      "supabaseAnonKey": ""
     }
   }
 }

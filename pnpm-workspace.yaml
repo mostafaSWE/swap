@@ -2,6 +2,13 @@ packages:
   - "apps/*"
   - "packages/*"
 
+# Flat, npm-style node_modules (no deep .pnpm virtual-store paths). Required for
+# React Native's Android/iOS native builds on Windows: pnpm's default isolated
+# store pushes CMake object-file paths past the ~250-char limit and ninja fails.
+# (pnpm 10+ reads this from pnpm-workspace.yaml, not .npmrc.) Does not change
+# pnpm-lock.yaml, so CI --frozen-lockfile still works.
+nodeLinker: hoisted
+
 # unrs-resolver ships a postinstall build script (used by some eslint resolvers).
 # We don't need it built; explicitly disallow so `pnpm install` doesn't warn/fail.
 allowBuilds:

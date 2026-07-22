@@ -170,18 +170,18 @@ Legend: `[x]` done · `[~]` partial / present but incomplete · `[ ]` not starte
 ---
 
 ### Phase 7 — Mobile Applications
+> **Detailed multi-session tracker: `docs/mobile-release-plan.md`** (phases M0–M7 + store readiness/compliance). This is the summary — keep the two in sync.
 
-- [ ] Expo Router mirrors web App Router: only `_layout.tsx` (single Stack) + `index.tsx`.
-- [~] **(Phase 7)** Shared hooks/API from `packages/api`: factory imported + Supabase client constructed, but **never used by any screen**.
-- [ ] Custom RN components (ListingCard, CategoryGrid, ChatBubble, ProposalBanner, BottomSheet, ImageGallery): none — only a static index screen of non-interactive category chips.
-- [ ] Navigation: tabs + nested stacks — none.
-- [ ] Camera integration: none.
-- [ ] Push notifications via Expo Notifications: none.
-- [ ] Biometric auth, share sheet, deep linking: none (scheme `swap` exists, no deep-link routes).
-- [ ] App Store / Play Store assets: none.
-- [ ] EAS Build: no `eas.json`.
+- [x] **M0 — toolchain & live-data baseline (Sessions 2–3, 2026-07-22):** upgraded to **Expo SDK 57** (RN 0.86 / React 19.2.3, New Arch on); mobile now reaches the **live backend** via shared `@swap/api` — Supabase auth with **AsyncStorage session persistence** (fixed `createSupabaseClient` to accept a storage adapter — additive, web unaffected), a wired `SwapApiClient` (`getToken`), RLS reads, Realtime. Bundle id `me.justswap.app`, name "JustSwap", scheme `justswap`. Typecheck 8/8 green.
+- [~] **(M0 — device smoke BLOCKED)** Dev runtime = a **local Android dev build** (`expo run:android` + `expo-dev-client`), not Expo Go / EAS. Toolchain (NDK 27 / CMake 3.22 / platform-36), the Pixel_3a API-34 emulator, and the local NestJS API are set up; **`nodeLinker: hoisted`** fixed a pnpm path-length build failure and all third-party native modules compile. **Blocked** at the New-Arch codegen 260-char path limit → needs Windows `LongPathsEnabled` (elevated registry write, denied to the agent). See the mobile plan's Known gaps for the command.
+- [~] **(Phase 7)** Shared API from `packages/api`: now **used** (M0 wires the Supabase client + `SwapApiClient`). Feature screens (M2–M4) consume the existing query/REST functions.
+- [ ] Custom RN components (ListingCard, CategoryGrid, ChatBubble, ProposalBanner, BottomSheet, ImageGallery): none yet — M1. Home is a temporary M0 connectivity harness.
+- [ ] Navigation: tabs + nested stacks — none yet (M1). i18n/RTL — M1.
+- [ ] Camera / push / biometrics / deep links: none yet (M5). Universal-Links/App-Links domain `justswap.me`.
+- [ ] Store assets + compliance (Apple 1.2 UGC report/block/filter, privacy nutrition labels, Play Data Safety, content rating, screenshots): none yet — M4 (safety) + Phase S (store/accounts).
+- [ ] EAS Build/Submit (`eas.json`): none yet (M6).
 
-**Exit criterion:** Both apps installable on device. Full swap lifecycle functional on mobile.
+**Exit criterion:** Both apps installable on device; full swap lifecycle functional on mobile. *(M0 nearly closes the Android half — one admin action, Windows long paths, away from a running build; details in `docs/mobile-release-plan.md`.)*
 
 ---
 
