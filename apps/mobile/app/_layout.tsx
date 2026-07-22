@@ -9,6 +9,10 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { colors } from "../src/theme";
 
+// The app entry is the tab group (there is no root app/index.tsx), so tell
+// expo-router the root anchor is "(tabs)".
+export const unstable_settings = { initialRouteName: "(tabs)" };
+
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
@@ -20,7 +24,8 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.background },
         }}
       >
-        <Stack.Screen name="index" options={{ title: "JustSwap" }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="m0-check" options={{ title: "M0 connectivity" }} />
       </Stack>
     </SafeAreaProvider>
   );
