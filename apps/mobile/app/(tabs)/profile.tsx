@@ -5,7 +5,7 @@ import { t } from "../../src/i18n";
 export default function Profile() {
   return (
     <Screen>
-      <EmptyState icon="👤" title={t("common.soon")} subtitle={t("profile.soon")} />
+      <EmptyState icon="👤" title={t("mobile.soon.title")} subtitle={t("mobile.soon.profile")} />
     </Screen>
   );
 }

@@ -29,11 +29,11 @@ export default function TabsLayout() {
         ),
       })}
     >
-      <Tabs.Screen name="index" options={{ title: t("nav.home") }} />
-      <Tabs.Screen name="browse" options={{ title: t("nav.browse") }} />
-      <Tabs.Screen name="messages" options={{ title: t("nav.messages") }} />
-      <Tabs.Screen name="notifications" options={{ title: t("nav.notifications") }} />
-      <Tabs.Screen name="profile" options={{ title: t("nav.profile") }} />
+      <Tabs.Screen name="index" options={{ title: t("mobile.tab.home") }} />
+      <Tabs.Screen name="browse" options={{ title: t("mobile.tab.browse") }} />
+      <Tabs.Screen name="messages" options={{ title: t("mobile.tab.messages") }} />
+      <Tabs.Screen name="notifications" options={{ title: t("mobile.tab.notifications") }} />
+      <Tabs.Screen name="profile" options={{ title: t("mobile.tab.profile") }} />
     </Tabs>
   );
 }

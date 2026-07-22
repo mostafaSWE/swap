@@ -5,7 +5,7 @@ import { t } from "../../src/i18n";
 export default function Notifications() {
   return (
     <Screen>
-      <EmptyState icon="🔔" title={t("common.soon")} subtitle={t("notifications.soon")} />
+      <EmptyState icon="🔔" title={t("mobile.soon.title")} subtitle={t("mobile.soon.notifications")} />
     </Screen>
   );
 }
