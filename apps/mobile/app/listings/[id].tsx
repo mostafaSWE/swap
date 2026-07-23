@@ -6,6 +6,7 @@ import { localizedName } from "@swap/ui";
 import type { ListingWithRelations } from "@swap/types";
 import {
   getListingById,
+  getOrCreateConversation,
   incrementListingView,
   isListingSaved,
   saveListing,
@@ -148,7 +149,25 @@ export default function ListingDetail() {
           loading={saveBusy}
         />
         <View style={styles.msg}>
-          <MessageButton onPress={() => router.push("/(tabs)/messages")} />
+          <MessageButton
+            onPress={async () => {
+              const { data } = await supabase.auth.getUser();
+              if (!data.user || !owner) {
+                router.push("/login");
+                return;
+              }
+              try {
+                const conv = await getOrCreateConversation(supabase, {
+                  currentUserId: data.user.id,
+                  otherUserId: owner.id,
+                  listingId: listing.id,
+                });
+                router.push({ pathname: "/messages/[id]", params: { id: conv.id } });
+              } catch {
+                router.push("/login");
+              }
+            }}
+          />
         </View>
       </View>
     </>
