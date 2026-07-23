@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Heart } from "lucide-react-native";
+import { Heart, Repeat2 } from "lucide-react-native";
 import { localizedName } from "@swap/ui";
 import type { ListingWithRelations } from "@swap/types";
 import {
@@ -20,6 +20,7 @@ import { Badge, Button, Divider, Icon } from "../../src/components/ui";
 import { WantedCard } from "../../src/components/WantedCard";
 import { SellerCard } from "../../src/components/SellerCard";
 import { MessageButton } from "../../src/components/MessageButton";
+import { ProposeSwapSheet } from "../../src/components/ProposeSwapSheet";
 import { ReportDialog } from "../../src/components/ReportDialog";
 import { ItemArtwork } from "../../src/components/ItemArtwork";
 
@@ -31,6 +32,8 @@ export default function ListingDetail() {
   const [listing, setListing] = useState<ListingWithRelations | null | undefined>(undefined);
   const [saved, setSaved] = useState(false);
   const [saveBusy, setSaveBusy] = useState(false);
+  const [myId, setMyId] = useState<string | null>(null);
+  const [proposeOpen, setProposeOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -40,6 +43,7 @@ export default function ListingDetail() {
       .catch(() => active && setListing(null));
     // Best-effort view tracking + saved-state, once we know who's signed in.
     supabase.auth.getUser().then(({ data }) => {
+      if (active) setMyId(data.user?.id ?? null);
       incrementListingView(supabase, id, data.user?.id ?? null).catch(() => undefined);
       if (data.user) isListingSaved(supabase, data.user.id, id).then((s) => active && setSaved(s)).catch(() => undefined);
     });
@@ -139,37 +143,67 @@ export default function ListingDetail() {
         </View>
       </ScrollView>
 
-      {/* Sticky action bar */}
+      {/* Sticky action bar — Save + Message secondary; Propose is the primary CTA. */}
       <View style={styles.actions}>
-        <Button
-          variant="secondary"
-          label={saved ? t("mobile.detail.saved") : t("mobile.detail.save")}
-          leftIcon={<Icon icon={Heart} size={18} color={saved ? colors.green : colors.text} />}
-          onPress={toggleSave}
-          loading={saveBusy}
-        />
-        <View style={styles.msg}>
-          <MessageButton
-            onPress={async () => {
-              const { data } = await supabase.auth.getUser();
-              if (!data.user || !owner) {
-                router.push("/login");
-                return;
-              }
-              try {
-                const conv = await getOrCreateConversation(supabase, {
-                  currentUserId: data.user.id,
-                  otherUserId: owner.id,
-                  listingId: listing.id,
-                });
-                router.push({ pathname: "/messages/[id]", params: { id: conv.id } });
-              } catch {
-                router.push("/login");
-              }
-            }}
-          />
+        <View style={styles.row}>
+          <View style={styles.grow}>
+            <Button
+              variant="secondary"
+              fullWidth
+              label={saved ? t("mobile.detail.saved") : t("mobile.detail.save")}
+              leftIcon={<Icon icon={Heart} size={18} color={saved ? colors.green : colors.text} />}
+              onPress={toggleSave}
+              loading={saveBusy}
+            />
+          </View>
+          <View style={styles.grow}>
+            <MessageButton
+              variant="secondary"
+              onPress={async () => {
+                const { data } = await supabase.auth.getUser();
+                if (!data.user || !owner) {
+                  router.push("/login");
+                  return;
+                }
+                try {
+                  const conv = await getOrCreateConversation(supabase, {
+                    currentUserId: data.user.id,
+                    otherUserId: owner.id,
+                    listingId: listing.id,
+                  });
+                  router.push({ pathname: "/messages/[id]", params: { id: conv.id } });
+                } catch {
+                  router.push("/login");
+                }
+              }}
+            />
+          </View>
         </View>
+        {/* Hide Propose on your own listing (the backend rejects self-proposals). */}
+        {owner && myId !== owner.id ? (
+          <Button
+            label={t("proposal.cta")}
+            leftIcon={<Icon icon={Repeat2} size={18} color={colors.navy} />}
+            onPress={() => (myId ? setProposeOpen(true) : router.push("/login"))}
+            fullWidth
+          />
+        ) : null}
       </View>
+
+      {proposeOpen && myId ? (
+        <ProposeSwapSheet
+          visible={proposeOpen}
+          onClose={() => setProposeOpen(false)}
+          targetListingId={listing.id}
+          currentUserId={myId}
+          onCreated={(conversationId) => {
+            setProposeOpen(false);
+            router.push(
+              conversationId ? { pathname: "/messages/[id]", params: { id: conversationId } } : "/(tabs)/messages",
+            );
+          }}
+        />
+      ) : null}
     </>
   );
 }
@@ -187,12 +221,12 @@ const styles = StyleSheet.create({
   desc: { color: colors.text, fontSize: 15, lineHeight: 22 },
   reportRow: { alignItems: "flex-start" },
   actions: {
-    flexDirection: "row",
     gap: spacing.sm,
     padding: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.surface,
   },
-  msg: { flex: 1 },
+  row: { flexDirection: "row", gap: spacing.sm },
+  grow: { flex: 1 },
 });
