@@ -9,3 +9,6 @@ allowBuilds:
   '@nestjs/core': false
   '@scarf/scarf': false
   unrs-resolver: false
+
+minimumReleaseAgeExclude:
+  - expo-updates@57.0.9

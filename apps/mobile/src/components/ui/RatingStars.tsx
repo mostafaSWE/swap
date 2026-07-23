@@ -5,7 +5,9 @@ const SIZES = { sm: 14, md: 20, lg: 28 } as const;
 
 /** 1–5 star control (web `RatingStars`). Read-only, or interactive when
  *  `onChange` is given (touch — keyboard nav is web-only). Uses ★/☆ glyphs so no
- *  icon library is needed. Star order is visual and identical in RTL/LTR. */
+ *  icon library is needed. The `row` auto-flips under RTL (intended): filled
+ *  stars fill from the leading edge — the right in Arabic — so the rating reads
+ *  as a quantity growing outward from where the eye starts. */
 export function RatingStars({
   value,
   onChange,
