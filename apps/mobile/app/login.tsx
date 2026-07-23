@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { supabase } from "../src/lib/supabase";
 import { t } from "../src/i18n";
@@ -73,6 +73,10 @@ export default function Login() {
             onSubmitEditing={submit}
           />
 
+          <Pressable onPress={() => router.push("/forgot-password")} hitSlop={8} style={styles.forgotWrap}>
+            <Text style={styles.forgot}>{t("auth.forgotTitle")}</Text>
+          </Pressable>
+
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <Button label={t("auth.loginButton")} onPress={submit} loading={busy} fullWidth />
@@ -93,6 +97,8 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: 26, fontWeight: "800" },
   subtitle: { color: colors.textMuted, fontSize: 14, marginBottom: spacing.sm },
   error: { color: colors.danger, fontSize: 13 },
+  forgotWrap: { alignSelf: "flex-end", paddingVertical: spacing.xs },
+  forgot: { color: colors.green, fontSize: 13, fontWeight: "600" },
   footer: { flexDirection: "row", justifyContent: "center", marginTop: spacing.md, flexWrap: "wrap" },
   muted: { color: colors.textMuted, fontSize: 14 },
   link: { color: colors.green, fontSize: 14, fontWeight: "700" },
