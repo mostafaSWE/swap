@@ -1,5 +1,4 @@
 import { getLocales } from "expo-localization";
-import { DevSettings, I18nManager } from "react-native";
 import arBase from "./ar.json";
 import enBase from "./en.json";
 
@@ -12,36 +11,27 @@ export type Locale = "ar" | "en";
  * App locale — the device locale via **expo-localization** (`getLocales()`), the
  * correct, reliable cross-Android-version API (Hermes `Intl` device-locale is
  * unreliable). An optional EXPO_PUBLIC_LOCALE override forces ar/en for testing.
- * **Arabic-first:** any device locale that is neither `ar` nor `en` falls back
- * to **ar** (matches the web default).
+ *
+ * **Locale rule (D-7):** an **Arabic** device → **Arabic**; **any other** device
+ * language → **English**. (English is the universal fallback; only an explicitly
+ * Arabic device gets Arabic.)
  */
 function detectLocale(): Locale {
   const override = process.env.EXPO_PUBLIC_LOCALE;
   if (override === "ar" || override === "en") return override;
-  const code = getLocales()[0]?.languageCode?.toLowerCase();
-  if (code === "ar") return "ar";
-  if (code === "en") return "en";
-  return "ar";
+  return getLocales()[0]?.languageCode?.toLowerCase() === "ar" ? "ar" : "en";
 }
 
 export const locale: Locale = detectLocale();
-export const isRTL = locale === "ar";
 
-// Arabic-first: force the native layout direction to match the app locale, so an
-// Arabic UI is RTL even on an LTR device (the `ar` fallback case) and vice-versa.
-// The native flag is read when the root view is created, so a *flip* only applies
-// after a full app relaunch. We set the flag here; production wires
-// expo-updates `Updates.reloadAsync()` (added with the in-app language switcher)
-// to relaunch automatically. A JS-only reload does NOT flip the native axis, so
-// we don't auto-reload here (avoids a reload loop) — a manual relaunch applies it.
-I18nManager.allowRTL(true);
-if (I18nManager.isRTL !== isRTL) {
-  I18nManager.forceRTL(isRTL);
-  if (__DEV__) {
-    console.log(`[i18n] forced RTL=${isRTL} for locale="${locale}" — relaunch the app to apply it.`);
-    void DevSettings; // reserved for the dev reload hook once RTL-flip UX is wired
-  }
-}
+/**
+ * The **required** layout direction for the active locale — the hard invariant:
+ * **Arabic ⇒ RTL, English ⇒ LTR**, always. This module never mutates
+ * `I18nManager`; the native flag is reconciled to this value exactly once, by the
+ * **boot direction guard** in `app/_layout.tsx`, which reloads behind the splash
+ * if the native flag disagrees so a mismatched direction is never rendered.
+ */
+export const isRTL = locale === "ar";
 
 // Mobile-only strings. The shared web catalog is ported verbatim in
 // ar.json / en.json; these are labels unique to the native app shell.

@@ -9,7 +9,11 @@
     "icon": "./assets/icon.png",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "me.justswap.app"
+      "bundleIdentifier": "me.justswap.app",
+      "infoPlist": {
+        "CFBundleLocalizations": ["ar", "en"],
+        "CFBundleDevelopmentRegion": "en"
+      }
     },
     "android": {
       "package": "me.justswap.app",
@@ -32,7 +36,8 @@
           "imageWidth": 200
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "./plugins/withAndroidRtlEarlySet"
     ],
     "experiments": {
       "typedRoutes": true,
