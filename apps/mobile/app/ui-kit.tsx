@@ -30,6 +30,10 @@ import { NotificationBell } from "../src/components/NotificationBell";
 import { ChatBubble } from "../src/components/ChatBubble";
 import { ConversationCard } from "../src/components/ConversationCard";
 import { SellerCard } from "../src/components/SellerCard";
+import { FeaturedCard } from "../src/components/FeaturedCard";
+import { WantedCard } from "../src/components/WantedCard";
+import { CategoryCarousel } from "../src/components/CategoryCard";
+import { ProfileHeader } from "../src/components/ProfileHeader";
 
 /** Dev-only preview of the RN component kit (like /m0-check). Not a tab —
  *  reached via the `justswap://ui-kit` route. Used to verify the kit renders
@@ -142,6 +146,44 @@ export default function UiKit() {
         <Checkbox checked={checked} onChange={setChecked} label="I accept the terms" hint="Required to post" />
       </Section>
 
+      <Section title="FeaturedCard · WantedCard">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hrail}>
+          <FeaturedCard title="iPhone 14 Pro Max" categoryIcon="mobiles" ownerName="Khalid" cityName="Riyadh" onPress={() => undefined} />
+          <FeaturedCard title="Herman Miller Chair" categoryIcon="furniture" ownerName="Sara" cityName="Jeddah" onPress={() => undefined} />
+        </ScrollView>
+        <WantedCard wanted="MacBook Pro M3 or an equivalent laptop" categoryIcon="computers" />
+        <WantedCard wanted="__any__" categoryIcon="open-exchange" />
+      </Section>
+
+      <Section title="Categories (carousel)">
+        <CategoryCarousel
+          items={[
+            { icon: "electronics", name: "Electronics" },
+            { icon: "cars", name: "Cars" },
+            { icon: "furniture", name: "Furniture" },
+            { icon: "fashion", name: "Fashion" },
+            { icon: "sports", name: "Sports" },
+          ]}
+          onSelect={() => undefined}
+        />
+      </Section>
+
+      <Section title="ProfileHeader">
+        <ProfileHeader
+          name="Khalid Al-Otaibi"
+          username="khalid"
+          completedSwaps={23}
+          rating={4.8}
+          ratingsCount={17}
+          memberSince="Jan 2024"
+          listingsCount={12}
+          followersCount={340}
+          followingCount={88}
+          bio="Trading gadgets and camera gear across Riyadh."
+          action={<Button label="Edit profile" variant="secondary" fullWidth onPress={() => undefined} />}
+        />
+      </Section>
+
       <Section title="Actions · Bell">
         <FollowButton following={following} onToggle={() => setFollowing((f) => !f)} />
         <MessageButton onPress={() => undefined} />
@@ -223,4 +265,5 @@ const styles = StyleSheet.create({
   artRow: { flexDirection: "row", gap: spacing.sm },
   art: { width: 104, height: 104, borderRadius: 12 },
   body: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
+  hrail: { gap: spacing.sm, paddingVertical: spacing.xs },
 });
