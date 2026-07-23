@@ -6,11 +6,11 @@ import { locale } from "../i18n";
 import { Badge, Card } from "./ui";
 
 /** Listing card: cover image + title + category badge · city. Built on the Card
- *  + Badge primitives. Tap-to-detail lands in M2. */
-export function ListingCard({ listing }: { listing: ListingWithRelations }) {
+ *  + Badge primitives. Pass `onPress` to open the listing detail. */
+export function ListingCard({ listing, onPress }: { listing: ListingWithRelations; onPress?: () => void }) {
   const cover = [...(listing.images ?? [])].sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url;
   return (
-    <Card padded={false}>
+    <Card padded={false} onPress={onPress}>
       {cover ? (
         <Image source={{ uri: cover }} style={styles.image} resizeMode="cover" />
       ) : (

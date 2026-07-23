@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import type { ListingWithRelations } from "@swap/types";
 import { getListings } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
@@ -11,6 +12,7 @@ import { colors, radii, spacing } from "../../src/theme";
 import { t } from "../../src/i18n";
 
 export default function Home() {
+  const router = useRouter();
   const [listings, setListings] = useState<ListingWithRelations[] | null>(null);
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function Home() {
       ) : (
         <View style={{ gap: spacing.lg }}>
           {listings.map((l) => (
-            <ListingCard key={l.id} listing={l} />
+            <ListingCard key={l.id} listing={l} onPress={() => router.push({ pathname: "/listings/[id]", params: { id: l.id } })} />
           ))}
         </View>
       )}

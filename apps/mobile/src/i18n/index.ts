@@ -39,6 +39,8 @@ const mobile = {
   ar: {
     tab: { home: "الرئيسية", browse: "تصفّح", messages: "المحادثات", notifications: "الإشعارات", profile: "حسابي" },
     home: { categories: "التصنيفات", featured: "إعلانات مميّزة", empty: "لا توجد إعلانات بعد" },
+    browse: { search: "ابحث عن غرض…", all: "الكل", newest: "الأحدث", mostViewed: "الأكثر مشاهدة", empty: "لا توجد إعلانات تطابق بحثك" },
+    detail: { save: "حفظ", saved: "محفوظ", views: "{count} مشاهدة", notFound: "لم يُعثر على الإعلان", conditions: { new: "جديد", used: "مستعمل" } },
     soon: {
       title: "قريبًا",
       browse: "التصفّح والبحث — المرحلة M2",
@@ -50,6 +52,8 @@ const mobile = {
   en: {
     tab: { home: "Home", browse: "Browse", messages: "Messages", notifications: "Alerts", profile: "Profile" },
     home: { categories: "Categories", featured: "Featured listings", empty: "No listings yet" },
+    browse: { search: "Search for an item…", all: "All", newest: "Newest", mostViewed: "Most viewed", empty: "No listings match your search" },
+    detail: { save: "Save", saved: "Saved", views: "{count} views", notFound: "Listing not found", conditions: { new: "New", used: "Used" } },
     soon: {
       title: "Coming soon",
       browse: "Browse & search — Phase M2",
