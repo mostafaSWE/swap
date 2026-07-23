@@ -24,6 +24,12 @@ import {
 } from "../src/components/ui";
 import { SwapPair } from "../src/components/SwapPair";
 import { ItemArtwork } from "../src/components/ItemArtwork";
+import { FollowButton } from "../src/components/FollowButton";
+import { MessageButton } from "../src/components/MessageButton";
+import { NotificationBell } from "../src/components/NotificationBell";
+import { ChatBubble } from "../src/components/ChatBubble";
+import { ConversationCard } from "../src/components/ConversationCard";
+import { SellerCard } from "../src/components/SellerCard";
 
 /** Dev-only preview of the RN component kit (like /m0-check). Not a tab —
  *  reached via the `justswap://ui-kit` route. Used to verify the kit renders
@@ -34,6 +40,7 @@ export default function UiKit() {
   const [country, setCountry] = useState<string>();
   const [text, setText] = useState("");
   const [seg, setSeg] = useState("all");
+  const [following, setFollowing] = useState(false);
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
@@ -133,6 +140,56 @@ export default function UiKit() {
         />
         <Textarea label="Description" placeholder="Describe your item" value={text} onChangeText={setText} />
         <Checkbox checked={checked} onChange={setChecked} label="I accept the terms" hint="Required to post" />
+      </Section>
+
+      <Section title="Actions · Bell">
+        <FollowButton following={following} onToggle={() => setFollowing((f) => !f)} />
+        <MessageButton onPress={() => undefined} />
+        <View style={styles.rowCenter}>
+          <NotificationBell count={3} onPress={() => undefined} />
+          <NotificationBell count={12} onPress={() => undefined} />
+          <NotificationBell count={0} onPress={() => undefined} />
+        </View>
+      </Section>
+
+      <Section title="SellerCard">
+        <SellerCard
+          name="Khalid Al-Otaibi"
+          username="khalid"
+          completedSwaps={23}
+          rating={4.8}
+          ratingsCount={17}
+          memberSince="Jan 2024"
+          bio="Trading gadgets and camera gear across Riyadh. Fast, fair, friendly."
+          following={following}
+          onToggleFollow={() => setFollowing((f) => !f)}
+          onViewProfile={() => undefined}
+        />
+      </Section>
+
+      <Section title="ChatBubble">
+        <ChatBubble body="Hi! Is the iPhone still available for swap?" time="2m" isOwn={false} />
+        <ChatBubble body="Yes! What do you have to trade?" time="1m" isOwn />
+      </Section>
+
+      <Section title="ConversationCard">
+        <ConversationCard
+          name="Sara Al-Amiri"
+          lastMessage="Deal! Let's meet tomorrow at 5pm."
+          time="5m"
+          unreadCount={2}
+          proposalStatus="agreed"
+          proposalLabel="Agreed"
+          onPress={() => undefined}
+        />
+        <ConversationCard
+          name="Omar Hassan"
+          lastMessage="Can you do 2 for 1?"
+          time="1h"
+          proposalStatus="pending"
+          proposalLabel="Pending"
+          onPress={() => undefined}
+        />
       </Section>
 
       <Section title="Skeleton · Icon">
