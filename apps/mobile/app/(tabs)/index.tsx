@@ -33,7 +33,7 @@ export default function Home() {
       </View>
 
       <Text style={styles.section}>{t("mobile.home.categories")}</Text>
-      <CategoryGrid />
+      <CategoryGrid onSelect={(id) => router.push({ pathname: "/browse", params: { categoryId: id } })} />
 
       <Text style={styles.section}>{t("mobile.home.featured")}</Text>
       {listings === null ? (

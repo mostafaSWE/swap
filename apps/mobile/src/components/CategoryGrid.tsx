@@ -6,12 +6,16 @@ import { locale } from "../i18n";
 import { Chip } from "./ui";
 
 /** Top-level category chips (shared @swap/config catalog), using the Chip
- *  primitive. Tapping to filter browse lands in M2. */
-export function CategoryGrid() {
+ *  primitive. Pass `onSelect` to filter Browse by the tapped category. */
+export function CategoryGrid({ onSelect }: { onSelect?: (categoryId: string) => void }) {
   return (
     <View style={styles.grid}>
       {CATEGORIES.map((cat) => (
-        <Chip key={cat.id} label={localizedName(cat, locale)} />
+        <Chip
+          key={cat.id}
+          label={localizedName(cat, locale)}
+          onPress={onSelect ? () => onSelect(cat.id) : undefined}
+        />
       ))}
     </View>
   );

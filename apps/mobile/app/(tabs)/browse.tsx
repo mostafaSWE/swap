@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, ScrollView, StyleSheet, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { CATEGORIES } from "@swap/config";
 import { localizedName } from "@swap/ui";
 import type { ListingWithRelations, SortOption } from "@swap/types";
@@ -16,9 +16,16 @@ const PAGE = 20;
 
 export default function Browse() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ categoryId?: string }>();
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [categoryId, setCategoryId] = useState<string | undefined>();
+  const [categoryId, setCategoryId] = useState<string | undefined>(params.categoryId || undefined);
+
+  // Apply a category passed from Home's category chips (only when present, so
+  // switching to the Browse tab directly never clears an in-place filter).
+  useEffect(() => {
+    if (params.categoryId) setCategoryId(params.categoryId);
+  }, [params.categoryId]);
   const [sort, setSort] = useState<SortOption>("newest");
   const [items, setItems] = useState<ListingWithRelations[] | null>(null);
   const [more, setMore] = useState(false);

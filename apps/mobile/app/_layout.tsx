@@ -87,6 +87,7 @@ export default function RootLayout() {
         <Stack.Screen name="ui-kit" options={{ title: "UI kit" }} />
         <Stack.Screen name="listings/[id]" options={{ title: "" }} />
         <Stack.Screen name="users/[username]" options={{ title: "" }} />
+        <Stack.Screen name="saved" options={{ title: "" }} />
       </Stack>
     </SafeAreaProvider>
   );
