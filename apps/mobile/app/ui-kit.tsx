@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { Star } from "lucide-react-native";
+import { ChevronRight, Star } from "lucide-react-native";
 import { colors, spacing } from "../src/theme";
 import {
+  Accordion,
   Avatar,
   Badge,
   Button,
@@ -12,13 +13,19 @@ import {
   Divider,
   Icon,
   Input,
+  ListRow,
   RatingStars,
+  SegmentedControl,
   Select,
+  Skeleton,
   StatCell,
+  StrengthMeter,
   Textarea,
 } from "../src/components/ui";
+import { SwapPair } from "../src/components/SwapPair";
+import { ItemArtwork } from "../src/components/ItemArtwork";
 
-/** Dev-only preview of the RN primitive kit (like /m0-check). Not a tab —
+/** Dev-only preview of the RN component kit (like /m0-check). Not a tab —
  *  reached via the `justswap://ui-kit` route. Used to verify the kit renders
  *  correctly in both LTR and RTL. */
 export default function UiKit() {
@@ -26,6 +33,7 @@ export default function UiKit() {
   const [checked, setChecked] = useState(false);
   const [country, setCountry] = useState<string>();
   const [text, setText] = useState("");
+  const [seg, setSeg] = useState("all");
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
@@ -47,6 +55,22 @@ export default function UiKit() {
         </View>
       </Section>
 
+      <Section title="SwapPair (signature)">
+        <View style={styles.rowWrap}>
+          <SwapPair categoryIcon="electronics" size="sm" />
+          <SwapPair categoryIcon="cars" size="md" />
+        </View>
+        <SwapPair categoryIcon="mobiles" size="lg" />
+      </Section>
+
+      <Section title="ItemArtwork">
+        <View style={styles.artRow}>
+          <ItemArtwork title="iPhone 14 Pro" categoryIcon="mobiles" style={styles.art} />
+          <ItemArtwork title="Office Chair" categoryIcon="furniture" style={styles.art} />
+          <ItemArtwork title="Mountain Bike" categoryIcon="motorcycles" style={styles.art} />
+        </View>
+      </Section>
+
       <Section title="Avatar · Stats · Rating">
         <View style={styles.rowCenter}>
           <Avatar name="Ahmed" size="lg" />
@@ -59,12 +83,38 @@ export default function UiKit() {
         <RatingStars value={rating} onChange={setRating} size="lg" label="Rate" />
       </Section>
 
-      <Section title="Chips">
+      <Section title="Chips · Segmented · Strength">
         <View style={styles.rowWrap}>
           <Chip label="All" active />
           <Chip label="Electronics" onPress={() => undefined} />
           <Chip label="Cars" onPress={() => undefined} />
         </View>
+        <SegmentedControl
+          segments={[
+            { value: "all", label: "All" },
+            { value: "gives", label: "Gives" },
+            { value: "wants", label: "Wants" },
+          ]}
+          value={seg}
+          onChange={setSeg}
+        />
+        <StrengthMeter score={3} label="Strong" />
+      </Section>
+
+      <Section title="ListRow · Accordion">
+        <ListRow
+          leading={<Avatar name="Sara" size="sm" />}
+          title="Sara Al-Amiri"
+          subtitle="Riyadh · 4.9 ★"
+          trailing={<Icon icon={ChevronRight} size={18} color={colors.textFaint} mirror />}
+          onPress={() => undefined}
+        />
+        <Accordion title="Shipping & pickup" defaultOpen>
+          <Text style={styles.body}>Meet in a public place, or arrange delivery within the city.</Text>
+        </Accordion>
+        <Accordion title="Return policy">
+          <Text style={styles.body}>Swaps are final once both sides confirm.</Text>
+        </Accordion>
       </Section>
 
       <Section title="Inputs · Select · Checkbox">
@@ -85,7 +135,10 @@ export default function UiKit() {
         <Checkbox checked={checked} onChange={setChecked} label="I accept the terms" hint="Required to post" />
       </Section>
 
-      <Section title="Icon">
+      <Section title="Skeleton · Icon">
+        <Skeleton width="70%" height={18} />
+        <Skeleton width="45%" height={14} />
+        <Skeleton height={72} radius={12} />
         <Icon icon={Star} color={colors.warning} size={28} />
       </Section>
     </ScrollView>
@@ -107,7 +160,10 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg, gap: spacing.lg },
   section: { gap: spacing.md },
   sectionTitle: { color: colors.text, fontSize: 16, fontWeight: "800" },
-  rowWrap: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
+  rowWrap: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm, alignItems: "flex-start" },
   rowCenter: { flexDirection: "row", alignItems: "center", gap: spacing.md },
   stats: { flex: 1, flexDirection: "row" },
+  artRow: { flexDirection: "row", gap: spacing.sm },
+  art: { width: 104, height: 104, borderRadius: 12 },
+  body: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
 });
