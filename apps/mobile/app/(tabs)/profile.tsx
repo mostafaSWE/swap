@@ -56,8 +56,7 @@ export default function ProfileTab() {
       <Screen>
         <View style={styles.signedOut}>
           <EmptyState icon="👤" title={t("mobile.profile.signInPrompt")} />
-          {/* Real auth screens land in M3; the M0 harness can establish a session for now. */}
-          <Button label={t("mobile.profile.signIn")} onPress={() => router.push("/m0-check")} fullWidth />
+          <Button label={t("mobile.profile.signIn")} onPress={() => router.push("/login")} fullWidth />
         </View>
       </Screen>
     );
