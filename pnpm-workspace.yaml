@@ -12,3 +12,4 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - expo-updates@57.0.9
+  - expo-image-picker@57.0.6

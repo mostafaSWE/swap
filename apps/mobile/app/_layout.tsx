@@ -91,6 +91,7 @@ export default function RootLayout() {
         <Stack.Screen name="login" options={{ title: "" }} />
         <Stack.Screen name="register" options={{ title: "" }} />
         <Stack.Screen name="forgot-password" options={{ title: "" }} />
+        <Stack.Screen name="new-listing" options={{ title: "" }} />
         <Stack.Screen name="messages/[id]" options={{ title: "" }} />
       </Stack>
     </SafeAreaProvider>

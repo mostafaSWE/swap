@@ -37,7 +37,14 @@
         }
       ],
       "expo-localization",
-      "./plugins/withAndroidRtlEarlySet"
+      "./plugins/withAndroidRtlEarlySet",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "JustSwap needs access to your photos so you can add pictures to your listings and profile.",
+          "cameraPermission": "JustSwap needs access to your camera so you can take photos for your listings."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
