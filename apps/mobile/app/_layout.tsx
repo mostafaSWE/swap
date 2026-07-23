@@ -26,6 +26,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="m0-check" options={{ title: "M0 connectivity" }} />
+        <Stack.Screen name="ui-kit" options={{ title: "UI kit" }} />
       </Stack>
     </SafeAreaProvider>
   );
