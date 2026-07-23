@@ -34,6 +34,8 @@ import { FeaturedCard } from "../src/components/FeaturedCard";
 import { WantedCard } from "../src/components/WantedCard";
 import { CategoryCarousel } from "../src/components/CategoryCard";
 import { ProfileHeader } from "../src/components/ProfileHeader";
+import { ReportDialog } from "../src/components/ReportDialog";
+import { AvatarUpload } from "../src/components/AvatarUpload";
 
 /** Dev-only preview of the RN component kit (like /m0-check). Not a tab —
  *  reached via the `justswap://ui-kit` route. Used to verify the kit renders
@@ -182,6 +184,13 @@ export default function UiKit() {
           bio="Trading gadgets and camera gear across Riyadh."
           action={<Button label="Edit profile" variant="secondary" fullWidth onPress={() => undefined} />}
         />
+      </Section>
+
+      <Section title="ReportDialog · AvatarUpload">
+        <View style={styles.rowCenter}>
+          <AvatarUpload name="Khalid" onPick={() => undefined} />
+          <ReportDialog onSubmit={() => undefined} />
+        </View>
       </Section>
 
       <Section title="Actions · Bell">
