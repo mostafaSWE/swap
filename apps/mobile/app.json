@@ -11,7 +11,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "me.justswap.app",
       "infoPlist": {
-        "CFBundleLocalizations": ["ar", "en"],
+        "CFBundleLocalizations": [
+          "ar",
+          "en"
+        ],
         "CFBundleDevelopmentRegion": "en"
       }
     },
@@ -49,6 +52,13 @@
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9f8660e2-f233-4eeb-a578-776367ebec8e"
+      }
+    },
+    "owner": "most.othman"
   }
 }

@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } fr
 import { Stack, useRouter } from "expo-router";
 import { MailCheck } from "lucide-react-native";
 import { supabase } from "../src/lib/supabase";
+import { authCallbackUrl } from "../src/lib/auth-redirect";
 import { t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
 import { Button, Icon, Input } from "../src/components/ui";
@@ -10,8 +11,7 @@ import { Button, Icon, Input } from "../src/components/ui";
 /**
  * Request a password-reset email (web `ForgotPasswordForm`). We **always** show
  * the "sent" state — never reveal whether an email is registered. No explicit
- * `redirectTo`: Supabase uses the project Site URL (the web reset flow), matching
- * register's email flow; the fully in-app reset deep link lands with M5.
+ * `redirectTo` targets the same native callback used by signup confirmation.
  */
 export default function ForgotPassword() {
   const router = useRouter();
@@ -23,7 +23,7 @@ export default function ForgotPassword() {
     if (busy || !email.trim()) return;
     setBusy(true);
     try {
-      await supabase.auth.resetPasswordForEmail(email.trim());
+      await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: authCallbackUrl("/reset-password") });
     } catch {
       // swallow — never reveal registration status
     } finally {

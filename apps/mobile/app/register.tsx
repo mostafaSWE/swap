@@ -7,6 +7,7 @@ import { localizedName } from "@swap/ui";
 import { updateProfile } from "@swap/api";
 import { supabase } from "../src/lib/supabase";
 import { buildPhone } from "../src/lib/phone";
+import { authCallbackUrl } from "../src/lib/auth-redirect";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
 import { Button, Checkbox, Icon, Input, Select, StrengthMeter } from "../src/components/ui";
@@ -69,7 +70,10 @@ export default function Register() {
       const { data, error: signUpErr } = await supabase.auth.signUp({
         email: email.trim(),
         password,
-        options: { data: { full_name: fullName.trim(), username: username.trim(), phone: normalizedPhone, preferred_language: locale } },
+        options: {
+          data: { full_name: fullName.trim(), username: username.trim(), phone: normalizedPhone, preferred_language: locale },
+          emailRedirectTo: authCallbackUrl("/onboarding"),
+        },
       });
       if (signUpErr) return setError(t("auth.errorGeneric"));
 

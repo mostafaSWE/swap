@@ -8,8 +8,11 @@ import {
   getListingById,
   getOrCreateConversation,
   incrementListingView,
+  isFollowing,
   isListingSaved,
+  followUser,
   saveListing,
+  unfollowUser,
   unsaveListing,
 } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
@@ -34,6 +37,8 @@ export default function ListingDetail() {
   const [saveBusy, setSaveBusy] = useState(false);
   const [myId, setMyId] = useState<string | null>(null);
   const [proposeOpen, setProposeOpen] = useState(false);
+  const [following, setFollowing] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -52,6 +57,19 @@ export default function ListingDetail() {
     };
   }, [id]);
 
+  useEffect(() => {
+    const ownerId = listing?.owner?.id;
+    if (!myId || !ownerId || myId === ownerId) {
+      setFollowing(false);
+      return;
+    }
+    let active = true;
+    isFollowing(supabase, myId, ownerId).then((value) => active && setFollowing(value)).catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [myId, listing?.owner?.id]);
+
   async function toggleSave() {
     const { data } = await supabase.auth.getUser();
     if (!data.user) {
@@ -68,6 +86,25 @@ export default function ListingDetail() {
       setSaved(!next); // revert
     } finally {
       setSaveBusy(false);
+    }
+  }
+
+  async function toggleFollow() {
+    if (!owner) return;
+    if (!myId) {
+      router.push("/login");
+      return;
+    }
+    if (followBusy) return;
+    const next = !following;
+    setFollowing(next);
+    setFollowBusy(true);
+    try {
+      await (next ? followUser(supabase, myId, owner.id) : unfollowUser(supabase, myId, owner.id));
+    } catch {
+      setFollowing(!next);
+    } finally {
+      setFollowBusy(false);
     }
   }
 
@@ -132,7 +169,9 @@ export default function ListingDetail() {
               ratingsCount={owner.ratings_count}
               memberSince={monthYear(owner.created_at, locale)}
               bio={owner.bio}
-              onToggleFollow={() => undefined}
+              isOwner={myId === owner.id}
+              following={following}
+              onToggleFollow={toggleFollow}
               onViewProfile={() => router.push({ pathname: "/users/[username]", params: { username: owner.username } })}
             />
           ) : null}
@@ -145,6 +184,14 @@ export default function ListingDetail() {
 
       {/* Sticky action bar — Save + Message secondary; Propose is the primary CTA. */}
       <View style={styles.actions}>
+        {owner && myId === owner.id ? (
+          <Button
+            label={t("listing.editListing")}
+            onPress={() => router.push({ pathname: "/listings/[id]/edit", params: { id: listing.id } })}
+            fullWidth
+          />
+        ) : (
+          <>
         <View style={styles.row}>
           <View style={styles.grow}>
             <Button
@@ -188,6 +235,8 @@ export default function ListingDetail() {
             fullWidth
           />
         ) : null}
+          </>
+        )}
       </View>
 
       {proposeOpen && myId ? (

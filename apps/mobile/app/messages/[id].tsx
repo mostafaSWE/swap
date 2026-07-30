@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { Send } from "lucide-react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import type { Message, PublicProfile, SwapProposalWithRelations } from "@swap/types";
@@ -21,6 +21,7 @@ export default function Conversation() {
   const [proposal, setProposal] = useState<SwapProposalWithRelations | null>(null);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const listRef = useRef<FlatList<Message>>(null);
 
   useEffect(() => {
@@ -51,9 +52,26 @@ export default function Conversation() {
     return () => unsub();
   }, [proposal?.id, id]);
 
+  // Same direct-RLS read receipt as the web chat room. The inbox's count then
+  // refreshes when the Messages tab regains focus.
+  useEffect(() => {
+    if (!id || !uid || !messages.length) return;
+    void supabase
+      .from("messages")
+      .update({ is_read: true })
+      .eq("conversation_id", id)
+      .neq("sender_id", uid)
+      .eq("is_read", false)
+      .select("id")
+      .then(({ data }) => {
+        if (data?.length) setMessages((current) => current.map((message) => message.sender_id === uid ? message : { ...message, is_read: true }));
+      });
+  }, [id, uid, messages.length]);
+
   async function send() {
     const body = draft.trim();
     if (!body || !uid || sending) return;
+    setError(null);
     setSending(true);
     setDraft("");
     try {
@@ -61,6 +79,7 @@ export default function Conversation() {
       setMessages((prev) => (prev.some((x) => x.id === msg.id) ? prev : [...prev, msg]));
     } catch {
       setDraft(body); // restore on failure
+      setError(t("chat.sendError"));
     } finally {
       setSending(false);
     }
@@ -86,10 +105,12 @@ export default function Conversation() {
             <ChatBubble body={item.body} time={timeAgo(item.created_at, locale)} isOwn={item.sender_id === uid} />
           )}
           contentContainerStyle={styles.list}
+          ListHeaderComponent={<Text style={styles.disclaimer}>{t("chat.disclaimerBeforeChat")}</Text>}
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
           ItemSeparatorComponent={() => <View style={styles.gap} />}
           keyboardShouldPersistTaps="handled"
         />
+        {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.composer}>
           <View style={styles.inputWrap}>
             <Input placeholder={t("chat.placeholder")} value={draft} onChangeText={setDraft} multiline />
@@ -106,7 +127,9 @@ export default function Conversation() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   list: { padding: spacing.lg },
+  disclaimer: { color: colors.textMuted, backgroundColor: colors.elevated, borderRadius: radii.md, padding: spacing.sm, fontSize: 12, lineHeight: 17, marginBottom: spacing.md },
   gap: { height: 6 },
+  error: { color: colors.danger, backgroundColor: colors.surface, paddingHorizontal: spacing.md, paddingTop: spacing.xs, textAlign: "center", fontSize: 13 },
   composer: {
     flexDirection: "row",
     alignItems: "flex-end",

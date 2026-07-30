@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MAX_PROPOSAL_ITEMS } from "@swap/validation";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { api } from "../lib/api";
 import { t } from "../i18n";
@@ -6,8 +7,9 @@ import { colors, spacing } from "../theme";
 import { BottomSheet, Button, Textarea } from "./ui";
 import { ListingPicker } from "./ListingPicker";
 
-// Mirror of @swap/validation MAX_PROPOSAL_ITEMS (not a mobile dep; backend enforces the real cap).
-export const MAX_PROPOSAL_ITEMS = 8;
+// Re-export the shared contract for the counter-offer sheet. This must stay in
+// the same package as the API validation rather than becoming a mobile copy.
+export { MAX_PROPOSAL_ITEMS };
 
 /**
  * Propose-a-swap bottom sheet (web `ProposeSwapDrawer`). Pick 1..N of your own

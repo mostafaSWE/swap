@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { ImagePlus, X } from "lucide-react-native";
+import { ArrowLeftRight, ImagePlus, Repeat2, X } from "lucide-react-native";
 import type { ListingCondition } from "@swap/types";
-import { COUNTRIES, COUNTRY_BY_ID, TOP_LEVEL_CATEGORIES, citiesByCountry } from "@swap/config";
+import { COUNTRIES, COUNTRY_BY_ID, FREE_PLAN_MAX_IMAGES, TOP_LEVEL_CATEGORIES, citiesByCountry } from "@swap/config";
 import { localizedName } from "@swap/ui";
 import { supabase } from "../src/lib/supabase";
 import { api } from "../src/lib/api";
@@ -11,17 +11,19 @@ import { pickImages, uploadListingImage, type PickedImage } from "../src/lib/upl
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
 import { Button, Checkbox, Icon, Input, SegmentedControl, Select, Textarea } from "../src/components/ui";
-
-const MAX_IMAGES = 4; // free plan; the backend enforces the real cap on sign/add
+import { ItemArtwork } from "../src/components/ItemArtwork";
 
 /**
- * Create a listing (web `NewListingForm`, flattened to a single scroll). Submit:
+ * Create a listing (web `NewListingForm`) in the same three phone-width steps:
+ * photos/title/category → condition/location/description → wanted/preview/safety.
+ * Submit:
  * `api.createListing` → upload each picked image in order (sort_order = cover
  * first) → route into the new listing. Images upload via the shared
  * sign→uploadToSignedUrl→addListingImage pipeline (see src/lib/upload).
  */
 export default function NewListing() {
   const router = useRouter();
+  const [step, setStep] = useState(1);
   const [images, setImages] = useState<PickedImage[]>([]);
   const [title, setTitle] = useState("");
   const [categoryId, setCategoryId] = useState<string>();
@@ -47,10 +49,26 @@ export default function NewListing() {
   useEffect(() => setCityId(undefined), [countryId]);
 
   async function addPhotos() {
-    const remaining = MAX_IMAGES - images.length;
+    const remaining = FREE_PLAN_MAX_IMAGES - images.length;
     if (remaining <= 0) return;
     const picked = await pickImages(remaining);
-    if (picked.length) setImages((prev) => [...prev, ...picked].slice(0, MAX_IMAGES));
+    if (picked.length) setImages((prev) => [...prev, ...picked].slice(0, FREE_PLAN_MAX_IMAGES));
+  }
+
+  function next() {
+    setError(null);
+    if (step === 1) {
+      if (title.trim().length < 3) return setError(t("auth.errorGeneric"));
+      if (!categoryId) return setError(t("common.selectCategory"));
+    }
+    if (step === 2 && (!countryId || !cityId)) return setError(t("common.selectCity"));
+    setStep((current) => Math.min(3, current + 1));
+  }
+
+  function back() {
+    setError(null);
+    if (step === 1) router.back();
+    else setStep((current) => current - 1);
   }
 
   async function submit() {
@@ -100,89 +118,73 @@ export default function NewListing() {
       <Stack.Screen options={{ title: t("newListing.title") }} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          {/* Photos */}
-          <View>
-            <Text style={styles.label}>{t("newListing.images")}</Text>
-            <Text style={styles.hint}>{t("newListing.imagesHint", { max: MAX_IMAGES })}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoRow}>
-              {images.map((img, i) => (
-                <View key={img.uri} style={styles.thumbBox}>
-                  <Image source={{ uri: img.uri }} style={styles.thumb} />
-                  {i === 0 ? (
-                    <View style={styles.coverTag}>
-                      <Text style={styles.coverText}>{t("newListing.cover")}</Text>
+          <View style={styles.heading}>
+            <Text style={styles.pageTitle}>{t("newListing.title")}</Text>
+            <Text style={styles.hint}>{t("newListing.step", { current: step, total: 3 })}</Text>
+          </View>
+          <View style={styles.progress} accessibilityRole="progressbar" accessibilityValue={{ min: 1, max: 3, now: step }}>
+            {[1, 2, 3].map((item) => <View key={item} style={[styles.progressPart, item <= step && styles.progressPartActive]} />)}
+          </View>
+
+          {step === 1 ? (
+            <>
+              <View>
+                <Text style={styles.label}>{t("newListing.images")}</Text>
+                <Text style={styles.hint}>{t("newListing.imagesHint", { max: FREE_PLAN_MAX_IMAGES })}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoRow}>
+                  {images.map((img, i) => (
+                    <View key={img.uri} style={styles.thumbBox}>
+                      <Image source={{ uri: img.uri }} style={styles.thumb} />
+                      {i === 0 ? <View style={styles.coverTag}><Text style={styles.coverText}>{t("newListing.cover")}</Text></View> : null}
+                      <Pressable onPress={() => setImages((prev) => prev.filter((_, j) => j !== i))} style={styles.removeBtn} accessibilityRole="button" accessibilityLabel={t("newListing.removeImage")}>
+                        <Icon icon={X} size={14} color={colors.white} />
+                      </Pressable>
                     </View>
+                  ))}
+                  {images.length < FREE_PLAN_MAX_IMAGES ? (
+                    <Pressable onPress={addPhotos} style={styles.addTile} accessibilityRole="button" accessibilityLabel={t("newListing.addImage")}>
+                      <Icon icon={ImagePlus} size={26} color={colors.textMuted} />
+                    </Pressable>
                   ) : null}
-                  <Pressable
-                    onPress={() => setImages((prev) => prev.filter((_, j) => j !== i))}
-                    style={styles.removeBtn}
-                    accessibilityRole="button"
-                    accessibilityLabel={t("newListing.removeImage")}
-                  >
-                    <Icon icon={X} size={14} color={colors.white} />
-                  </Pressable>
-                </View>
-              ))}
-              {images.length < MAX_IMAGES ? (
-                <Pressable onPress={addPhotos} style={styles.addTile} accessibilityRole="button" accessibilityLabel={t("newListing.addImage")}>
-                  <Icon icon={ImagePlus} size={26} color={colors.textMuted} />
-                </Pressable>
-              ) : null}
-            </ScrollView>
-          </View>
-
-          <Input label={t("newListing.fieldTitle")} value={title} onChangeText={setTitle} />
-
-          <Select
-            label={t("newListing.fieldCategory")}
-            placeholder={t("common.selectCategory")}
-            value={categoryId}
-            onChange={setCategoryId}
-            options={categoryOptions}
-          />
-
-          <View>
-            <Text style={styles.label}>{t("newListing.fieldCondition")}</Text>
-            <SegmentedControl
-              segments={[
-                { value: "new", label: t("mobile.detail.conditions.new") },
-                { value: "used", label: t("mobile.detail.conditions.used") },
-              ]}
-              value={condition}
-              onChange={setCondition}
-            />
-          </View>
-
-          <Select
-            label={t("newListing.fieldCountry")}
-            placeholder={t("auth.country")}
-            value={countryId}
-            onChange={setCountryId}
-            options={countryOptions}
-          />
-          {countryId ? (
-            <Select
-              label={t("newListing.fieldCity")}
-              placeholder={t("auth.city")}
-              value={cityId}
-              onChange={setCityId}
-              options={cityOptions}
-            />
+                </ScrollView>
+              </View>
+              <Input label={t("newListing.fieldTitle")} value={title} onChangeText={setTitle} />
+              <Select label={t("newListing.fieldCategory")} placeholder={t("common.selectCategory")} value={categoryId} onChange={setCategoryId} options={categoryOptions} />
+            </>
           ) : null}
 
-          <Textarea label={t("newListing.fieldDescription")} value={description} onChangeText={setDescription} maxLength={2000} />
+          {step === 2 ? (
+            <>
+              <View>
+                <Text style={styles.label}>{t("newListing.fieldCondition")}</Text>
+                <SegmentedControl segments={[{ value: "new", label: t("mobile.detail.conditions.new") }, { value: "used", label: t("mobile.detail.conditions.used") }]} value={condition} onChange={setCondition} />
+              </View>
+              <Select label={t("newListing.fieldCountry")} placeholder={t("auth.country")} value={countryId} onChange={setCountryId} options={countryOptions} />
+              {countryId ? <Select label={t("newListing.fieldCity")} placeholder={t("auth.city")} value={cityId} onChange={setCityId} options={cityOptions} /> : null}
+              <Textarea label={t("newListing.fieldDescription")} value={description} onChangeText={setDescription} maxLength={2000} />
+            </>
+          ) : null}
 
-          <Checkbox checked={openToAny} onChange={setOpenToAny} label={t("newListing.fieldOpenToAny")} />
-          {openToAny ? (
-            <Text style={styles.hint}>{t("newListing.fieldOpenToAnyHint")}</Text>
-          ) : (
-            <Textarea label={t("newListing.fieldWanted")} value={wanted} onChangeText={setWanted} maxLength={500} />
-          )}
-
-          <Text style={styles.safety}>{t("safety.points.meetPublic")}</Text>
+          {step === 3 ? (
+            <>
+              <View style={styles.wantedCard}>
+                <Checkbox checked={openToAny} onChange={setOpenToAny} label={t("newListing.fieldOpenToAny")} />
+                <Text style={styles.hint}>{t("newListing.fieldOpenToAnyHint")}</Text>
+              </View>
+              <Textarea label={t("newListing.fieldWanted")} value={wanted} onChangeText={setWanted} maxLength={500} editable={!openToAny} />
+              <ExchangePreview title={title.trim() || t("newListing.yourItem")} imageUrl={images[0]?.uri} categoryId={categoryId} wanted={openToAny ? t("listing.openToAnyExchange") : wanted.trim() || t("listing.openToOffers")} />
+              <View style={styles.safetyCard}>
+                <Text style={styles.safetyTitle}>{t("safety.disclaimerTitle")}</Text>
+                <Text style={styles.safety}>{t("safety.points.meetPublic")}</Text>
+              </View>
+            </>
+          ) : null}
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Button label={t("newListing.submit")} onPress={submit} loading={busy} fullWidth />
+          <View style={styles.footer}>
+            <View style={styles.footerButton}><Button label={t("common.back")} onPress={back} variant="secondary" fullWidth /></View>
+            <View style={styles.footerButton}><Button label={step === 3 ? t("newListing.submit") : t("common.next")} onPress={step === 3 ? submit : next} loading={busy} fullWidth /></View>
+          </View>
           {busy && status ? <Text style={styles.status}>{status}</Text> : null}
         </ScrollView>
       </KeyboardAvoidingView>
@@ -190,9 +192,36 @@ export default function NewListing() {
   );
 }
 
+function ExchangePreview({ title, imageUrl, categoryId, wanted }: { title: string; imageUrl?: string; categoryId?: string; wanted: string }) {
+  const category = categoryId ? TOP_LEVEL_CATEGORIES.find((item) => item.id === categoryId) : undefined;
+  return (
+    <View style={styles.preview} accessibilityLiveRegion="polite">
+      <Text style={styles.previewLabel}>{t("newListing.swapPreview")}</Text>
+      <View style={styles.previewRow}>
+        <View style={styles.previewSide}>
+          <Text style={styles.previewEyebrow}>{t("newListing.yourItem")}</Text>
+          <ItemArtwork imageUrl={imageUrl} title={title} categoryIcon={category?.icon} style={styles.previewArt} />
+          <Text style={styles.previewTitle} numberOfLines={2}>{title}</Text>
+        </View>
+        <View style={styles.swapIcon}><Icon icon={ArrowLeftRight} size={22} color={colors.white} mirror /></View>
+        <View style={[styles.previewSide, styles.previewWanted]}>
+          <Text style={styles.previewEyebrow}>{t("newListing.previewWanted")}</Text>
+          <View style={styles.repeatIcon}><Icon icon={Repeat2} size={26} color={colors.white} /></View>
+          <Text style={styles.previewTitle} numberOfLines={2}>{wanted}</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing["3xl"] },
+  heading: { gap: 2 },
+  pageTitle: { color: colors.text, fontSize: 20, fontWeight: "800" },
+  progress: { flexDirection: "row", gap: spacing.xs },
+  progressPart: { height: 6, flex: 1, borderRadius: radii.pill, backgroundColor: colors.border },
+  progressPartActive: { backgroundColor: colors.green },
   label: { color: colors.textMuted, fontSize: 13, fontWeight: "600", marginBottom: spacing.xs },
   hint: { color: colors.textFaint, fontSize: 12, marginBottom: spacing.sm },
   photoRow: { gap: spacing.sm, paddingVertical: spacing.xs },
@@ -230,7 +259,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  wantedCard: { gap: spacing.xs, backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, padding: spacing.md },
+  preview: { gap: spacing.sm, borderWidth: 1, borderColor: colors.border, borderRadius: radii.lg, backgroundColor: colors.surface, padding: spacing.md },
+  previewLabel: { color: colors.textMuted, fontSize: 11, fontWeight: "800", textTransform: "uppercase" },
+  previewRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  previewSide: { flex: 1, minHeight: 150, alignItems: "center", justifyContent: "space-between", gap: spacing.xs, borderWidth: 1, borderColor: colors.border, borderRadius: radii.md, padding: spacing.sm, backgroundColor: colors.background },
+  previewWanted: { borderColor: colors.green, backgroundColor: colors.greenLight },
+  previewEyebrow: { color: colors.textMuted, fontSize: 10, fontWeight: "800", textTransform: "uppercase" },
+  previewArt: { width: 56, height: 56, borderRadius: radii.md },
+  previewTitle: { color: colors.text, fontSize: 12, fontWeight: "800", textAlign: "center" },
+  swapIcon: { width: 40, height: 40, borderRadius: radii.pill, backgroundColor: colors.green, alignItems: "center", justifyContent: "center" },
+  repeatIcon: { width: 56, height: 56, borderRadius: radii.md, backgroundColor: colors.green, alignItems: "center", justifyContent: "center" },
+  safetyCard: { gap: spacing.xs, borderWidth: 1, borderColor: colors.border, borderRadius: radii.md, backgroundColor: colors.surface, padding: spacing.md },
+  safetyTitle: { color: colors.text, fontSize: 13, fontWeight: "800" },
   safety: { color: colors.textMuted, fontSize: 12, lineHeight: 17 },
   error: { color: colors.danger, fontSize: 13 },
   status: { color: colors.textMuted, fontSize: 13, textAlign: "center" },
+  footer: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm },
+  footerButton: { flex: 1 },
 });

@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { CATEGORIES } from "@swap/config";
+import { CATEGORIES, COUNTRIES, citiesByCountry } from "@swap/config";
 import { localizedName } from "@swap/ui";
-import type { ListingWithRelations, SortOption } from "@swap/types";
+import type { ListingCondition, ListingWithRelations, SortOption } from "@swap/types";
 import { getListings } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
 import { locale, t } from "../../src/i18n";
 import { colors, spacing } from "../../src/theme";
-import { Chip, Input, SegmentedControl } from "../../src/components/ui";
+import { Button, Chip, Input, SegmentedControl, Select } from "../../src/components/ui";
 import { ListingCard } from "../../src/components/ListingCard";
 import { EmptyState } from "../../src/components/EmptyState";
 
@@ -20,12 +20,18 @@ export default function Browse() {
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
   const [categoryId, setCategoryId] = useState<string | undefined>(params.categoryId || undefined);
+  const [countryId, setCountryId] = useState<string | undefined>();
+  const [cityId, setCityId] = useState<string | undefined>();
+  const [condition, setCondition] = useState<ListingCondition | undefined>();
+  const [featuredOnly, setFeaturedOnly] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Apply a category passed from Home's category chips (only when present, so
   // switching to the Browse tab directly never clears an in-place filter).
   useEffect(() => {
     if (params.categoryId) setCategoryId(params.categoryId);
   }, [params.categoryId]);
+  useEffect(() => setCityId(undefined), [countryId]);
   const [sort, setSort] = useState<SortOption>("newest");
   const [items, setItems] = useState<ListingWithRelations[] | null>(null);
   const [more, setMore] = useState(false);
@@ -42,7 +48,17 @@ export default function Browse() {
     let active = true;
     setItems(null);
     setEnd(false);
-    getListings(supabase, { search: debounced || undefined, categoryId, sort, limit: PAGE, offset: 0 })
+    getListings(supabase, {
+      search: debounced || undefined,
+      categoryId,
+      countryId,
+      cityId,
+      condition,
+      isFeatured: featuredOnly || undefined,
+      sort,
+      limit: PAGE,
+      offset: 0,
+    })
       .then((rows) => {
         if (!active) return;
         setItems(rows);
@@ -52,19 +68,38 @@ export default function Browse() {
     return () => {
       active = false;
     };
-  }, [debounced, categoryId, sort]);
+  }, [debounced, categoryId, countryId, cityId, condition, featuredOnly, sort]);
 
   const loadMore = useCallback(() => {
     if (more || end || !items || items.length === 0) return;
     setMore(true);
-    getListings(supabase, { search: debounced || undefined, categoryId, sort, limit: PAGE, offset: items.length })
+    getListings(supabase, {
+      search: debounced || undefined,
+      categoryId,
+      countryId,
+      cityId,
+      condition,
+      isFeatured: featuredOnly || undefined,
+      sort,
+      limit: PAGE,
+      offset: items.length,
+    })
       .then((rows) => {
         setItems((prev) => [...(prev ?? []), ...rows]);
         setEnd(rows.length < PAGE);
       })
       .catch(() => undefined)
       .finally(() => setMore(false));
-  }, [more, end, items, debounced, categoryId, sort]);
+  }, [more, end, items, debounced, categoryId, countryId, cityId, condition, featuredOnly, sort]);
+
+  const countryOptions = useMemo(
+    () => COUNTRIES.map((country) => ({ value: country.id, label: localizedName(country, locale) })),
+    [],
+  );
+  const cityOptions = useMemo(
+    () => (countryId ? citiesByCountry(countryId).map((city) => ({ value: city.id, label: localizedName(city, locale) })) : []),
+    [countryId],
+  );
 
   return (
     <View style={styles.root}>
@@ -84,6 +119,28 @@ export default function Browse() {
           value={sort}
           onChange={(v) => setSort(v as SortOption)}
         />
+        <Button
+          label={t("listings.filters")}
+          variant="secondary"
+          onPress={() => setFiltersOpen((open) => !open)}
+          fullWidth
+        />
+        {filtersOpen ? (
+          <View style={styles.filters}>
+            <Select label={t("newListing.fieldCountry")} placeholder={t("auth.country")} value={countryId} onChange={setCountryId} options={countryOptions} />
+            {countryId ? <Select label={t("newListing.fieldCity")} placeholder={t("auth.city")} value={cityId} onChange={setCityId} options={cityOptions} /> : null}
+            <SegmentedControl
+              segments={[
+                { value: "", label: t("mobile.browse.all") },
+                { value: "new", label: t("mobile.detail.conditions.new") },
+                { value: "used", label: t("mobile.detail.conditions.used") },
+              ]}
+              value={condition ?? ""}
+              onChange={(value) => setCondition((value || undefined) as ListingCondition | undefined)}
+            />
+            <Chip label={t("listings.featuredOnly")} active={featuredOnly} onPress={() => setFeaturedOnly((value) => !value)} />
+          </View>
+        ) : null}
       </View>
 
       {items === null ? (
@@ -113,6 +170,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   controls: { padding: spacing.lg, gap: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   chips: { gap: spacing.sm, paddingVertical: 2 },
+  filters: { gap: spacing.md, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.md },
   list: { padding: spacing.lg, gap: spacing.lg },
   spinner: { marginTop: spacing["2xl"] },
 });

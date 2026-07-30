@@ -83,6 +83,7 @@ export default function ProfileTab() {
       )}
 
       <View style={styles.actions}>
+        <Button variant="secondary" label={t("profile.edit")} onPress={() => router.push("/profile/edit")} fullWidth />
         <Button label={t("newListing.title")} onPress={() => router.push("/new-listing")} fullWidth />
         <Button variant="secondary" label={t("mobile.profile.saved")} onPress={() => router.push("/saved")} fullWidth />
         <Button variant="ghost" label={t("mobile.profile.signOut")} onPress={() => supabase.auth.signOut()} fullWidth />

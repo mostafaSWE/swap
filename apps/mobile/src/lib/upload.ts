@@ -1,6 +1,8 @@
 import * as ImagePicker from "expo-image-picker";
 import { decode } from "base64-arraybuffer";
 import { STORAGE_BUCKETS } from "@swap/config";
+import type { SwapProposalWithRelations } from "@swap/types";
+import { updateProfile } from "@swap/api";
 import { supabase } from "./supabase";
 import { api } from "./api";
 
@@ -55,4 +57,41 @@ export async function uploadListingImage(listingId: string, img: PickedImage): P
   const { data } = supabase.storage.from(STORAGE_BUCKETS.listingImages).getPublicUrl(path);
   await api.addListingImage(listingId, data.publicUrl);
   return data.publicUrl;
+}
+
+/**
+ * Confirm one side of a completed handover. The confirmation bucket is private,
+ * but its RLS policy deliberately allows both proposal parties to view both
+ * photos. The server owns the state transition: it atomically records this
+ * path and completes the swap only once the other party has confirmed too.
+ */
+export async function uploadSwapConfirmation(
+  proposalId: string,
+  img: PickedImage,
+): Promise<SwapProposalWithRelations> {
+  if (!img.base64) throw new Error("missing image bytes");
+  const { path, token } = await api.signConfirmationUpload(proposalId, img.fileName);
+  const contentType = ALLOWED_MIME.includes(img.mimeType) ? img.mimeType : "image/jpeg";
+  const { error: upErr } = await supabase.storage
+    .from(STORAGE_BUCKETS.swapConfirmations)
+    .uploadToSignedUrl(path, token, decode(img.base64), { contentType });
+  if (upErr) throw upErr;
+  return api.confirmSwap(proposalId, { photo_path: path });
+}
+
+/** Upload the current user's avatar exactly as the web does: stable object key,
+ * public URL cache-busted on each replacement, then immediately persisted. */
+export async function uploadAvatar(userId: string, img: PickedImage): Promise<string> {
+  if (!img.base64) throw new Error("missing image bytes");
+  if (img.fileSize && img.fileSize > MAX_IMAGE_BYTES) throw new Error("image too large");
+  const contentType = ALLOWED_MIME.includes(img.mimeType) ? img.mimeType : "image/jpeg";
+  const path = `${userId}/avatar`;
+  const { error } = await supabase.storage
+    .from(STORAGE_BUCKETS.avatars)
+    .upload(path, decode(img.base64), { upsert: true, contentType });
+  if (error) throw error;
+  const { data } = supabase.storage.from(STORAGE_BUCKETS.avatars).getPublicUrl(path);
+  const url = `${data.publicUrl}?v=${Date.now()}`;
+  await updateProfile(supabase, userId, { avatar_url: url });
+  return url;
 }

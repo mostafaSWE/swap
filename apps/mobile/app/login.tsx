@@ -2,6 +2,7 @@ import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { supabase } from "../src/lib/supabase";
+import { authCallbackUrl } from "../src/lib/auth-redirect";
 import { t } from "../src/i18n";
 import { colors, spacing } from "../src/theme";
 import { Button, Input } from "../src/components/ui";
@@ -15,6 +16,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resendEmail, setResendEmail] = useState<string | null>(null);
+  const [resend, setResend] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   async function submit() {
     setError(null);
@@ -34,7 +37,10 @@ export default function Login() {
         // Supabase returns a stable code for an unverified account — surface that
         // (email confirmation is ON) instead of a misleading "wrong credentials".
         const code = (signInErr as { code?: string }).code;
-        setError(code === "email_not_confirmed" ? t("auth.errorEmailUnconfirmed") : t("auth.errorInvalid"));
+        if (code === "email_not_confirmed") {
+          setResendEmail(email);
+          setError(t("auth.errorEmailUnconfirmed"));
+        } else setError(t("auth.errorInvalid"));
         return;
       }
       // Session set → onAuthStateChange updates the app. Return to where we came from.
@@ -45,6 +51,14 @@ export default function Login() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function resendConfirmation() {
+    const email = resendEmail ?? (identifier.includes("@") ? identifier.trim() : "");
+    if (!email || resend === "sending" || resend === "sent") return;
+    setResend("sending");
+    const { error: resendError } = await supabase.auth.resend({ type: "signup", email, options: { emailRedirectTo: authCallbackUrl("/onboarding") } });
+    setResend(resendError ? "error" : "sent");
   }
 
   return (
@@ -78,6 +92,12 @@ export default function Login() {
           </Pressable>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
+          {resendEmail ? (
+            <View style={styles.resend}>
+              {resend === "sent" ? <Text style={styles.sent}>{t("auth.verifyBannerSent")}</Text> : <Pressable onPress={resendConfirmation} disabled={resend === "sending"}><Text style={styles.link}>{resend === "sending" ? t("auth.verifyBannerSending") : t("auth.resendConfirmation")}</Text></Pressable>}
+              {resend === "error" ? <Text style={styles.error}>{t("auth.verifyBannerError")}</Text> : null}
+            </View>
+          ) : null}
 
           <Button label={t("auth.loginButton")} onPress={submit} loading={busy} fullWidth />
 
@@ -97,6 +117,8 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: 26, fontWeight: "800" },
   subtitle: { color: colors.textMuted, fontSize: 14, marginBottom: spacing.sm },
   error: { color: colors.danger, fontSize: 13 },
+  resend: { gap: spacing.xs, borderWidth: 1, borderColor: colors.warning, borderRadius: 10, padding: spacing.sm },
+  sent: { color: colors.green, fontSize: 13, fontWeight: "700" },
   forgotWrap: { alignSelf: "flex-end", paddingVertical: spacing.xs },
   forgot: { color: colors.green, fontSize: 13, fontWeight: "600" },
   footer: { flexDirection: "row", justifyContent: "center", marginTop: spacing.md, flexWrap: "wrap" },

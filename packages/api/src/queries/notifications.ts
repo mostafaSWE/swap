@@ -10,6 +10,11 @@ import type { SwapClient } from "../client";
 const PUBLIC_PROFILE_COLUMNS =
   "id, full_name, username, avatar_url, bio, country_id, city_id, followers_count, following_count, listings_count, completed_swaps_count, rating, ratings_count, created_at";
 
+// A badge and the notification-center screen can coexist. Supabase reuses a
+// channel by name, and adding callbacks after its first subscribe throws, so
+// every helper call must allocate its own short-lived channel instance.
+let notificationChannelSequence = 0;
+
 /** The current user's notifications, newest first, each with its actor's profile. */
 export async function getNotifications(
   supabase: SwapClient,
@@ -67,7 +72,7 @@ export function subscribeToNotifications(
 ) {
   const filter = `user_id=eq.${userId}`;
   const channel = supabase
-    .channel(`notifications:${userId}`)
+    .channel(`notifications:${userId}:${++notificationChannelSequence}`)
     .on(
       "postgres_changes",
       { event: "INSERT", schema: "public", table: "notifications", filter },

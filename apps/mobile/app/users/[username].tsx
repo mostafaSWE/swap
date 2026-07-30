@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import type { ListingWithRelations, PublicProfile, RatingWithRater } from "@swap/types";
-import { getListings, getPublicProfileByUsername, getRatingsForUser } from "@swap/api";
+import { followUser, getListings, getPublicProfileByUsername, getRatingsForUser, isFollowing, unfollowUser } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
 import { locale, t } from "../../src/i18n";
 import { monthYear } from "../../src/lib/format";
@@ -19,6 +19,9 @@ export default function PublicProfileScreen() {
   const [profile, setProfile] = useState<PublicProfile | null | undefined>(undefined);
   const [listings, setListings] = useState<ListingWithRelations[] | null>(null);
   const [reviews, setReviews] = useState<RatingWithRater[] | null>(null);
+  const [viewerId, setViewerId] = useState<string | null>(null);
+  const [following, setFollowing] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
 
   useEffect(() => {
     if (!username) return;
@@ -36,6 +39,41 @@ export default function PublicProfileScreen() {
       active = false;
     };
   }, [username]);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setViewerId(data.user?.id ?? null));
+  }, []);
+
+  useEffect(() => {
+    if (!viewerId || !profile || viewerId === profile.id) {
+      setFollowing(false);
+      return;
+    }
+    let active = true;
+    isFollowing(supabase, viewerId, profile.id).then((value) => active && setFollowing(value)).catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [viewerId, profile?.id]);
+
+  async function toggleFollow() {
+    if (!profile) return;
+    if (!viewerId) {
+      router.push("/login");
+      return;
+    }
+    if (followBusy) return;
+    const next = !following;
+    setFollowing(next);
+    setFollowBusy(true);
+    try {
+      await (next ? followUser(supabase, viewerId, profile.id) : unfollowUser(supabase, viewerId, profile.id));
+    } catch {
+      setFollowing(!next);
+    } finally {
+      setFollowBusy(false);
+    }
+  }
 
   if (profile === undefined) {
     return <View style={styles.center}><ActivityIndicator color={colors.green} /></View>;
@@ -60,7 +98,7 @@ export default function PublicProfileScreen() {
           listingsCount={profile.listings_count}
           followersCount={profile.followers_count}
           followingCount={profile.following_count}
-          action={<FollowButton following={false} onToggle={() => undefined} />}
+          action={viewerId === profile.id ? undefined : <FollowButton following={following} onToggle={toggleFollow} busy={followBusy} />}
         />
 
         <Text style={styles.section}>{t("profile.listings")}</Text>

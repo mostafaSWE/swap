@@ -86,11 +86,16 @@ export default function RootLayout() {
         <Stack.Screen name="m0-check" options={{ title: "M0 connectivity" }} />
         <Stack.Screen name="ui-kit" options={{ title: "UI kit" }} />
         <Stack.Screen name="listings/[id]" options={{ title: "" }} />
+        <Stack.Screen name="listings/[id]/edit" options={{ title: "" }} />
         <Stack.Screen name="users/[username]" options={{ title: "" }} />
         <Stack.Screen name="saved" options={{ title: "" }} />
         <Stack.Screen name="login" options={{ title: "" }} />
         <Stack.Screen name="register" options={{ title: "" }} />
         <Stack.Screen name="forgot-password" options={{ title: "" }} />
+        <Stack.Screen name="reset-password" options={{ title: "" }} />
+        <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ title: "" }} />
+        <Stack.Screen name="profile/edit" options={{ title: "" }} />
         <Stack.Screen name="new-listing" options={{ title: "" }} />
         <Stack.Screen name="messages/[id]" options={{ title: "" }} />
       </Stack>
