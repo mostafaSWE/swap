@@ -108,6 +108,9 @@ importers:
       '@swap/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@swap/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
       base64-arraybuffer:
         specifier: ^1.0.2
         version: 1.0.2
