@@ -94,6 +94,16 @@ Current migrations:
 0008_notifications.sql
 0009_blocks_autohide.sql
 0010_admin_moderation.sql
+0011_admin_back_office.sql
+0012_email_verification_gate.sql
+0013_email_for_username.sql
+0014_identity_uniqueness.sql
+0015_phone_cleanup.sql
+0016_egypt_syria.sql
+0017_morocco.sql
+0018_terms_and_report_authz.sql   # M4: versioned Terms/EULA + report authorization
+0019_terms_gate_profile_bio.sql   # M4: Terms gate on the public profile bio
+0020_push_notifications.sql       # M5: device_tokens + push_outbox + enqueue trigger
 ```
 
 ## Quick Start
