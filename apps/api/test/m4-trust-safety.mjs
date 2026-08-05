@@ -119,6 +119,24 @@ async function main() {
   r = await call("POST", "/reports", st, { target_type: "message", target_id: MSG, reason: "spam" });
   ok("POST /reports message (non-participant) -> 403", r.status === 403);
 
+  console.log("\n== F/G: Terms gate on profile BIO (0019 trigger + API) ==");
+  const { data: kp } = await admin.from("profiles").select("bio, full_name").eq("id", KHALID).single();
+  const BIO = kp?.bio;
+  const NAME = kp?.full_name;
+  await admin.from("profiles").update({ terms_accepted_version: null, terms_accepted_at: null }).eq("id", KHALID);
+  const kc = createClient(URL, ANON, { auth: { persistSession: false } });
+  await kc.auth.signInWithPassword({ email: "khalid@swap.demo", password: "Swap1234!" });
+  let br = await kc.from("profiles").update({ bio: "m4-bio-test" }).eq("id", KHALID).select("id");
+  ok("direct bio change (un-accepted) -> BLOCKED by 0019 trigger", !!br.error);
+  br = await kc.from("profiles").update({ full_name: NAME }).eq("id", KHALID).select("id");
+  ok("direct non-UGC field change (un-accepted) -> ALLOWED (not over-gated)", !br.error);
+  const kt2 = (await signIn("khalid@swap.demo")).token;
+  let ar = await call("PATCH", "/me", kt2, { bio: "m4-bio-api" });
+  ok("PATCH /me bio (un-accepted) -> 403 terms_not_accepted", ar.status === 403 && ar.body?.code === "terms_not_accepted");
+  ar = await call("PATCH", "/me", kt2, { full_name: NAME });
+  ok("PATCH /me non-UGC field (un-accepted) -> 200 (not over-gated)", ar.status === 200);
+  await admin.from("profiles").update({ bio: BIO }).eq("id", KHALID); // restore bio
+
   // restore demo state
   await admin.from("profiles").update({ terms_accepted_version: null, terms_accepted_at: null }).eq("id", KHALID);
   if (LID && ORIG) await admin.from("listings").update({ title: ORIG }).eq("id", LID);

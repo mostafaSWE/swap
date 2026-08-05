@@ -1552,6 +1552,27 @@ create unique index if not exists reports_one_pending_per_reporter
   on public.reports (reporter_id, target_type, target_id)
   where status = 'pending';
 
+-- ░░░░░░░░░░░░░░░░░░░░ migrations/0019_terms_gate_profile_bio.sql ░░░░░░░░░░░░░░░░░░░░
+-- Terms gate on the public profile bio (blocks a bio change by an authenticated
+-- non-admin who hasn't accepted the current Terms; service-role/onboarding exempt).
+
+create or replace function public.enforce_terms_on_profile_ugc()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if new.bio is distinct from old.bio
+     and auth.uid() is not null
+     and not public.is_admin(auth.uid())
+     and not public.has_accepted_current_terms(auth.uid()) then
+    raise exception 'terms_not_accepted' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists profiles_terms_gate on public.profiles;
+create trigger profiles_terms_gate
+  before update on public.profiles
+  for each row execute function public.enforce_terms_on_profile_ugc();
+
 -- ░░░░░░░░░░░░░░░░░░░░ seed.sql ░░░░░░░░░░░░░░░░░░░░
 
 -- ════════════════════════════════════════════════════════════════════════

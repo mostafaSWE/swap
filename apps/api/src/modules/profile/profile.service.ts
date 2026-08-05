@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import type { ListingWithRelations, Profile, PublicProfile } from "@swap/types";
 import type { UpdateProfileInput } from "@swap/validation";
 import { TERMS_VERSION } from "@swap/config";
@@ -22,6 +22,29 @@ export class ProfileService {
   }
 
   async updateMe(userId: string, input: UpdateProfileInput): Promise<Profile> {
+    // Gate a CHANGE to the public `bio` (UGC text) on accepted Terms (Apple 1.2) —
+    // this is the service-role path, which the 0019 trigger exempts, so enforce it
+    // here. Other fields (name/username/phone/country/city/avatar) are not gated,
+    // and POST /me/terms is the separate acceptance path.
+    if (input.bio !== undefined) {
+      const { data: current } = await this.supabase.admin
+        .from("profiles")
+        .select("bio, terms_accepted_version")
+        .eq("id", userId)
+        .maybeSingle();
+      if (
+        current &&
+        input.bio !== current.bio &&
+        (current.terms_accepted_version ?? 0) < TERMS_VERSION
+      ) {
+        throw new ForbiddenException({
+          statusCode: 403,
+          error: "Forbidden",
+          code: "terms_not_accepted",
+          message: "Please accept the latest Terms of Service before editing your bio.",
+        });
+      }
+    }
     // username uniqueness is enforced by a DB constraint; surface a clean error.
     const { data, error } = await this.supabase.admin
       .from("profiles")
