@@ -1053,5 +1053,15 @@
   "share": {
     "listingMessage": "شاهد ‏«{title}» على JustSwap\n{url}",
     "profileMessage": "شاهد {name} على JustSwap\n{url}"
+  },
+  "biometric": {
+    "settingLabel": "قفل التطبيق",
+    "enablePrompt": "أكّد لتفعيل قفل التطبيق",
+    "unlockPrompt": "فتح JustSwap",
+    "lockedTitle": "التطبيق مقفل",
+    "unlock": "فتح القفل",
+    "on": "مفعّل",
+    "off": "معطّل",
+    "unavailable": "قفل السمات الحيوية غير متاح على هذا الجهاز."
   }
 }

@@ -94,7 +94,13 @@
           "microphonePermission": false
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "JustSwap can use Face ID to unlock the app when you turn on the app lock."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

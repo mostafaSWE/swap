@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import type { ListingWithRelations, Profile } from "@swap/types";
 import { getListings, getProfileById } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
+import { isAppLockEnabled, isBiometricAvailable, setAppLockEnabled } from "../../src/lib/biometrics";
 import { locale, t } from "../../src/i18n";
 import { monthYear } from "../../src/lib/format";
 import { colors, spacing } from "../../src/theme";
@@ -22,6 +23,18 @@ export default function ProfileTab() {
   const [session, setSession] = useState<Sess | undefined>(undefined); // undefined = resolving
   const [profile, setProfile] = useState<Profile | null>(null);
   const [listings, setListings] = useState<ListingWithRelations[] | null>(null);
+  const [biometricOk, setBiometricOk] = useState(false);
+  const [appLockOn, setAppLockOn] = useState(false);
+
+  useEffect(() => {
+    isBiometricAvailable().then(setBiometricOk).catch(() => undefined);
+    isAppLockEnabled().then(setAppLockOn).catch(() => undefined);
+  }, []);
+
+  async function toggleAppLock() {
+    const next = await setAppLockEnabled(!appLockOn); // enabling requires a successful auth
+    setAppLockOn(next);
+  }
 
   // React to auth: initial session + every sign-in/out/refresh.
   useEffect(() => {
@@ -88,6 +101,14 @@ export default function ProfileTab() {
         <Button variant="secondary" label={t("mobile.profile.saved")} onPress={() => router.push("/saved")} fullWidth />
         <Button variant="secondary" label={t("block.blockedTitle")} onPress={() => router.push("/blocked")} fullWidth />
         <Button variant="secondary" label={t("support.title")} onPress={() => router.push("/support")} fullWidth />
+        {biometricOk ? (
+          <Button
+            variant="secondary"
+            label={`${t("biometric.settingLabel")}: ${appLockOn ? t("biometric.on") : t("biometric.off")}`}
+            onPress={toggleAppLock}
+            fullWidth
+          />
+        ) : null}
         <Button variant="ghost" label={t("mobile.profile.signOut")} onPress={() => supabase.auth.signOut()} fullWidth />
       </View>
 

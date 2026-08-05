@@ -14,6 +14,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { colors } from "../src/theme";
 import { isRTL } from "../src/i18n";
 import { TermsProvider } from "../src/lib/terms";
+import { BiometricLock } from "../src/components/BiometricLock";
+import { PushManager } from "../src/components/PushManager";
 
 // Keep the native splash up until the boot direction guard has confirmed the
 // native layout direction matches the locale — nothing renders before then.
@@ -76,8 +78,10 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      <TermsProvider>
-        <Stack
+      <BiometricLock>
+        <TermsProvider>
+          <PushManager />
+          <Stack
           screenOptions={{
             headerStyle: { backgroundColor: colors.navy },
             headerTintColor: colors.white,
@@ -104,7 +108,8 @@ export default function RootLayout() {
           <Stack.Screen name="new-listing" options={{ title: "" }} />
           <Stack.Screen name="messages/[id]" options={{ title: "" }} />
         </Stack>
-      </TermsProvider>
+        </TermsProvider>
+      </BiometricLock>
     </SafeAreaProvider>
   );
 }

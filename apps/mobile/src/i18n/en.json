@@ -1053,5 +1053,15 @@
   "share": {
     "listingMessage": "Check out “{title}” on JustSwap\n{url}",
     "profileMessage": "Check out {name} on JustSwap\n{url}"
+  },
+  "biometric": {
+    "settingLabel": "App lock",
+    "enablePrompt": "Confirm to turn on the app lock",
+    "unlockPrompt": "Unlock JustSwap",
+    "lockedTitle": "JustSwap is locked",
+    "unlock": "Unlock",
+    "on": "On",
+    "off": "Off",
+    "unavailable": "Biometric lock isn't available on this device."
   }
 }
