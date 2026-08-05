@@ -339,8 +339,16 @@ const REPORTS_WORKING_LIMIT = 500;
 
 export interface EnrichedReport extends Report {
   reporter_username: string | null;
-  /** Human label for the reported entity (listing title / username) when resolvable. */
+  /** Human label for the reported entity: listing title / username / message snippet
+   *  ("(message deleted)" when gone) / "conversation". */
   target_label: string | null;
+  /** For a message report: the reported message's author (username + id), if
+   *  resolvable — so a moderator can act on the SENDER (target_id is the message id). */
+  message_sender_username: string | null;
+  message_sender_id: string | null;
+  /** The conversation a message/conversation report belongs to — lets a moderator
+   *  jump to the thread (admins can read any conversation's messages via RLS). */
+  context_conversation_id: string | null;
   severity: number;
 }
 
@@ -386,17 +394,49 @@ export async function fetchAdminReports(query: AdminReportsQuery = {}): Promise<
       for (const l of ls ?? []) titleMap[l.id] = l.title;
     }
 
-    const enriched: EnrichedReport[] = reports.map((r) => ({
-      ...r,
-      reporter_username: reporters[r.reporter_id] ?? null,
-      target_label:
-        r.target_type === "user"
-          ? targetUsers[r.target_id] ?? null
-          : r.target_type === "listing"
-            ? titleMap[r.target_id] ?? null
-            : null,
-      severity: REPORT_SEVERITY[r.reason] ?? 0,
-    }));
+    // Resolve message reports: a body snippet + author + owning conversation, so a
+    // moderator can act on the message target (target_id is the message id).
+    // Admins can read any message via RLS; a missing row = deleted → safe placeholder.
+    const messageTargetIds = reports.filter((r) => r.target_type === "message").map((r) => r.target_id);
+    const messageMap: Record<string, { body: string; sender_id: string; conversation_id: string }> = {};
+    if (messageTargetIds.length) {
+      const { data: ms } = await supabase
+        .from("messages")
+        .select("id,body,sender_id,conversation_id")
+        .in("id", [...new Set(messageTargetIds)]);
+      for (const m of ms ?? []) messageMap[m.id] = { body: m.body, sender_id: m.sender_id, conversation_id: m.conversation_id };
+    }
+    const messageSenders = await usernameMap(Object.values(messageMap).map((m) => m.sender_id));
+    const snippet = (s: string) => (s.length > 80 ? `${s.slice(0, 80)}…` : s);
+
+    const enriched: EnrichedReport[] = reports.map((r) => {
+      const msg = r.target_type === "message" ? messageMap[r.target_id] : undefined;
+      return {
+        ...r,
+        reporter_username: reporters[r.reporter_id] ?? null,
+        target_label:
+          r.target_type === "user"
+            ? targetUsers[r.target_id] ?? null
+            : r.target_type === "listing"
+              ? titleMap[r.target_id] ?? null
+              : r.target_type === "message"
+                ? msg
+                  ? snippet(msg.body)
+                  : "(message deleted)"
+                : r.target_type === "conversation"
+                  ? "conversation"
+                  : null,
+        message_sender_username: msg ? messageSenders[msg.sender_id] ?? null : null,
+        message_sender_id: msg?.sender_id ?? null,
+        context_conversation_id:
+          r.target_type === "message"
+            ? msg?.conversation_id ?? null
+            : r.target_type === "conversation"
+              ? r.target_id
+              : null,
+        severity: REPORT_SEVERITY[r.reason] ?? 0,
+      };
+    });
 
     enriched.sort((a, b) => {
       if (sort === "severity" && b.severity !== a.severity) return b.severity - a.severity;

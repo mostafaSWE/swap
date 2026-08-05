@@ -52,8 +52,22 @@ export default async function AdminReportsPage({
     if (reason === "Exchange dispute" || reason === "Swap dispute") return tr("reasons.swap_dispute");
     return reason;
   };
-  const targetHref = (type: string, id: string) =>
-    type === "listing" ? `/listings/${id}` : type === "user" ? `/admin/users/${id}` : null;
+  // A message report's actionable entity is its AUTHOR (target_id is the message
+  // id), so link message/user/listing targets to a page a moderator can act on.
+  const targetHref = (r: (typeof rows)[number]) =>
+    r.target_type === "listing"
+      ? `/listings/${r.target_id}`
+      : r.target_type === "user"
+        ? `/admin/users/${r.target_id}`
+        : r.target_type === "message" && r.message_sender_id
+          ? `/admin/users/${r.message_sender_id}`
+          : null;
+  const targetText = (r: (typeof rows)[number]) =>
+    r.target_type === "message"
+      ? [r.message_sender_username ? `@${r.message_sender_username}` : null, r.target_label]
+          .filter(Boolean)
+          .join(": ") || r.target_type
+      : r.target_label ?? r.target_type;
 
   return (
     <div className="space-y-4">
@@ -71,7 +85,7 @@ export default async function AdminReportsPage({
       ) : (
         <ul className="space-y-3">
           {rows.map((r) => {
-            const href = targetHref(r.target_type, r.target_id);
+            const href = targetHref(r);
             return (
               <li key={r.id} className="rounded-card border border-line bg-surface p-4">
                 <div className="flex flex-wrap items-center gap-2">
@@ -90,10 +104,10 @@ export default async function AdminReportsPage({
                     {t("reportsTable.target")}:{" "}
                     {href ? (
                       <Link href={href} className="text-green hover:underline">
-                        {r.target_label ?? r.target_type}
+                        {targetText(r)}
                       </Link>
                     ) : (
-                      <span className="text-ink">{r.target_label ?? r.target_type}</span>
+                      <span className="text-ink">{targetText(r)}</span>
                     )}
                   </p>
                 </div>
