@@ -73,6 +73,15 @@ export type Profile = {
   suspended_until: string | null;
   /** Admin-supplied reason for the current suspension/ban; surfaced to the user. */
   suspension_reason: string | null;
+  /**
+   * The Terms/EULA version this user last accepted (Apple 1.2 / Google UGC, 0018).
+   * NULL = never accepted. Re-consent is required before a UGC write whenever this
+   * is NULL or < `TERMS_VERSION` (@swap/config). Server-stamped via POST /me/terms
+   * so the client cannot spoof the accepted version. Not part of PublicProfile.
+   */
+  terms_accepted_version: number | null;
+  /** When the user accepted the current Terms version (0018). NULL = never. */
+  terms_accepted_at: string | null;
   followers_count: number;
   following_count: number;
   listings_count: number;

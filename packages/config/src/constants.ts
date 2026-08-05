@@ -7,6 +7,17 @@ export const SLOGAN = {
   en: "Exchange what you have for what you need",
 } as const;
 
+/**
+ * Terms/EULA acceptance version (Apple Guideline 1.2 / Google UGC). A **monotonic
+ * integer**: bump it whenever the Terms or the zero-tolerance UGC policy change,
+ * to force every user to re-consent before their next UGC write. This is the
+ * single source of truth for the app layer; the DB mirrors it in the
+ * `current_terms_version()` function (migration 0018) — **bump both together.**
+ * `TERMS_LAST_UPDATED` is the human-facing date shown on the Terms screen.
+ */
+export const TERMS_VERSION = 1;
+export const TERMS_LAST_UPDATED = "2026-06-20";
+
 /** Free plan image limit per listing. */
 export const FREE_PLAN_MAX_IMAGES = 4;
 

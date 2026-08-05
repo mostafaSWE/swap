@@ -1484,6 +1484,74 @@ create trigger reports_auto_hide
   after insert on public.reports
   for each row execute function public.auto_hide_reported_listing();
 
+-- ░░░░░░░░░░░░░░░░░░░░ migrations/0018_terms_and_report_authz.sql ░░░░░░░░░░░░░░░░░░░░
+-- Terms/EULA acceptance (Apple 1.2) + report authorization. Additive + idempotent.
+
+alter table public.profiles add column if not exists terms_accepted_version int;
+alter table public.profiles add column if not exists terms_accepted_at timestamptz;
+
+create or replace function public.current_terms_version()
+returns int language sql immutable set search_path = public as $$
+  select 1;  -- mirror @swap/config TERMS_VERSION; bump both together
+$$;
+grant execute on function public.current_terms_version() to anon, authenticated, service_role;
+
+create or replace function public.has_accepted_current_terms(uid uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select coalesce(
+    (select p.terms_accepted_version >= public.current_terms_version()
+       from public.profiles p where p.id = uid),
+    false
+  );
+$$;
+grant execute on function public.has_accepted_current_terms(uuid) to anon, authenticated, service_role;
+
+drop policy if exists "listings insert own" on public.listings;
+create policy "listings insert own" on public.listings
+  for insert with check (
+    owner_id = auth.uid()
+    and public.has_accepted_current_terms(auth.uid())
+  );
+
+drop policy if exists "messages send if participant" on public.messages;
+create policy "messages send if participant" on public.messages
+  for insert with check (
+    sender_id = auth.uid()
+    and public.is_conversation_participant(conversation_id, auth.uid())
+    and not exists (
+      select 1 from public.conversation_participants p2
+      where p2.conversation_id = messages.conversation_id
+        and p2.user_id <> auth.uid()
+        and public.blocked_between(auth.uid(), p2.user_id)
+    )
+    and public.has_accepted_current_terms(auth.uid())
+  );
+
+drop policy if exists "reports insert own" on public.reports;
+create policy "reports insert own" on public.reports
+  for insert with check (
+    reporter_id = auth.uid()
+    and (
+      target_type in ('listing', 'user')
+      or (
+        target_type = 'message'
+        and exists (
+          select 1 from public.messages m
+          where m.id = reports.target_id
+            and public.is_conversation_participant(m.conversation_id, auth.uid())
+        )
+      )
+      or (
+        target_type = 'conversation'
+        and public.is_conversation_participant(reports.target_id, auth.uid())
+      )
+    )
+  );
+
+create unique index if not exists reports_one_pending_per_reporter
+  on public.reports (reporter_id, target_type, target_id)
+  where status = 'pending';
+
 -- ░░░░░░░░░░░░░░░░░░░░ seed.sql ░░░░░░░░░░░░░░░░░░░░
 
 -- ════════════════════════════════════════════════════════════════════════
