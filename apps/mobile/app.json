@@ -32,14 +32,41 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
-            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/en/listings" },
-            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/ar/listings" },
-            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/en/users" },
-            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/ar/users" },
-            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/en/messages" },
-            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/ar/messages" }
+            {
+              "scheme": "https",
+              "host": "justswap.me",
+              "pathPrefix": "/en/listings"
+            },
+            {
+              "scheme": "https",
+              "host": "justswap.me",
+              "pathPrefix": "/ar/listings"
+            },
+            {
+              "scheme": "https",
+              "host": "justswap.me",
+              "pathPrefix": "/en/users"
+            },
+            {
+              "scheme": "https",
+              "host": "justswap.me",
+              "pathPrefix": "/ar/users"
+            },
+            {
+              "scheme": "https",
+              "host": "justswap.me",
+              "pathPrefix": "/en/messages"
+            },
+            {
+              "scheme": "https",
+              "host": "justswap.me",
+              "pathPrefix": "/ar/messages"
+            }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -66,7 +93,8 @@
           "cameraPermission": "JustSwap needs access to your camera so you can take photos for your listings.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

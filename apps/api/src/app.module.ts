@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
+import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { SupabaseModule } from "./common/supabase/supabase.module";
 import { HealthModule } from "./health/health.module";
@@ -13,6 +14,7 @@ import { ReportsModule } from "./modules/reports/reports.module";
 import { AdminModule } from "./modules/admin/admin.module";
 import { SafetyModule } from "./modules/safety/safety.module";
 import { ModerationModule } from "./modules/moderation/moderation.module";
+import { PushModule } from "./modules/push/push.module";
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { ModerationModule } from "./modules/moderation/moderation.module";
     // proposal/report creation) tighten this with a per-route @Throttle override;
     // `/health` opts out via @SkipThrottle.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
+    ScheduleModule.forRoot(), // in-process cron for the push-outbox worker (M5)
     SupabaseModule,
     ModerationModule, // provider-agnostic content-moderation boundary (D-2 seam)
     HealthModule,
@@ -33,6 +36,7 @@ import { ModerationModule } from "./modules/moderation/moderation.module";
     ReportsModule,
     AdminModule,
     SafetyModule,
+    PushModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

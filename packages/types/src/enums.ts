@@ -15,6 +15,19 @@ export type ReportStatus = (typeof REPORT_STATUSES)[number];
 export const LOCALES = ["ar", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
 
+/* ── Push notifications (M5) ── */
+export const DEVICE_PLATFORMS = ["ios", "android"] as const;
+export type DevicePlatform = (typeof DEVICE_PLATFORMS)[number];
+
+export const PUSH_PROVIDERS = ["expo", "fcm", "apns"] as const;
+export type PushProviderKind = (typeof PUSH_PROVIDERS)[number];
+
+export const APP_ENVS = ["development", "preview", "production"] as const;
+export type AppEnv = (typeof APP_ENVS)[number];
+
+export const PUSH_OUTBOX_STATUSES = ["pending", "sent", "failed", "skipped"] as const;
+export type PushOutboxStatus = (typeof PUSH_OUTBOX_STATUSES)[number];
+
 export const DEFAULT_LOCALE: Locale = "ar";
 
 export const SORT_OPTIONS = ["newest", "most_viewed"] as const;

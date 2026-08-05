@@ -8,10 +8,14 @@
  * signature). Keep them as `type`.
  */
 import type {
+  AppEnv,
+  DevicePlatform,
   ListingCondition,
   ListingStatus,
   Locale,
   NotificationType,
+  PushOutboxStatus,
+  PushProviderKind,
   ReportStatus,
   ReportTargetType,
   SwapProposalStatus,
@@ -185,6 +189,39 @@ export type SavedListing = {
   user_id: string;
   listing_id: string;
   created_at: string;
+};
+
+/**
+ * A registered push target — one row per (user, app installation). The push token
+ * is OWNER-ONLY (RLS); never exposed to other users. `enabled` is toggled off on
+ * logout or when a provider reports the token invalid (M5, migration 0020).
+ */
+export type DeviceToken = {
+  id: string;
+  user_id: string;
+  installation_id: string;
+  token: string;
+  provider: PushProviderKind;
+  platform: DevicePlatform;
+  app_env: AppEnv;
+  enabled: boolean;
+  last_seen_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+/** A durable push-delivery queue row (one per notification). A backend worker
+ *  processes these out of band; the in-app notification stays the source of truth. */
+export type PushOutbox = {
+  id: string;
+  notification_id: string;
+  user_id: string;
+  status: PushOutboxStatus;
+  attempts: number;
+  next_attempt_at: string;
+  last_error: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 /**

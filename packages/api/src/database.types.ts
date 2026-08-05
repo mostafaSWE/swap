@@ -13,6 +13,7 @@ import type {
   Conversation,
   ConversationParticipant,
   Country,
+  DeviceToken,
   Follow,
   Listing,
   ListingImage,
@@ -20,6 +21,7 @@ import type {
   Message,
   Notification,
   Profile,
+  PushOutbox,
   Rating,
   Report,
   SavedListing,
@@ -60,6 +62,8 @@ export interface Database {
       saved_listings: Table<SavedListing>;
       listing_views: Table<ListingView>;
       admin_actions: Table<AdminAction>;
+      device_tokens: Table<DeviceToken>;
+      push_outbox: Table<PushOutbox>;
     };
     Views: Record<string, never>;
     Functions: {

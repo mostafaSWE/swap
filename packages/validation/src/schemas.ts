@@ -1,7 +1,10 @@
 import { z } from "zod";
 import {
+  APP_ENVS,
+  DEVICE_PLATFORMS,
   LISTING_CONDITIONS,
   LISTING_STATUSES,
+  PUSH_PROVIDERS,
   REPORT_TARGET_TYPES,
   REPORT_STATUSES,
   SORT_OPTIONS,
@@ -151,6 +154,16 @@ export type CreateReportInput = z.infer<typeof createReportSchema>;
 
 export const updateReportSchema = z.object({ status: z.enum(REPORT_STATUSES) });
 export type UpdateReportInput = z.infer<typeof updateReportSchema>;
+
+/* ── Push notifications (M5) ── */
+export const registerDeviceSchema = z.object({
+  installation_id: z.string().min(1).max(200),
+  token: z.string().min(1).max(500),
+  provider: z.enum(PUSH_PROVIDERS).default("expo"),
+  platform: z.enum(DEVICE_PLATFORMS),
+  app_env: z.enum(APP_ENVS).default("development"),
+});
+export type RegisterDeviceInput = z.infer<typeof registerDeviceSchema>;
 
 /* ── Admin ── */
 export const adminUpdateUserSchema = z.object({

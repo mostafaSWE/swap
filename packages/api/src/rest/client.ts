@@ -15,6 +15,7 @@ import type {
   City,
   Conversation,
   Country,
+  DeviceToken,
   Listing,
   ListingWithRelations,
   Message,
@@ -37,6 +38,7 @@ import type {
   CreateReportInput,
   DisputeSwapInput,
   ListingFiltersInput,
+  RegisterDeviceInput,
   ListProposalsQuery,
   SendMessageInput,
   StartConversationInput,
@@ -130,6 +132,14 @@ export class SwapApiClient {
   updateMe = (input: UpdateProfileInput) => this.request<Profile>("PATCH", "/me", input);
   /** Record acceptance of the current Terms/EULA version (server-stamps the version). */
   acceptTerms = () => this.request<Profile>("POST", "/me/terms");
+
+  /* ── Push devices (M5) ── */
+  /** Register / rotate this installation's push token after login. */
+  registerDevice = (input: RegisterDeviceInput) => this.request<void>("POST", "/me/devices", input);
+  /** Revoke this installation's token on logout. */
+  revokeDevice = (installationId: string) =>
+    this.request<void>("DELETE", `/me/devices/${encodeURIComponent(installationId)}`);
+  devices = () => this.request<DeviceToken[]>("GET", "/me/devices");
   getUser = (username: string) => this.request<PublicProfile>("GET", `/users/${username}`);
   follow = (userId: string) => this.request<void>("POST", `/users/${userId}/follow`);
   unfollow = (userId: string) => this.request<void>("DELETE", `/users/${userId}/follow`);
