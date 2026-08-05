@@ -1041,5 +1041,17 @@
     "accept": "أوافق — قبول ومتابعة",
     "decline": "ليس الآن",
     "error": "تعذّر تسجيل موافقتك. حاول مرة أخرى."
+  },
+  "imagePicker": {
+    "title": "إضافة صورة",
+    "takePhoto": "التقاط صورة",
+    "chooseLibrary": "الاختيار من المعرض",
+    "cameraDeniedTitle": "يلزم الوصول إلى الكاميرا",
+    "cameraDeniedBody": "فعّل الوصول إلى الكاميرا من الإعدادات لالتقاط صورة.",
+    "openSettings": "فتح الإعدادات"
+  },
+  "share": {
+    "listingMessage": "شاهد ‏«{title}» على JustSwap\n{url}",
+    "profileMessage": "شاهد {name} على JustSwap\n{url}"
   }
 }

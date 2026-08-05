@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Ban, Undo2 } from "lucide-react-native";
+import { Ban, Share2, Undo2 } from "lucide-react-native";
 import type { ListingWithRelations, PublicProfile, RatingWithRater } from "@swap/types";
 import { followUser, getListings, getPublicProfileByUsername, getRatingsForUser, isBlocked, isFollowing, unfollowUser } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
@@ -15,6 +15,7 @@ import { FollowButton } from "../../src/components/FollowButton";
 import { ListingCard } from "../../src/components/ListingCard";
 import { ReportDialog } from "../../src/components/ReportDialog";
 import { EmptyState } from "../../src/components/EmptyState";
+import { shareProfile } from "../../src/lib/share";
 
 export default function PublicProfileScreen() {
   const { username } = useLocalSearchParams<{ username: string }>();
@@ -138,7 +139,16 @@ export default function PublicProfileScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: `@${profile.username}` }} />
+      <Stack.Screen
+        options={{
+          title: `@${profile.username}`,
+          headerRight: () => (
+            <Pressable onPress={() => shareProfile(profile.username, profile.full_name)} hitSlop={10} accessibilityRole="button" accessibilityLabel={t("listing.share")}>
+              <Icon icon={Share2} size={22} color={colors.white} />
+            </Pressable>
+          ),
+        }}
+      />
       <ScrollView style={styles.root} contentContainerStyle={styles.content}>
         <ProfileHeader
           name={profile.full_name}

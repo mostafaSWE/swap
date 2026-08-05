@@ -1041,5 +1041,17 @@
     "accept": "I agree — accept and continue",
     "decline": "Not now",
     "error": "Couldn't record your acceptance. Please try again."
+  },
+  "imagePicker": {
+    "title": "Add a photo",
+    "takePhoto": "Take photo",
+    "chooseLibrary": "Choose from library",
+    "cameraDeniedTitle": "Camera access needed",
+    "cameraDeniedBody": "Enable camera access in Settings to take a photo.",
+    "openSettings": "Open settings"
+  },
+  "share": {
+    "listingMessage": "Check out “{title}” on JustSwap\n{url}",
+    "profileMessage": "Check out {name} on JustSwap\n{url}"
   }
 }

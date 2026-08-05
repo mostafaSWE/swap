@@ -1,3 +1,4 @@
+import { Alert, Linking } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { decode } from "base64-arraybuffer";
 import { STORAGE_BUCKETS } from "@swap/config";
@@ -5,6 +6,7 @@ import type { SwapProposalWithRelations } from "@swap/types";
 import { updateProfile } from "@swap/api";
 import { supabase } from "./supabase";
 import { api } from "./api";
+import { t } from "../i18n";
 
 export type PickedImage = {
   uri: string;
@@ -16,6 +18,17 @@ export type PickedImage = {
 
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // matches the storage bucket file_size_limit
+
+function mapAssets(res: ImagePicker.ImagePickerResult): PickedImage[] {
+  if (res.canceled) return [];
+  return res.assets.map((a, i) => ({
+    uri: a.uri,
+    base64: a.base64 ?? null,
+    fileName: a.fileName ?? `photo-${i}.jpg`,
+    mimeType: a.mimeType ?? "image/jpeg",
+    fileSize: a.fileSize,
+  }));
+}
 
 /**
  * Launch the system photo library and return the picked images (with base64 so
@@ -30,14 +43,38 @@ export async function pickImages(limit: number): Promise<PickedImage[]> {
     quality: 0.7,
     base64: true,
   });
-  if (res.canceled) return [];
-  return res.assets.map((a, i) => ({
-    uri: a.uri,
-    base64: a.base64 ?? null,
-    fileName: a.fileName ?? `photo-${i}.jpg`,
-    mimeType: a.mimeType ?? "image/jpeg",
-    fileSize: a.fileSize,
-  }));
+  return mapAssets(res);
+}
+
+/** Take a single photo with the camera, requesting permission on first use.
+ *  A permanent denial routes the user to the OS settings. Returns [] on cancel/denial. */
+export async function captureImage(): Promise<PickedImage[]> {
+  const perm = await ImagePicker.requestCameraPermissionsAsync();
+  if (!perm.granted) {
+    Alert.alert(t("imagePicker.cameraDeniedTitle"), t("imagePicker.cameraDeniedBody"), [
+      { text: t("common.cancel"), style: "cancel" },
+      ...(perm.canAskAgain ? [] : [{ text: t("imagePicker.openSettings"), onPress: () => Linking.openSettings() }]),
+    ]);
+    return [];
+  }
+  const res = await ImagePicker.launchCameraAsync({ quality: 0.7, base64: true });
+  return mapAssets(res);
+}
+
+/**
+ * Native image acquisition with a source chooser (mirrors the web file input, but
+ * offers the phone camera too). Presents Take Photo / Choose from Library, then
+ * runs the matching picker. The camera captures ONE photo; the library respects
+ * `limit`. Feeds the SAME `PickedImage` → upload pipeline (no alternate path).
+ */
+export function acquireImages(limit: number): Promise<PickedImage[]> {
+  return new Promise((resolve) => {
+    Alert.alert(t("imagePicker.title"), undefined, [
+      { text: t("imagePicker.takePhoto"), onPress: () => captureImage().then(resolve) },
+      { text: t("imagePicker.chooseLibrary"), onPress: () => pickImages(limit).then(resolve) },
+      { text: t("common.cancel"), style: "cancel", onPress: () => resolve([]) },
+    ]);
+  });
 }
 
 /**

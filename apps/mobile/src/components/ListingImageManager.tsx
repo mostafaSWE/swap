@@ -5,7 +5,7 @@ import { FREE_PLAN_MAX_IMAGES } from "@swap/config";
 import { getListingById } from "@swap/api";
 import type { ListingImage } from "@swap/types";
 import { api } from "../lib/api";
-import { pickImages, uploadListingImage } from "../lib/upload";
+import { acquireImages, uploadListingImage } from "../lib/upload";
 import { supabase } from "../lib/supabase";
 import { useTerms } from "../lib/terms";
 import { t } from "../i18n";
@@ -28,7 +28,7 @@ export function ListingImageManager({ listingId, initialImages }: { listingId: s
   async function add() {
     if (busy) return;
     if (!(await ensureAccepted())) return; // Apple 1.2 — accept Terms before uploading UGC
-    const selected = await pickImages(FREE_PLAN_MAX_IMAGES - images.length);
+    const selected = await acquireImages(FREE_PLAN_MAX_IMAGES - images.length);
     if (!selected.length) return;
     setBusy(true);
     setError(null);

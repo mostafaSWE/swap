@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Heart, Repeat2 } from "lucide-react-native";
+import { Heart, Repeat2, Share2 } from "lucide-react-native";
 import { localizedName } from "@swap/ui";
 import type { ListingWithRelations } from "@swap/types";
 import {
@@ -23,6 +23,7 @@ import { Badge, Button, Divider, Icon } from "../../src/components/ui";
 import { WantedCard } from "../../src/components/WantedCard";
 import { SellerCard } from "../../src/components/SellerCard";
 import { MessageButton } from "../../src/components/MessageButton";
+import { shareListing } from "../../src/lib/share";
 import { ProposeSwapSheet } from "../../src/components/ProposeSwapSheet";
 import { ReportDialog } from "../../src/components/ReportDialog";
 import { ItemArtwork } from "../../src/components/ItemArtwork";
@@ -129,7 +130,16 @@ export default function ListingDetail() {
 
   return (
     <>
-      <Stack.Screen options={{ title: listing.title }} />
+      <Stack.Screen
+        options={{
+          title: listing.title,
+          headerRight: () => (
+            <Pressable onPress={() => shareListing(listing.id, listing.title)} hitSlop={10} accessibilityRole="button" accessibilityLabel={t("listing.share")}>
+              <Icon icon={Share2} size={22} color={colors.white} />
+            </Pressable>
+          ),
+        }}
+      />
       <ScrollView style={styles.root} contentContainerStyle={styles.scroll}>
         {images.length > 0 ? (
           <FlatList

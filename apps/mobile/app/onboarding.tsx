@@ -6,7 +6,7 @@ import type { Profile } from "@swap/types";
 import { getProfileById, updateProfile } from "@swap/api";
 import { localizedName } from "@swap/ui";
 import { supabase } from "../src/lib/supabase";
-import { pickImages, uploadAvatar } from "../src/lib/upload";
+import { acquireImages, uploadAvatar } from "../src/lib/upload";
 import { locale, t } from "../src/i18n";
 import { colors, spacing } from "../src/theme";
 import { AvatarUpload } from "../src/components/AvatarUpload";
@@ -59,7 +59,7 @@ export default function Onboarding() {
   async function chooseAvatar() {
     if (!profile || avatarBusy) return;
     setAvatarError(null);
-    const picked = await pickImages(1);
+    const picked = await acquireImages(1);
     const image = picked[0];
     if (!image) return;
     setAvatarBusy(true);

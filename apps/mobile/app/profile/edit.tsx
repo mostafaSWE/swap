@@ -6,7 +6,7 @@ import { localizedName } from "@swap/ui";
 import type { Profile } from "@swap/types";
 import { getProfileById, updateProfile } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
-import { pickImages, uploadAvatar } from "../../src/lib/upload";
+import { acquireImages, uploadAvatar } from "../../src/lib/upload";
 import { useTerms } from "../../src/lib/terms";
 import { locale, t } from "../../src/i18n";
 import { colors, spacing } from "../../src/theme";
@@ -66,7 +66,7 @@ export default function EditProfile() {
     if (!profile || avatarBusy) return;
     if (!(await ensureAccepted())) return; // Apple 1.2 — an avatar is user-uploaded content
     setAvatarError(null);
-    const image = (await pickImages(1))[0];
+    const image = (await acquireImages(1))[0];
     if (!image) return;
     setAvatarBusy(true);
     try { setAvatarUrl(await uploadAvatar(profile.id, image)); }

@@ -14,7 +14,7 @@ import type {
   SwapProposalWithRelations,
 } from "@swap/types";
 import { api } from "../lib/api";
-import { pickImages, type PickedImage, uploadSwapConfirmation } from "../lib/upload";
+import { acquireImages, type PickedImage, uploadSwapConfirmation } from "../lib/upload";
 import { useTerms } from "../lib/terms";
 import { supabase } from "../lib/supabase";
 import { t } from "../i18n";
@@ -185,7 +185,7 @@ export function ProposalContextCard({
     if (busy) return;
     setError(null);
     try {
-      setConfirmImage((await pickImages(1))[0] ?? null);
+      setConfirmImage((await acquireImages(1))[0] ?? null);
     } catch {
       setError(t("proposal.uploadError"));
     }

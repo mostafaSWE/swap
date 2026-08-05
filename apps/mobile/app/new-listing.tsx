@@ -7,7 +7,7 @@ import { COUNTRIES, COUNTRY_BY_ID, FREE_PLAN_MAX_IMAGES, TOP_LEVEL_CATEGORIES, c
 import { localizedName } from "@swap/ui";
 import { supabase } from "../src/lib/supabase";
 import { api } from "../src/lib/api";
-import { pickImages, uploadListingImage, type PickedImage } from "../src/lib/upload";
+import { acquireImages, uploadListingImage, type PickedImage } from "../src/lib/upload";
 import { useTerms } from "../src/lib/terms";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
@@ -53,7 +53,7 @@ export default function NewListing() {
   async function addPhotos() {
     const remaining = FREE_PLAN_MAX_IMAGES - images.length;
     if (remaining <= 0) return;
-    const picked = await pickImages(remaining);
+    const picked = await acquireImages(remaining);
     if (picked.length) setImages((prev) => [...prev, ...picked].slice(0, FREE_PLAN_MAX_IMAGES));
   }
 
