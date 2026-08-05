@@ -1,0 +1,14 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "me.justswap.app",
+      "sha256_cert_fingerprints": [
+        "REPLACE_WITH_EAS_DEVELOPMENT_SHA256",
+        "REPLACE_WITH_EAS_PREVIEW_SHA256",
+        "REPLACE_WITH_EAS_PRODUCTION_SHA256"
+      ]
+    }
+  }
+]

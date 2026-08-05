@@ -66,7 +66,19 @@ const nextConfig = {
     ],
   },
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [
+      // App-Link / Universal-Link association files must be served as JSON with no
+      // redirect. The extension-less AASA needs the content-type set explicitly.
+      {
+        source: "/.well-known/apple-app-site-association",
+        headers: [{ key: "Content-Type", value: "application/json" }],
+      },
+      {
+        source: "/.well-known/assetlinks.json",
+        headers: [{ key: "Content-Type", value: "application/json" }],
+      },
+      { source: "/(.*)", headers: securityHeaders },
+    ];
   },
   webpack(config) {
     // @supabase/supabase-js reads process.version to build its X-Client-Info

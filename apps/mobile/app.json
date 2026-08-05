@@ -10,6 +10,9 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "me.justswap.app",
+      "associatedDomains": [
+        "applinks:justswap.me"
+      ],
       "infoPlist": {
         "CFBundleLocalizations": [
           "ar",
@@ -23,7 +26,22 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0A0E1A"
-      }
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/en/listings" },
+            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/ar/listings" },
+            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/en/users" },
+            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/ar/users" },
+            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/en/messages" },
+            { "scheme": "https", "host": "justswap.me", "pathPrefix": "/ar/messages" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/icon.png"
