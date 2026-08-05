@@ -37,6 +37,18 @@ const PASS_THROUGH: ModerationVerdict = { scanned: false, allowed: true, flagged
  */
 @Injectable()
 export class ContentModerationService {
+  /**
+   * The UGC surfaces this boundary is designed to cover once a provider is wired
+   * (Decision D-2). Text via {@link checkText}: listing title/description/wanted,
+   * message body, proposal note, rating/review. Images via {@link checkImage}:
+   * listing photos, avatars, swap-confirmation photos — plus a SEPARATE CSAM
+   * hash-match path (see docs/d2-content-moderation.md §4).
+   */
+  static readonly COVERAGE = {
+    text: ["listing_text", "message_body", "proposal_note", "rating_comment", "profile_bio"],
+    image: ["listing_image", "avatar", "confirmation_photo"],
+  } as const;
+
   /** Scan user-authored text (listing title/description, message body, note, review). */
   async checkText(_text: string): Promise<ModerationVerdict> {
     // TODO(D-2): call the selected text provider; map its response to ModerationVerdict.
@@ -47,6 +59,16 @@ export class ContentModerationService {
   async checkImage(_imageUrl: string): Promise<ModerationVerdict> {
     // TODO(D-2): call the selected image provider (+ a separate CSAM hash-match path).
     return PASS_THROUGH;
+  }
+
+  /**
+   * Honest health/config signal (no secrets). `active:false` + `provider:"none"`
+   * makes it explicit that proactive scanning is NOT running — reactive
+   * report/auto-hide is the current safety net (Decision D-2 open). When a
+   * provider is wired, also set the failure policy it will use on outage.
+   */
+  status(): { provider: string; active: boolean; failurePolicy: string } {
+    return { provider: "none", active: false, failurePolicy: "n/a (no provider configured)" };
   }
 }
 
