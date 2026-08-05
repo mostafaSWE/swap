@@ -151,4 +151,4 @@ Suspected **child sexual abuse material (CSAM)** or other illegal content is han
 > content and suspend/ban users within 24 hours; every action is audit-logged.
 > Blocking a user (profile or chat) immediately hides their listings and prevents any
 > messaging both ways. Every user must accept the zero-tolerance Terms/EULA before they
-> can post. Contact: **support@justswap.app**.
+> can post. Contact: **support@justswap.me**.

@@ -6,6 +6,7 @@ import { IBM_Plex_Sans_Arabic, Inter } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import type { Locale } from "@swap/types";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { TermsGate } from "@/components/TermsGate";
 import { getSiteUrl } from "@/lib/site-url";
 import { altLinks, OG_DEFAULT } from "@/lib/seo";
 import "../globals.css";
@@ -94,7 +95,10 @@ export default async function LocaleLayout({
     <html lang={locale} dir={dir} className={`${plexArabic.variable} ${inter.variable}`} suppressHydrationWarning>
       <body className={locale === "ar" ? "font-sans" : "font-latin"}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-          <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+          <NextIntlClientProvider messages={messages}>
+            {children}
+            <TermsGate />
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>

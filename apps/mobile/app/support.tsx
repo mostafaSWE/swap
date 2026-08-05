@@ -9,7 +9,7 @@ type Topic = { title: string; description: string };
 
 /**
  * Support / contact screen (web `/support`). The ONLY contact channel is email —
- * `support@justswap.app` — surfaced as a mailto. Gives an App-Review reviewer a
+ * `support@justswap.me` — surfaced as a mailto. Gives an App-Review reviewer a
  * discoverable published contact point (Apple 1.2 pillar). Reachable from the
  * Profile tab and the Terms/legal screens.
  */

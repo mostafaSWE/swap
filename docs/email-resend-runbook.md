@@ -58,14 +58,14 @@ insufficient because the web client can write to Supabase directly when
 ### Part A — Resend: verify the sending domain (do this first)
 DKIM/SPF must be **Verified** before production mail reaches inboxes.
 
-1. Resend → **Domains → Add Domain** → enter the sending domain (e.g. `justswap.app`,
-   or a subdomain like `mail.justswap.app` to keep the root's SPF/DMARC clean).
+1. Resend → **Domains → Add Domain** → enter the sending domain (e.g. `justswap.me`,
+   or a subdomain like `mail.justswap.me` to keep the root's SPF/DMARC clean).
 2. Add the DNS records Resend shows at your DNS provider:
    - **SPF** — TXT `v=spf1 include:amazonses.com ~all` (merge into the existing SPF
      TXT if one exists — only one SPF record per domain is valid).
    - **DKIM** — the CNAME(s) Resend provides (e.g. `resend._domainkey → …resend.dev`).
    - **DMARC** (recommended) — TXT at `_dmarc.<domain>`:
-     `v=DMARC1; p=none; rua=mailto:dmarc@justswap.app` (start `p=none`, tighten later).
+     `v=DMARC1; p=none; rua=mailto:dmarc@justswap.me` (start `p=none`, tighten later).
 3. Click **Verify**; wait until SPF + DKIM show **Verified**.
 4. **API Keys → Create** → "Sending access" → copy the `re_…` key (shown once).
 
@@ -83,8 +83,8 @@ npx supabase functions deploy send-email --no-verify-jwt
 npx supabase secrets set \
   RESEND_API_KEY=re_xxx \
   SEND_EMAIL_HOOK_SECRET=v1,whsec_xxx \
-  RESEND_FROM="JustSwap <noreply@justswap.app>" \
-  PUBLIC_APP_URL=https://justswap.app
+  RESEND_FROM="JustSwap <noreply@justswap.me>" \
+  PUBLIC_APP_URL=https://justswap.me
 ```
 - `RESEND_FROM` must be on the **verified** domain from Part A.
 - `PUBLIC_APP_URL` = the **production origin, no trailing slash**. This is the single
@@ -99,8 +99,8 @@ npx supabase secrets set \
   copy it back into the `secrets set` above.
 
 ### Part C — Supabase Auth → URL Configuration
-- **Site URL** = `https://justswap.app` (the fallback link base; never localhost).
-- **Redirect URLs** — add `https://justswap.app/**` (and a Vercel preview wildcard if
+- **Site URL** = `https://justswap.me` (the fallback link base; never localhost).
+- **Redirect URLs** — add `https://justswap.me/**` (and a Vercel preview wildcard if
   used). Without this, Supabase silently rewrites `redirect_to` to Site URL and users
   land on the wrong post-confirm page.
 - **Authentication → Providers → Email → Confirm email = ON.**
@@ -111,7 +111,7 @@ against production — paste it into the Supabase **SQL Editor** (simplest), or
 `npx supabase db push` if you manage migrations through the linked CLI.
 
 ### Part E — Web host (Vercel)
-Set `NEXT_PUBLIC_APP_URL=https://justswap.app` for **all** environments (inlined at
+Set `NEXT_PUBLIC_APP_URL=https://justswap.me` for **all** environments (inlined at
 build time) and `NEXT_PUBLIC_API_URL` to the production API origin so mutations go
 through the gated API.
 
@@ -123,7 +123,7 @@ through the gated API.
 ```bash
 curl -X POST 'https://api.resend.com/emails' \
   -H 'Authorization: Bearer re_xxx' -H 'Content-Type: application/json' \
-  -d '{"from":"JustSwap <noreply@justswap.app>","to":["you@example.com"],
+  -d '{"from":"JustSwap <noreply@justswap.me>","to":["you@example.com"],
        "subject":"JustSwap Resend delivery test","html":"<strong>It works.</strong>"}'
 ```
 Expect HTTP 200 `{"id":"…"}`; the mail lands in the **inbox** (check spam — if it's in
@@ -133,7 +133,7 @@ spam, revisit SPF/DKIM/DMARC).
 trigger a password reset), then open the email and confirm:
 - [ ] Branded: dark navy, JustSwap logo + wordmark, green button, Arabic renders RTL.
 - [ ] Plain-text part present (view source / "show original").
-- [ ] The confirm/reset link **starts with `https://justswap.app/auth/confirm?…`** —
+- [ ] The confirm/reset link **starts with `https://justswap.me/auth/confirm?…`** —
       not `localhost`, not `*.supabase.co`.
 - [ ] Clicking it verifies and lands on the same-origin `next` page (e.g. `/ar/onboarding`).
 - [ ] Footer Terms/Privacy/Help links point at the production domain.

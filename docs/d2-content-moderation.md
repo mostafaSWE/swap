@@ -21,7 +21,7 @@ has now **built every UGC pillar except proactive filtering**:
 | EULA/terms accepted **before** posting (zero-tolerance wording) | ✅ built — mobile terms gate + `TermsGuard` + RLS (0018) |
 | In-app **Report** on listing / image / message / profile | ✅ built — mobile report UI (all 4 targets) → shared queue |
 | In-app **Block** user | ✅ built — profile + chat + blocked-users screen |
-| **Published contact** info | ✅ built — Support screen (`support@justswap.app`) |
+| **Published contact** info | ✅ built — Support screen (`support@justswap.me`) |
 | **24h** report-response SLA (documented) | ✅ documented — `docs/moderation-sla.md` |
 | **Proactive filter** for incoming UGC (esp. images), adult hidden by default | ⛔ **NOT built — this is D-2** |
 | **CSAM** escalation + report-to-authority procedure | ⚠ documented (SLA §6); detection tooling = D-2 |
