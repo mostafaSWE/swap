@@ -7,6 +7,7 @@ import type { ListingCondition, ListingWithRelations } from "@swap/types";
 import { getListingById } from "@swap/api";
 import { api } from "../../../src/lib/api";
 import { supabase } from "../../../src/lib/supabase";
+import { useTerms } from "../../../src/lib/terms";
 import { locale, t } from "../../../src/i18n";
 import { colors, spacing } from "../../../src/theme";
 import { ListingImageManager } from "../../../src/components/ListingImageManager";
@@ -17,6 +18,7 @@ import { Button, Checkbox, Input, SegmentedControl, Select, Textarea } from "../
 export default function EditListing() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { ensureAccepted } = useTerms();
   const [listing, setListing] = useState<ListingWithRelations | null | undefined>(undefined);
   const [title, setTitle] = useState("");
   const [categoryId, setCategoryId] = useState<string>();
@@ -65,6 +67,7 @@ export default function EditListing() {
 
   async function save() {
     if (!listing || !categoryId || !countryId || !cityId || busy) return;
+    if (!(await ensureAccepted())) return; // Apple 1.2 — accept Terms before editing content
     setBusy(true);
     setError(null);
     try {

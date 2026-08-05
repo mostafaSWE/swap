@@ -8,6 +8,7 @@ import { localizedName } from "@swap/ui";
 import { supabase } from "../src/lib/supabase";
 import { api } from "../src/lib/api";
 import { pickImages, uploadListingImage, type PickedImage } from "../src/lib/upload";
+import { useTerms } from "../src/lib/terms";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
 import { Button, Checkbox, Icon, Input, SegmentedControl, Select, Textarea } from "../src/components/ui";
@@ -23,6 +24,7 @@ import { ItemArtwork } from "../src/components/ItemArtwork";
  */
 export default function NewListing() {
   const router = useRouter();
+  const { ensureAccepted } = useTerms();
   const [step, setStep] = useState(1);
   const [images, setImages] = useState<PickedImage[]>([]);
   const [title, setTitle] = useState("");
@@ -82,6 +84,8 @@ export default function NewListing() {
       router.push("/login");
       return;
     }
+    // Apple 1.2 — a listing is UGC; require accepted Terms before publishing.
+    if (!(await ensureAccepted())) return;
 
     setBusy(true);
     setStatus(t("newListing.submit"));

@@ -7,6 +7,7 @@ import type { Profile } from "@swap/types";
 import { getProfileById, updateProfile } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
 import { pickImages, uploadAvatar } from "../../src/lib/upload";
+import { useTerms } from "../../src/lib/terms";
 import { locale, t } from "../../src/i18n";
 import { colors, spacing } from "../../src/theme";
 import { AvatarUpload } from "../../src/components/AvatarUpload";
@@ -16,6 +17,7 @@ import { Button, Input, Select, Textarea } from "../../src/components/ui";
  * picked; the rest is saved together through the shared profile query. */
 export default function EditProfile() {
   const router = useRouter();
+  const { ensureAccepted } = useTerms();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
@@ -62,6 +64,7 @@ export default function EditProfile() {
 
   async function chooseAvatar() {
     if (!profile || avatarBusy) return;
+    if (!(await ensureAccepted())) return; // Apple 1.2 — an avatar is user-uploaded content
     setAvatarError(null);
     const image = (await pickImages(1))[0];
     if (!image) return;
@@ -73,6 +76,7 @@ export default function EditProfile() {
 
   async function save() {
     if (!profile || busy) return;
+    if (!(await ensureAccepted())) return; // Apple 1.2 — the bio is public UGC
     setBusy(true);
     setSaved(false);
     setError(null);

@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Ban, Undo2 } from "lucide-react-native";
 import type { ListingWithRelations, PublicProfile, RatingWithRater } from "@swap/types";
-import { followUser, getListings, getPublicProfileByUsername, getRatingsForUser, isFollowing, unfollowUser } from "@swap/api";
+import { followUser, getListings, getPublicProfileByUsername, getRatingsForUser, isBlocked, isFollowing, unfollowUser } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
+import { api } from "../../src/lib/api";
 import { locale, t } from "../../src/i18n";
 import { monthYear } from "../../src/lib/format";
 import { colors, spacing } from "../../src/theme";
-import { Avatar, RatingStars } from "../../src/components/ui";
+import { Avatar, Button, Icon, RatingStars } from "../../src/components/ui";
 import { ProfileHeader } from "../../src/components/ProfileHeader";
 import { FollowButton } from "../../src/components/FollowButton";
 import { ListingCard } from "../../src/components/ListingCard";
+import { ReportDialog } from "../../src/components/ReportDialog";
 import { EmptyState } from "../../src/components/EmptyState";
 
 export default function PublicProfileScreen() {
@@ -22,6 +25,8 @@ export default function PublicProfileScreen() {
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [following, setFollowing] = useState(false);
   const [followBusy, setFollowBusy] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const [blockBusy, setBlockBusy] = useState(false);
 
   useEffect(() => {
     if (!username) return;
@@ -47,14 +52,23 @@ export default function PublicProfileScreen() {
   useEffect(() => {
     if (!viewerId || !profile || viewerId === profile.id) {
       setFollowing(false);
+      setBlocked(false);
       return;
     }
     let active = true;
     isFollowing(supabase, viewerId, profile.id).then((value) => active && setFollowing(value)).catch(() => undefined);
+    isBlocked(supabase, viewerId, profile.id).then((value) => active && setBlocked(value)).catch(() => undefined);
     return () => {
       active = false;
     };
   }, [viewerId, profile?.id]);
+
+  /** Re-pull the profile's listings — after a block/unblock their active listings
+   *  become RLS-hidden / visible again (no router.refresh() in Expo Router). */
+  function refetchListings(id: string) {
+    setListings(null);
+    getListings(supabase, { ownerId: id, limit: 20 }).then(setListings).catch(() => setListings([]));
+  }
 
   async function toggleFollow() {
     if (!profile) return;
@@ -73,6 +87,46 @@ export default function PublicProfileScreen() {
     } finally {
       setFollowBusy(false);
     }
+  }
+
+  async function runBlock() {
+    if (!profile || !viewerId || blockBusy) return;
+    setBlockBusy(true);
+    try {
+      await api.block(profile.id);
+      setBlocked(true);
+      setFollowing(false); // blocking severs the follow edge both ways (DB trigger)
+      refetchListings(profile.id);
+    } catch {
+      Alert.alert(t("common.error"));
+    } finally {
+      setBlockBusy(false);
+    }
+  }
+
+  async function runUnblock() {
+    if (!profile || !viewerId || blockBusy) return;
+    setBlockBusy(true);
+    try {
+      await api.unblock(profile.id);
+      setBlocked(false);
+      refetchListings(profile.id); // NOTE: does NOT restore the severed follow (by design)
+    } catch {
+      Alert.alert(t("common.error"));
+    } finally {
+      setBlockBusy(false);
+    }
+  }
+
+  function confirmBlock() {
+    if (!viewerId) {
+      router.push("/login");
+      return;
+    }
+    Alert.alert(t("block.confirmTitle"), t("block.confirmBody"), [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("block.block"), style: "destructive", onPress: runBlock },
+    ]);
   }
 
   if (profile === undefined) {
@@ -98,8 +152,34 @@ export default function PublicProfileScreen() {
           listingsCount={profile.listings_count}
           followersCount={profile.followers_count}
           followingCount={profile.following_count}
-          action={viewerId === profile.id ? undefined : <FollowButton following={following} onToggle={toggleFollow} busy={followBusy} />}
+          action={viewerId === profile.id || blocked ? undefined : <FollowButton following={following} onToggle={toggleFollow} busy={followBusy} />}
         />
+
+        {viewerId && viewerId !== profile.id ? (
+          <View style={styles.modRow}>
+            {blocked ? (
+              <View style={styles.blockedWrap}>
+                <Text style={styles.blockedNotice}>{t("block.blockedNotice")}</Text>
+                <Button
+                  variant="secondary"
+                  label={t("block.unblock")}
+                  onPress={runUnblock}
+                  loading={blockBusy}
+                  leftIcon={<Icon icon={Undo2} size={16} color={colors.text} mirror />}
+                />
+              </View>
+            ) : (
+              <Button
+                variant="ghost"
+                label={t("block.block")}
+                onPress={confirmBlock}
+                loading={blockBusy}
+                leftIcon={<Icon icon={Ban} size={16} color={colors.danger} />}
+              />
+            )}
+            <ReportDialog targetType="user" targetId={profile.id} />
+          </View>
+        ) : null}
 
         <Text style={styles.section}>{t("profile.listings")}</Text>
         {listings === null ? (
@@ -146,6 +226,9 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing["3xl"] },
   center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
   notFound: { color: colors.textMuted, fontSize: 15 },
+  modRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.md, flexWrap: "wrap" },
+  blockedWrap: { flexDirection: "row", alignItems: "center", gap: spacing.sm, flex: 1, flexWrap: "wrap" },
+  blockedNotice: { color: colors.textMuted, fontSize: 13, fontWeight: "600" },
   section: { color: colors.text, fontSize: 16, fontWeight: "800", marginTop: spacing.sm },
   review: { flexDirection: "row", gap: spacing.sm, paddingVertical: spacing.sm },
   reviewBody: { flex: 1, gap: 3 },

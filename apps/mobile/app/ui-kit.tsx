@@ -189,7 +189,7 @@ export default function UiKit() {
       <Section title="ReportDialog · AvatarUpload">
         <View style={styles.rowCenter}>
           <AvatarUpload name="Khalid" onPick={() => undefined} />
-          <ReportDialog onSubmit={() => undefined} />
+          <ReportDialog targetType="listing" targetId="00000000-0000-4000-8000-000000000000" />
         </View>
       </Section>
 

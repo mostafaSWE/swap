@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MAX_PROPOSAL_ITEMS } from "@swap/validation";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { api } from "../lib/api";
+import { useTerms } from "../lib/terms";
 import { t } from "../i18n";
 import { colors, spacing } from "../theme";
 import { BottomSheet, Button, Textarea } from "./ui";
@@ -30,6 +31,7 @@ export function ProposeSwapSheet({
   currentUserId: string;
   onCreated: (conversationId: string | null) => void;
 }) {
+  const { ensureAccepted } = useTerms();
   const [selected, setSelected] = useState<string[]>([]);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,6 +39,7 @@ export function ProposeSwapSheet({
 
   async function submit() {
     if (!selected.length || busy) return;
+    if (!(await ensureAccepted())) return; // Apple 1.2 — a proposal note is UGC
     setBusy(true);
     setError(null);
     try {

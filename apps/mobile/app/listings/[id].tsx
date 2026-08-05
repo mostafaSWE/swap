@@ -176,9 +176,11 @@ export default function ListingDetail() {
             />
           ) : null}
 
-          <View style={styles.reportRow}>
-            <ReportDialog onSubmit={() => undefined} />
-          </View>
+          {owner && myId !== owner.id ? (
+            <View style={styles.reportRow}>
+              <ReportDialog targetType="listing" targetId={listing.id} />
+            </View>
+          ) : null}
         </View>
       </ScrollView>
 

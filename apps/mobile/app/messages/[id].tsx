@@ -1,20 +1,25 @@
 import { useEffect, useRef, useState } from "react";
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { Send } from "lucide-react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
-import type { Message, PublicProfile, SwapProposalWithRelations } from "@swap/types";
+import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { MoreVertical, Send } from "lucide-react-native";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import type { Message, PublicProfile, ReportTargetType, SwapProposalWithRelations } from "@swap/types";
 import { getMessages, getProposalByConversationId, sendMessage, subscribeToMessages, subscribeToProposal } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
+import { api } from "../../src/lib/api";
 import { fetchOtherParticipant } from "../../src/lib/chat";
+import { useTerms } from "../../src/lib/terms";
 import { locale, t } from "../../src/i18n";
 import { timeAgo } from "../../src/lib/format";
 import { colors, radii, spacing } from "../../src/theme";
 import { ChatBubble } from "../../src/components/ChatBubble";
 import { ProposalContextCard } from "../../src/components/ProposalContextCard";
+import { ReportSheet } from "../../src/components/ReportDialog";
 import { Icon, Input } from "../../src/components/ui";
 
 export default function Conversation() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const { ensureAccepted } = useTerms();
   const [uid, setUid] = useState<string | null>(null);
   const [other, setOther] = useState<PublicProfile | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -22,6 +27,8 @@ export default function Conversation() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Which report sheet (if any) is open: a single message, or the whole thread.
+  const [reportTarget, setReportTarget] = useState<{ type: ReportTargetType; id: string } | null>(null);
   const listRef = useRef<FlatList<Message>>(null);
 
   useEffect(() => {
@@ -71,6 +78,8 @@ export default function Conversation() {
   async function send() {
     const body = draft.trim();
     if (!body || !uid || sending) return;
+    // Apple 1.2 — a UGC post is blocked until the current Terms are accepted.
+    if (!(await ensureAccepted())) return;
     setError(null);
     setSending(true);
     setDraft("");
@@ -85,10 +94,47 @@ export default function Conversation() {
     }
   }
 
+  function confirmBlock() {
+    if (!other) return;
+    Alert.alert(t("block.confirmTitle"), t("block.confirmBody"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("block.block"),
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await api.block(other.id);
+            router.back(); // the thread is now restricted (messaging severed)
+          } catch {
+            Alert.alert(t("common.error"));
+          }
+        },
+      },
+    ]);
+  }
+
+  // Header overflow: report the whole conversation, or block the other user.
+  function openMenu() {
+    Alert.alert(other?.full_name ?? t("chat.title"), undefined, [
+      { text: t("chat.reportConversation"), onPress: () => setReportTarget({ type: "conversation", id }) },
+      ...(other ? [{ text: t("block.block"), style: "destructive" as const, onPress: confirmBlock }] : []),
+      { text: t("common.cancel"), style: "cancel" as const },
+    ]);
+  }
+
   const canSend = !!draft.trim() && !sending;
   return (
     <>
-      <Stack.Screen options={{ title: other?.full_name ?? t("chat.title") }} />
+      <Stack.Screen
+        options={{
+          title: other?.full_name ?? t("chat.title"),
+          headerRight: () => (
+            <Pressable onPress={openMenu} hitSlop={10} accessibilityRole="button" accessibilityLabel={t("chat.reportConversation")}>
+              <Icon icon={MoreVertical} size={22} color={colors.white} />
+            </Pressable>
+          ),
+        }}
+      />
       <KeyboardAvoidingView
         behavior="padding"
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
@@ -101,9 +147,18 @@ export default function Conversation() {
           ref={listRef}
           data={messages}
           keyExtractor={(m) => m.id}
-          renderItem={({ item }) => (
-            <ChatBubble body={item.body} time={timeAgo(item.created_at, locale)} isOwn={item.sender_id === uid} />
-          )}
+          renderItem={({ item }) => {
+            const isOwn = item.sender_id === uid;
+            return (
+              <Pressable
+                onLongPress={isOwn ? undefined : () => setReportTarget({ type: "message", id: item.id })}
+                delayLongPress={350}
+                accessibilityHint={isOwn ? undefined : t("chat.reportMessage")}
+              >
+                <ChatBubble body={item.body} time={timeAgo(item.created_at, locale)} isOwn={isOwn} />
+              </Pressable>
+            );
+          }}
           contentContainerStyle={styles.list}
           ListHeaderComponent={<Text style={styles.disclaimer}>{t("chat.disclaimerBeforeChat")}</Text>}
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
@@ -120,6 +175,14 @@ export default function Conversation() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+
+      {/* One report sheet drives both message (long-press) and conversation (menu). */}
+      <ReportSheet
+        visible={!!reportTarget}
+        onClose={() => setReportTarget(null)}
+        targetType={reportTarget?.type ?? "message"}
+        targetId={reportTarget?.id ?? id}
+      />
     </>
   );
 }

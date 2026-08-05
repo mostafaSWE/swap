@@ -13,6 +13,7 @@ import * as Updates from "expo-updates";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { colors } from "../src/theme";
 import { isRTL } from "../src/i18n";
+import { TermsProvider } from "../src/lib/terms";
 
 // Keep the native splash up until the boot direction guard has confirmed the
 // native layout direction matches the locale — nothing renders before then.
@@ -75,30 +76,35 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: colors.navy },
-          headerTintColor: colors.white,
-          contentStyle: { backgroundColor: colors.background },
-        }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="m0-check" options={{ title: "M0 connectivity" }} />
-        <Stack.Screen name="ui-kit" options={{ title: "UI kit" }} />
-        <Stack.Screen name="listings/[id]" options={{ title: "" }} />
-        <Stack.Screen name="listings/[id]/edit" options={{ title: "" }} />
-        <Stack.Screen name="users/[username]" options={{ title: "" }} />
-        <Stack.Screen name="saved" options={{ title: "" }} />
-        <Stack.Screen name="login" options={{ title: "" }} />
-        <Stack.Screen name="register" options={{ title: "" }} />
-        <Stack.Screen name="forgot-password" options={{ title: "" }} />
-        <Stack.Screen name="reset-password" options={{ title: "" }} />
-        <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ title: "" }} />
-        <Stack.Screen name="profile/edit" options={{ title: "" }} />
-        <Stack.Screen name="new-listing" options={{ title: "" }} />
-        <Stack.Screen name="messages/[id]" options={{ title: "" }} />
-      </Stack>
+      <TermsProvider>
+        <Stack
+          screenOptions={{
+            headerStyle: { backgroundColor: colors.navy },
+            headerTintColor: colors.white,
+            contentStyle: { backgroundColor: colors.background },
+          }}
+        >
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="m0-check" options={{ title: "M0 connectivity" }} />
+          <Stack.Screen name="ui-kit" options={{ title: "UI kit" }} />
+          <Stack.Screen name="listings/[id]" options={{ title: "" }} />
+          <Stack.Screen name="listings/[id]/edit" options={{ title: "" }} />
+          <Stack.Screen name="users/[username]" options={{ title: "" }} />
+          <Stack.Screen name="saved" options={{ title: "" }} />
+          <Stack.Screen name="blocked" options={{ title: "" }} />
+          <Stack.Screen name="support" options={{ title: "" }} />
+          <Stack.Screen name="terms" options={{ title: "" }} />
+          <Stack.Screen name="login" options={{ title: "" }} />
+          <Stack.Screen name="register" options={{ title: "" }} />
+          <Stack.Screen name="forgot-password" options={{ title: "" }} />
+          <Stack.Screen name="reset-password" options={{ title: "" }} />
+          <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ title: "" }} />
+          <Stack.Screen name="profile/edit" options={{ title: "" }} />
+          <Stack.Screen name="new-listing" options={{ title: "" }} />
+          <Stack.Screen name="messages/[id]" options={{ title: "" }} />
+        </Stack>
+      </TermsProvider>
     </SafeAreaProvider>
   );
 }

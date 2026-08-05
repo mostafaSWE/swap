@@ -7,6 +7,7 @@ import type { ListingImage } from "@swap/types";
 import { api } from "../lib/api";
 import { pickImages, uploadListingImage } from "../lib/upload";
 import { supabase } from "../lib/supabase";
+import { useTerms } from "../lib/terms";
 import { t } from "../i18n";
 import { colors, radii, spacing } from "../theme";
 import { Icon } from "./ui";
@@ -14,6 +15,7 @@ import { Icon } from "./ui";
 /** Native implementation of the web ListingImageManager. Every add/remove/order
  * operation uses the owner-checked API and persists immediately. */
 export function ListingImageManager({ listingId, initialImages }: { listingId: string; initialImages: ListingImage[] }) {
+  const { ensureAccepted } = useTerms();
   const [images, setImages] = useState(() => [...initialImages].sort((a, b) => a.sort_order - b.sort_order));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +27,7 @@ export function ListingImageManager({ listingId, initialImages }: { listingId: s
 
   async function add() {
     if (busy) return;
+    if (!(await ensureAccepted())) return; // Apple 1.2 — accept Terms before uploading UGC
     const selected = await pickImages(FREE_PLAN_MAX_IMAGES - images.length);
     if (!selected.length) return;
     setBusy(true);

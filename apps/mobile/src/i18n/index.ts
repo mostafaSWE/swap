@@ -90,3 +90,13 @@ export function t(key: string, params?: Record<string, string | number>): string
   if (!params) return raw;
   return raw.replace(/\{(\w+)\}/g, (_m, k: string) => (params[k] != null ? String(params[k]) : `{${k}}`));
 }
+
+/**
+ * Raw catalog lookup for NON-string values — arrays of items/sections that drive
+ * list UIs verbatim from the shared catalog (e.g. `support.topics`,
+ * `terms.sections`). Falls back to English, then to an empty array.
+ */
+export function tList<T = unknown>(key: string): T[] {
+  const raw = lookup(catalog[locale], key) ?? lookup(catalog.en, key);
+  return Array.isArray(raw) ? (raw as T[]) : [];
+}

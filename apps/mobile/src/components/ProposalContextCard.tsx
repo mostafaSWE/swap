@@ -15,6 +15,7 @@ import type {
 } from "@swap/types";
 import { api } from "../lib/api";
 import { pickImages, type PickedImage, uploadSwapConfirmation } from "../lib/upload";
+import { useTerms } from "../lib/terms";
 import { supabase } from "../lib/supabase";
 import { t } from "../i18n";
 import { colors, radii, spacing } from "../theme";
@@ -54,6 +55,7 @@ export function ProposalContextCard({
   currentUserId: string;
   onChange: (updated: SwapProposalWithRelations) => void;
 }) {
+  const { ensureAccepted } = useTerms();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [counterOpen, setCounterOpen] = useState(false);
@@ -231,6 +233,7 @@ export function ProposalContextCard({
 
   async function submitRating() {
     if (!ratingStars || ratingBusy) return;
+    if (!(await ensureAccepted())) return; // Apple 1.2 — a review is public UGC
     setRatingBusy(true);
     setRatingError(null);
     try {
