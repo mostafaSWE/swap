@@ -19,6 +19,7 @@ import {
 } from "@swap/validation";
 import { AuthGuard } from "../../common/auth/auth.guard";
 import { EmailVerifiedGuard } from "../../common/auth/email-verified.guard";
+import { TermsGuard } from "../../common/auth/terms.guard";
 import { CurrentUserId } from "../../common/auth/current-user.decorator";
 import { ZodBody } from "../../common/pipes/zod-validation.pipe";
 import { ProposalsService } from "./proposals.service";
@@ -43,9 +44,10 @@ export class ProposalsController {
     return this.proposals.get(id, userId);
   }
 
-  // Proposing a swap (new offer or a counter-offer) requires a confirmed email.
+  // Proposing a swap (new offer or a counter-offer) posts UGC (an optional note)
+  // → confirmed email + accepted Terms/EULA (Apple 1.2).
   @Post()
-  @UseGuards(EmailVerifiedGuard)
+  @UseGuards(EmailVerifiedGuard, TermsGuard)
   create(
     @CurrentUserId() userId: string,
     @Body(new ZodBody(createProposalSchema)) input: CreateProposalInput,
@@ -54,7 +56,7 @@ export class ProposalsController {
   }
 
   @Post(":id/counter")
-  @UseGuards(EmailVerifiedGuard)
+  @UseGuards(EmailVerifiedGuard, TermsGuard)
   counter(
     @Param("id") id: string,
     @CurrentUserId() userId: string,
@@ -113,9 +115,9 @@ export class ProposalsController {
 
   /* ── Ratings (post-swap reviews, spec §3.4/§3.6) ── */
 
-  // Ratings are public review content — verified email required.
+  // Ratings are public review content — verified email + accepted Terms/EULA.
   @Post(":id/rating")
-  @UseGuards(EmailVerifiedGuard)
+  @UseGuards(EmailVerifiedGuard, TermsGuard)
   rate(
     @Param("id") id: string,
     @CurrentUserId() userId: string,

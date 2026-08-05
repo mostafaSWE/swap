@@ -128,6 +128,8 @@ export class SwapApiClient {
   /* ── Auth / profile ── */
   me = () => this.request<Profile>("GET", "/me");
   updateMe = (input: UpdateProfileInput) => this.request<Profile>("PATCH", "/me", input);
+  /** Record acceptance of the current Terms/EULA version (server-stamps the version). */
+  acceptTerms = () => this.request<Profile>("POST", "/me/terms");
   getUser = (username: string) => this.request<PublicProfile>("GET", `/users/${username}`);
   follow = (userId: string) => this.request<void>("POST", `/users/${userId}/follow`);
   unfollow = (userId: string) => this.request<void>("DELETE", `/users/${userId}/follow`);

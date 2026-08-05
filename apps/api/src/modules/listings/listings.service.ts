@@ -15,10 +15,14 @@ import type {
 import { SupabaseService } from "../../common/supabase/supabase.service";
 import { LISTING_SELECT } from "../../common/db.constants";
 import { assertNotBlocked } from "../../common/blocks.util";
+import { ContentModerationService } from "../moderation/moderation.module";
 
 @Injectable()
 export class ListingsService {
-  constructor(private readonly supabase: SupabaseService) {}
+  constructor(
+    private readonly supabase: SupabaseService,
+    private readonly moderation: ContentModerationService,
+  ) {}
 
   private get db() {
     return this.supabase.admin;
@@ -82,9 +86,16 @@ export class ListingsService {
 
   async create(ownerId: string, input: CreateListingInput): Promise<Listing> {
     await this.validateRefs(input.category_id, input.country_id, input.city_id);
+    // Proactive moderation seam (D-2): a NO-OP pass-through today (see ModerationModule).
+    // Once a provider is wired, a flagged listing is created HIDDEN (pending human
+    // review) rather than published — the reactive report/auto-hide path is the backstop.
+    const verdict = await this.moderation.checkText(
+      [input.title, input.description, input.wanted_exchange].filter(Boolean).join("\n"),
+    );
+    const status = verdict.scanned && !verdict.allowed ? "hidden" : "active";
     const { data, error } = await this.db
       .from("listings")
-      .insert({ ...input, owner_id: ownerId, status: "active" })
+      .insert({ ...input, owner_id: ownerId, status })
       .select("*")
       .single();
     if (error) throw error;

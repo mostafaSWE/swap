@@ -39,6 +39,15 @@ export class ProfileController {
     return this.profiles.updateMe(userId, input);
   }
 
+  /** Record acceptance of the current Terms/EULA version (Apple 1.2). Version is
+   *  server-stamped; no body. NOT terms-gated (this is the acceptance path). */
+  @Post("me/terms")
+  @ApiBearerAuth("supabase-jwt")
+  @UseGuards(AuthGuard)
+  acceptTerms(@CurrentUserId() userId: string) {
+    return this.profiles.acceptTerms(userId);
+  }
+
   @Get("me/saved")
   @ApiBearerAuth("supabase-jwt")
   @UseGuards(AuthGuard)

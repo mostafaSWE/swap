@@ -28,6 +28,7 @@ import {
 import { z } from "zod";
 import { AuthGuard } from "../../common/auth/auth.guard";
 import { EmailVerifiedGuard } from "../../common/auth/email-verified.guard";
+import { TermsGuard } from "../../common/auth/terms.guard";
 import { CurrentUserId } from "../../common/auth/current-user.decorator";
 import { ZodBody } from "../../common/pipes/zod-validation.pipe";
 import { ListingsService } from "./listings.service";
@@ -53,8 +54,9 @@ export class ListingsController {
 
   @Post()
   @ApiBearerAuth("supabase-jwt")
-  // Creating a listing requires a confirmed email (spec: verification gate).
-  @UseGuards(AuthGuard, EmailVerifiedGuard)
+  // Creating a listing requires a confirmed email (verification gate) + accepted
+  // Terms/EULA (Apple 1.2 — accept before posting).
+  @UseGuards(AuthGuard, EmailVerifiedGuard, TermsGuard)
   create(
     @CurrentUserId() userId: string,
     @Body(new ZodBody(createListingSchema)) input: CreateListingInput,
@@ -64,7 +66,7 @@ export class ListingsController {
 
   @Patch(":id")
   @ApiBearerAuth("supabase-jwt")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, TermsGuard)
   update(
     @Param("id") id: string,
     @CurrentUserId() userId: string,
@@ -133,7 +135,7 @@ export class ListingsController {
   // Upload signing is sensitive + abusable — tighter than the global default.
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @ApiBearerAuth("supabase-jwt")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, TermsGuard)
   signImage(
     @Param("id") id: string,
     @CurrentUserId() userId: string,
@@ -145,7 +147,7 @@ export class ListingsController {
   @Post(":id/images")
   @HttpCode(204)
   @ApiBearerAuth("supabase-jwt")
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, TermsGuard)
   addImage(
     @Param("id") id: string,
     @CurrentUserId() userId: string,

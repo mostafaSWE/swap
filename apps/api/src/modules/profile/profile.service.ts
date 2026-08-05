@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import type { ListingWithRelations, Profile, PublicProfile } from "@swap/types";
 import type { UpdateProfileInput } from "@swap/validation";
+import { TERMS_VERSION } from "@swap/config";
 import { SupabaseService } from "../../common/supabase/supabase.service";
 import { LISTING_SELECT, PUBLIC_PROFILE_COLUMNS } from "../../common/db.constants";
 import { assertNotBlocked } from "../../common/blocks.util";
@@ -32,6 +33,27 @@ export class ProfileService {
       if (error.code === "23505") throw new BadRequestException("Username already taken");
       throw error;
     }
+    if (!data) throw new NotFoundException("Profile not found");
+    return data;
+  }
+
+  /**
+   * Record that the caller accepted the CURRENT Terms/EULA version. The version
+   * is stamped SERVER-SIDE from `TERMS_VERSION` (the client cannot claim a version
+   * it never saw), with the acceptance timestamp. Returns the updated profile so
+   * the client can refresh its cached terms state. Apple 1.2 / Google UGC gate.
+   */
+  async acceptTerms(userId: string): Promise<Profile> {
+    const { data, error } = await this.supabase.admin
+      .from("profiles")
+      .update({
+        terms_accepted_version: TERMS_VERSION,
+        terms_accepted_at: new Date().toISOString(),
+      })
+      .eq("id", userId)
+      .select("*")
+      .maybeSingle();
+    if (error) throw error;
     if (!data) throw new NotFoundException("Profile not found");
     return data;
   }

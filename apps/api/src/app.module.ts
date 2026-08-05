@@ -12,6 +12,7 @@ import { ProposalsModule } from "./modules/proposals/proposals.module";
 import { ReportsModule } from "./modules/reports/reports.module";
 import { AdminModule } from "./modules/admin/admin.module";
 import { SafetyModule } from "./modules/safety/safety.module";
+import { ModerationModule } from "./modules/moderation/moderation.module";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SafetyModule } from "./modules/safety/safety.module";
     // `/health` opts out via @SkipThrottle.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
     SupabaseModule,
+    ModerationModule, // provider-agnostic content-moderation boundary (D-2 seam)
     HealthModule,
     ProfileModule,
     ListingsModule,
