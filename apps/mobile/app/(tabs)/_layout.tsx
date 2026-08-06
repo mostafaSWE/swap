@@ -1,58 +1,52 @@
-import { useEffect, useState } from "react";
-import { Tabs } from "expo-router";
-import { Bell, Home, MessageCircle, Search, UserRound } from "lucide-react-native";
+import { StyleSheet, View } from "react-native";
+import { Tabs, useRouter } from "expo-router";
+import { Home, MessageCircle, Plus, Search, UserRound } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
-import { getUnreadNotificationCount, subscribeToNotifications } from "@swap/api";
-import { colors } from "../../src/theme";
+import { colors, radii } from "../../src/theme";
 import { t } from "../../src/i18n";
 import { supabase } from "../../src/lib/supabase";
 import { Icon } from "../../src/components/ui/Icon";
+import { HeaderBell } from "../../src/components/HeaderBell";
 
 const ICONS: Record<string, LucideIcon> = {
   index: Home,
   browse: Search,
   messages: MessageCircle,
-  notifications: Bell,
   profile: UserRound,
 };
 
+/**
+ * Bottom navigation (M7 batch 2) — a native adaptation of the website's mobile nav:
+ * Home / Browse / **Add** (prominent green center action) / Messages / Profile, with
+ * notifications lifted OUT of the tab bar into a consistent header **bell** (exactly
+ * like the responsive website).
+ *
+ * Deliberately built on the STOCK expo-router `<Tabs>` bar (green active tint, lucide
+ * icons via the `Icon` wrapper, a `tabPress` listener for Add, `headerRight` for the
+ * bell). A fully custom `tabBar`/`header` was tried and reproducibly crashes this
+ * Fabric/New-Arch build natively (Hermes render throw, no redbox) — the stock chrome
+ * is the stable path, so the reassessment is delivered through supported options only.
+ */
 export default function TabsLayout() {
-  const [unread, setUnread] = useState(0);
+  const router = useRouter();
 
-  useEffect(() => {
-    let active = true;
-    let unsubscribe: (() => void) | undefined;
-    async function start() {
-      const { data } = await supabase.auth.getUser();
-      const userId = data.user?.id;
-      if (!active || !userId) {
-        if (active) setUnread(0);
-        return;
-      }
-      const refresh = () => getUnreadNotificationCount(supabase, userId).then((count) => active && setUnread(count)).catch(() => undefined);
-      refresh();
-      unsubscribe = subscribeToNotifications(supabase, userId, refresh);
-    }
-    void start();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUnread(0);
-      if (session) void getUnreadNotificationCount(supabase, session.user.id).then((count) => active && setUnread(count)).catch(() => undefined);
-    });
-    return () => {
-      active = false;
-      subscription.unsubscribe();
-      unsubscribe?.();
-    };
-  }, []);
+  async function onAddPress() {
+    const { data } = await supabase.auth.getSession();
+    router.push(data.session ? "/new-listing" : "/login");
+  }
 
   return (
     <Tabs
       screenOptions={({ route }) => ({
         headerStyle: { backgroundColor: colors.navy },
         headerTintColor: colors.white,
-        headerTitleStyle: { fontWeight: "700" },
+        headerTitleStyle: { fontWeight: "800", fontSize: 20 },
+        headerShadowVisible: false,
+        headerRight: () => (
+          <View style={styles.headerRight}>
+            <HeaderBell color={colors.white} />
+          </View>
+        ),
         sceneStyle: { backgroundColor: colors.background },
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
         tabBarActiveTintColor: colors.green,
@@ -63,9 +57,47 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index" options={{ title: t("mobile.tab.home"), headerShown: false }} />
       <Tabs.Screen name="browse" options={{ title: t("mobile.tab.browse") }} />
+      <Tabs.Screen
+        name="add"
+        options={{
+          title: t("newListing.title"),
+          headerShown: false,
+          tabBarLabel: () => null,
+          tabBarIcon: () => (
+            <View style={styles.addFab}>
+              <Icon icon={Plus} size={24} color={colors.navy} />
+            </View>
+          ),
+        }}
+        listeners={() => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            void onAddPress();
+          },
+        })}
+      />
       <Tabs.Screen name="messages" options={{ title: t("mobile.tab.messages") }} />
-      <Tabs.Screen name="notifications" options={{ title: t("mobile.tab.notifications"), tabBarBadge: unread || undefined, tabBarBadgeStyle: { backgroundColor: colors.green, color: colors.navy, fontWeight: "800" } }} />
       <Tabs.Screen name="profile" options={{ title: t("mobile.tab.profile") }} />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  headerRight: { marginEnd: 8 },
+  // Prominent green center action. Rendered inside the stock tabBarIcon slot (a plain
+  // View + Icon — the safe render path), so it reads as a raised FAB without a custom bar.
+  addFab: {
+    width: 44,
+    height: 44,
+    borderRadius: radii.pill,
+    marginTop: -6,
+    backgroundColor: colors.green,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: colors.green,
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
+  },
+});

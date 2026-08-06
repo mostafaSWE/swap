@@ -3,18 +3,20 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "
 import { useFocusEffect, useRouter } from "expo-router";
 import { getNotifications, markAllNotificationsRead, subscribeToNotifications } from "@swap/api";
 import type { NotificationWithActor } from "@swap/types";
-import { supabase } from "../../src/lib/supabase";
-import { timeAgo } from "../../src/lib/format";
-import { locale, t } from "../../src/i18n";
-import { colors, radii, spacing } from "../../src/theme";
-import { Avatar } from "../../src/components/ui";
-import { EmptyState } from "../../src/components/EmptyState";
-import { Screen } from "../../src/components/Screen";
+import { supabase } from "../src/lib/supabase";
+import { timeAgo } from "../src/lib/format";
+import { locale, t } from "../src/i18n";
+import { colors, radii, spacing } from "../src/theme";
+import { Avatar } from "../src/components/ui";
+import { EmptyState } from "../src/components/EmptyState";
+import { Screen } from "../src/components/Screen";
+import { Bell } from "lucide-react-native";
+import { Icon } from "../src/components/ui/Icon";
 
 type Sess = { user: { id: string } } | null;
 
-/** Native counterpart to the web's live notification bell panel. The tab clears
- * unread state on focus; rows route to the same profile/conversation targets. */
+/** Notifications — reached from the header bell (not a bottom tab, matching the web).
+ * Clears unread on focus; rows route to the same profile/conversation targets. */
 export default function Notifications() {
   const router = useRouter();
   const [session, setSession] = useState<Sess | undefined>(undefined);
@@ -52,16 +54,13 @@ export default function Notifications() {
     }, [userId]),
   );
 
-  // A notification tab can already be focused while a user finishes signing
-  // in. React Navigation does not always replay the focus callback for that
-  // session transition, so also clear on the first resolved user id.
   useEffect(() => {
     if (userId) void markAllNotificationsRead(supabase, userId).catch(() => undefined);
   }, [userId]);
 
   if (session === undefined || (session && items === null)) return <View style={styles.center}><ActivityIndicator color={colors.green} /></View>;
-  if (!session) return <Screen><EmptyState icon="🔔" title={t("mobile.profile.signInPrompt")} /></Screen>;
-  if (!items?.length) return <Screen><EmptyState icon="🔔" title={t("notifications.empty")} /></Screen>;
+  if (!session) return <Screen><EmptyState icon={<Icon icon={Bell} size={26} color={colors.green} />} title={t("mobile.profile.signInPrompt")} /></Screen>;
+  if (!items?.length) return <Screen><EmptyState icon={<Icon icon={Bell} size={26} color={colors.green} />} title={t("notifications.empty")} /></Screen>;
 
   return (
     <FlatList
@@ -75,10 +74,10 @@ export default function Notifications() {
   );
 
   function navigate(notification: NotificationWithActor) {
-    if (notification.type === "new_rating") router.push("/(tabs)/profile");
+    if (notification.type === "new_rating") router.push("/profile");
     else if (notification.type === "new_follower" && notification.actor) router.push({ pathname: "/users/[username]", params: { username: notification.actor.username } });
     else if (notification.conversation_id) router.push({ pathname: "/messages/[id]", params: { id: notification.conversation_id } });
-    else router.push("/(tabs)/profile");
+    else router.push("/profile");
   }
 }
 

@@ -68,7 +68,8 @@
     "language": "اللغة",
     "arabic": "العربية",
     "english": "English",
-    "error": "حدث خطأ ما. حاول مرة أخرى."
+    "error": "حدث خطأ ما. حاول مرة أخرى.",
+    "retry": "أعد المحاولة"
   },
   "condition": {
     "new": "جديد",
@@ -337,6 +338,8 @@
     "edit": "تعديل الملف",
     "followers": "متابِعون",
     "following": "يتابع",
+    "followersEmpty": "لا يوجد متابِعون بعد",
+    "followingEmpty": "لا يتابع أحدًا بعد",
     "listings": "إعلانات",
     "bio": "نبذة",
     "noBio": "لا توجد نبذة",

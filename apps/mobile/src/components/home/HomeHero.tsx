@@ -7,6 +7,7 @@ import { colors, radii, spacing } from "../../theme";
 import { isRTL, t } from "../../i18n";
 import { Icon } from "../ui/Icon";
 import { Button } from "../ui/Button";
+import { HeaderBell } from "../HeaderBell";
 
 /**
  * Native adaptation of the web `Hero` — a branded, full-bleed panel that opens the
@@ -50,15 +51,18 @@ export function HomeHero({ isAuthenticated }: { isAuthenticated: boolean }) {
           <Text style={styles.wordmark} accessibilityRole="header">
             Just<Text style={styles.wordmarkAccent}>Swap</Text>
           </Text>
-          <Pressable
-            onPress={() => router.push("/profile")}
-            accessibilityRole="button"
-            accessibilityLabel={t("mobile.profile.signIn")}
-            hitSlop={8}
-            style={({ pressed }) => [styles.accountBtn, pressed && styles.pressed]}
-          >
-            <Icon icon={UserRound} size={20} color={colors.text} />
-          </Pressable>
+          <View style={styles.headerActions}>
+            <HeaderBell color={colors.white} />
+            <Pressable
+              onPress={() => router.push("/profile")}
+              accessibilityRole="button"
+              accessibilityLabel={t("mobile.profile.signIn")}
+              hitSlop={8}
+              style={({ pressed }) => [styles.accountBtn, pressed && styles.pressed]}
+            >
+              <Icon icon={UserRound} size={20} color={colors.text} />
+            </Pressable>
+          </View>
         </View>
 
         <Animated.View style={{ opacity: anim, transform: [{ translateY }] }}>
@@ -93,6 +97,7 @@ const styles = StyleSheet.create({
   wrap: { overflow: "hidden", backgroundColor: colors.navy },
   content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl, gap: spacing.md },
   topRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: spacing.xs },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
   wordmark: { color: colors.white, fontSize: 22, fontWeight: "800", letterSpacing: 0.2 },
   wordmarkAccent: { color: colors.green },
   accountBtn: {

@@ -118,6 +118,10 @@ export type PublicProfile = Pick<
   | "created_at"
 >;
 
+/** A public profile plus the current viewer's follow state — one row of a
+ *  followers/following list (see the `list_follows` RPC / migration 0021). */
+export type PublicProfileWithFollow = PublicProfile & { is_following: boolean };
+
 export type Listing = {
   id: string;
   owner_id: string;

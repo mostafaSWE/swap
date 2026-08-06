@@ -3,10 +3,18 @@ import { Bell } from "lucide-react-native";
 import { colors, radii } from "../theme";
 import { Icon } from "./ui/Icon";
 
-/** Bell with an unread-count badge (web `NotificationBell` trigger). The panel
- *  itself is an M3 screen; this is just the header affordance. The badge uses a
- *  logical `end` inset so it sits on the trailing-top corner in both directions. */
-export function NotificationBell({ count = 0, onPress }: { count?: number; onPress?: () => void }) {
+/** Presentational bell with an unread-count badge (web `NotificationBell` trigger).
+ *  The badge uses a logical `end` inset so it sits on the trailing-top corner in
+ *  both directions. `HeaderBell` wires this to the live count + navigation. */
+export function NotificationBell({
+  count = 0,
+  onPress,
+  color = colors.text,
+}: {
+  count?: number;
+  onPress?: () => void;
+  color?: string;
+}) {
   return (
     <View style={styles.wrap}>
       <Pressable
@@ -16,7 +24,7 @@ export function NotificationBell({ count = 0, onPress }: { count?: number; onPre
         hitSlop={8}
         style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
       >
-        <Icon icon={Bell} size={24} color={colors.text} />
+        <Icon icon={Bell} size={24} color={color} />
       </Pressable>
       {count > 0 ? (
         <View style={styles.badge} pointerEvents="none">

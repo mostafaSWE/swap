@@ -21,6 +21,7 @@ import type {
   Message,
   Notification,
   Profile,
+  PublicProfileWithFollow,
   PushOutbox,
   Rating,
   Report,
@@ -93,6 +94,11 @@ export interface Database {
       record_swap_confirmation: {
         Args: { p_proposal_id: string; p_user_id: string; p_photo_path: string };
         Returns: string;
+      };
+      /** Block-safe followers/following list; each row carries the viewer's is_following. Migration 0021. */
+      list_follows: {
+        Args: { p_target: string; p_direction: string; p_limit?: number; p_offset?: number };
+        Returns: PublicProfileWithFollow[];
       };
     };
     Enums: Record<string, never>;

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Ban, Share2, Undo2 } from "lucide-react-native";
+import { Ban, MessageCircle, Share2, Undo2 } from "lucide-react-native";
 import type { ListingWithRelations, PublicProfile, RatingWithRater } from "@swap/types";
-import { followUser, getListings, getPublicProfileByUsername, getRatingsForUser, isBlocked, isFollowing, unfollowUser } from "@swap/api";
+import { followUser, getListings, getOrCreateConversation, getPublicProfileByUsername, getRatingsForUser, isBlocked, isFollowing, unfollowUser } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
 import { api } from "../../src/lib/api";
 import { locale, t } from "../../src/i18n";
@@ -90,6 +90,20 @@ export default function PublicProfileScreen() {
     }
   }
 
+  async function goMessage() {
+    if (!profile) return;
+    if (!viewerId) return router.push("/login");
+    try {
+      const conv = await getOrCreateConversation(supabase, { currentUserId: viewerId, otherUserId: profile.id });
+      router.push({ pathname: "/messages/[id]", params: { id: conv.id } });
+    } catch {
+      Alert.alert(t("common.error"));
+    }
+  }
+
+  const goConnections = (tab: "followers" | "following") =>
+    profile && router.push({ pathname: "/connections/[username]", params: { username: profile.username, tab } });
+
   async function runBlock() {
     if (!profile || !viewerId || blockBusy) return;
     setBlockBusy(true);
@@ -162,8 +176,19 @@ export default function PublicProfileScreen() {
           listingsCount={profile.listings_count}
           followersCount={profile.followers_count}
           followingCount={profile.following_count}
+          onPressFollowers={() => goConnections("followers")}
+          onPressFollowing={() => goConnections("following")}
           action={viewerId === profile.id || blocked ? undefined : <FollowButton following={following} onToggle={toggleFollow} busy={followBusy} />}
         />
+
+        {viewerId && viewerId !== profile.id && !blocked ? (
+          <Button
+            label={t("listing.message")}
+            onPress={goMessage}
+            leftIcon={<Icon icon={MessageCircle} size={18} color={colors.navy} />}
+            fullWidth
+          />
+        ) : null}
 
         {viewerId && viewerId !== profile.id ? (
           <View style={styles.modRow}>

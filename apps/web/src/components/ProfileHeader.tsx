@@ -1,15 +1,28 @@
 import { useLocale, useTranslations } from "next-intl";
 import { formatDate } from "@swap/ui";
 import type { Locale, PublicProfile } from "@swap/types";
+import { Link } from "@/i18n/navigation";
 import { ProfileAvatar } from "./ProfileAvatar";
 import { RatingBadge, SwapCountBadge } from "./badges";
 
-function Stat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="text-center">
+function Stat({ value, label, href }: { value: number; label: string; href?: string }) {
+  const inner = (
+    <>
       <div className="font-bold text-ink">{value}</div>
       <div className="text-xs text-muted">{label}</div>
-    </div>
+    </>
+  );
+  // Followers/Following are interactive — they open the connections list. The others
+  // are plain figures. Keep the same visual footprint so the row stays aligned.
+  return href ? (
+    <Link
+      href={href}
+      className="rounded-lg py-0.5 text-center transition-colors hover:bg-line/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+    >
+      {inner}
+    </Link>
+  ) : (
+    <div className="text-center">{inner}</div>
   );
 }
 
@@ -54,8 +67,16 @@ export function ProfileHeader({
       <div className="mt-4 grid grid-cols-4 gap-2 border-t border-line pt-3">
         <Stat value={profile.completed_swaps_count} label={tl("completedSwaps")} />
         <Stat value={profile.listings_count} label={t("listings")} />
-        <Stat value={profile.followers_count} label={t("followers")} />
-        <Stat value={profile.following_count} label={t("following")} />
+        <Stat
+          value={profile.followers_count}
+          label={t("followers")}
+          href={`/users/${profile.username}/connections?tab=followers`}
+        />
+        <Stat
+          value={profile.following_count}
+          label={t("following")}
+          href={`/users/${profile.username}/connections?tab=following`}
+        />
       </div>
 
       {action ? <div className="mt-4">{action}</div> : null}

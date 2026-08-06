@@ -68,7 +68,8 @@
     "language": "اللغة",
     "arabic": "العربية",
     "english": "English",
-    "error": "حدث خطأ ما. حاول مرة أخرى."
+    "error": "حدث خطأ ما. حاول مرة أخرى.",
+    "loadMore": "تحميل المزيد"
   },
   "condition": {
     "new": "جديد",
@@ -341,7 +342,9 @@
     "memberSince": "عضو منذ {date}",
     "noListings": "لا توجد إعلانات بعد",
     "reviewsTitle": "التقييمات ({count})",
-    "reviewStarsAria": "{count} من 5 نجوم"
+    "reviewStarsAria": "{count} من 5 نجوم",
+    "followersEmpty": "لا يوجد متابِعون بعد",
+    "followingEmpty": "لا يتابع أحداً بعد"
   },
   "chat": {
     "title": "المحادثات",

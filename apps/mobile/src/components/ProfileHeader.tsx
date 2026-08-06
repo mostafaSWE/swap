@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Repeat2 } from "lucide-react-native";
 import { colors, radii, spacing } from "../theme";
 import { t } from "../i18n";
@@ -23,6 +23,8 @@ export function ProfileHeader({
   followersCount,
   followingCount,
   action,
+  onPressFollowers,
+  onPressFollowing,
 }: {
   name: string;
   username: string;
@@ -36,6 +38,8 @@ export function ProfileHeader({
   followersCount: number;
   followingCount: number;
   action?: ReactNode;
+  onPressFollowers?: () => void;
+  onPressFollowing?: () => void;
 }) {
   return (
     <View style={styles.card}>
@@ -57,12 +61,28 @@ export function ProfileHeader({
       <View style={styles.stats}>
         <View style={styles.stat}><StatCell value={completedSwaps} label={t("listing.completedSwaps")} /></View>
         <View style={styles.stat}><StatCell value={listingsCount} label={t("profile.listings")} /></View>
-        <View style={styles.stat}><StatCell value={followersCount} label={t("profile.followers")} /></View>
-        <View style={styles.stat}><StatCell value={followingCount} label={t("profile.following")} /></View>
+        <StatButton value={followersCount} label={t("profile.followers")} onPress={onPressFollowers} />
+        <StatButton value={followingCount} label={t("profile.following")} onPress={onPressFollowing} />
       </View>
 
       {action ? <View style={styles.action}>{action}</View> : null}
     </View>
+  );
+}
+
+/** A stat cell that becomes a button when `onPress` is given (followers/following
+ *  open the connections list). Falls back to a plain cell otherwise. */
+function StatButton({ value, label, onPress }: { value: number; label: string; onPress?: () => void }) {
+  if (!onPress) return <View style={styles.stat}><StatCell value={value} label={label} /></View>;
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${value} ${label}`}
+      style={({ pressed }) => [styles.stat, styles.statPressable, pressed && styles.statPressed]}
+    >
+      <StatCell value={value} label={label} />
+    </Pressable>
   );
 }
 
@@ -78,5 +98,7 @@ const styles = StyleSheet.create({
   bio: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
   stats: { flexDirection: "row", borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.md },
   stat: { flex: 1 },
+  statPressable: { borderRadius: radii.sm, paddingVertical: spacing.xs },
+  statPressed: { backgroundColor: colors.elevated },
   action: { marginTop: spacing.xs },
 });

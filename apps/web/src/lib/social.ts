@@ -3,9 +3,36 @@
  * Database-first; never throws (logs + returns an empty/false fallback). Mutations
  * go through the backend API client in the button components, not here.
  */
-import { getBlockedUsers, isBlocked, isFollowing } from "@swap/api";
-import type { PublicProfile } from "@swap/types";
+import { getBlockedUsers, getFollowers, getFollowing, isBlocked, isFollowing } from "@swap/api";
+import type { PublicProfile, PublicProfileWithFollow } from "@swap/types";
 import { createClient } from "./supabase/server";
+
+/** One page of a user's followers (newest first). Block-safe + carries per-row
+ *  `is_following` for the viewer (via the `list_follows` RPC). Never throws. */
+export async function fetchFollowers(
+  userId: string,
+  opts?: { limit?: number; offset?: number },
+): Promise<PublicProfileWithFollow[]> {
+  try {
+    return await getFollowers(createClient(), userId, opts);
+  } catch (e) {
+    console.error("[social] fetchFollowers failed:", e);
+    return [];
+  }
+}
+
+/** One page of the users a person follows (newest first). Block-safe. Never throws. */
+export async function fetchFollowing(
+  userId: string,
+  opts?: { limit?: number; offset?: number },
+): Promise<PublicProfileWithFollow[]> {
+  try {
+    return await getFollowing(createClient(), userId, opts);
+  } catch (e) {
+    console.error("[social] fetchFollowing failed:", e);
+    return [];
+  }
+}
 
 /** Whether `followerId` currently follows `followingId`. */
 export async function fetchIsFollowing(followerId: string, followingId: string): Promise<boolean> {

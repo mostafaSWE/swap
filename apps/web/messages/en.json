@@ -68,7 +68,8 @@
     "language": "Language",
     "arabic": "العربية",
     "english": "English",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "loadMore": "Load more"
   },
   "condition": {
     "new": "New",
@@ -341,7 +342,9 @@
     "memberSince": "Member since {date}",
     "noListings": "No listings yet",
     "reviewsTitle": "Reviews ({count})",
-    "reviewStarsAria": "{count} out of 5 stars"
+    "reviewStarsAria": "{count} out of 5 stars",
+    "followersEmpty": "No followers yet",
+    "followingEmpty": "Not following anyone yet"
   },
   "chat": {
     "title": "Messages",

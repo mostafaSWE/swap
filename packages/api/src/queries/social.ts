@@ -1,5 +1,8 @@
-import type { ListingWithRelations, PublicProfile, ReportTargetType } from "@swap/types";
+import type { ListingWithRelations, PublicProfile, PublicProfileWithFollow, ReportTargetType } from "@swap/types";
 import type { SwapClient } from "../client";
+
+export type FollowDirection = "followers" | "following";
+export type FollowListOptions = { limit?: number; offset?: number };
 
 const PUBLIC_PROFILE_COLUMNS =
   "id, full_name, username, avatar_url, bio, country_id, city_id, followers_count, following_count, listings_count, completed_swaps_count, rating, ratings_count, created_at";
@@ -45,6 +48,33 @@ export async function isFollowing(
   if (error) throw error;
   return (count ?? 0) > 0;
 }
+
+/** One page of a user's followers or the accounts they follow. Block-safe and
+ *  carries the viewer's `is_following` per row — via the `list_follows` RPC, which
+ *  derives the viewer from auth.uid() and filters block relationships in BOTH
+ *  directions (which a plain client query cannot, since profiles/follows are
+ *  public-read). Newest-first, paginated. See migration 0021. */
+async function listFollows(
+  supabase: SwapClient,
+  targetId: string,
+  direction: FollowDirection,
+  opts?: FollowListOptions,
+): Promise<PublicProfileWithFollow[]> {
+  const { data, error } = await supabase.rpc("list_follows", {
+    p_target: targetId,
+    p_direction: direction,
+    p_limit: opts?.limit ?? 30,
+    p_offset: opts?.offset ?? 0,
+  });
+  if (error) throw error;
+  return (data ?? []) as PublicProfileWithFollow[];
+}
+
+export const getFollowers = (supabase: SwapClient, userId: string, opts?: FollowListOptions) =>
+  listFollows(supabase, userId, "followers", opts);
+
+export const getFollowing = (supabase: SwapClient, userId: string, opts?: FollowListOptions) =>
+  listFollows(supabase, userId, "following", opts);
 
 /* ── Blocks ── */
 

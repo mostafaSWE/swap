@@ -1637,6 +1637,57 @@ drop trigger if exists notifications_enqueue_push on public.notifications;
 create trigger notifications_enqueue_push after insert on public.notifications
   for each row execute function public.enqueue_push_on_notification();
 
+-- ░░░░░░░░░░░░░░░░░░░░ migrations/0021_follow_lists.sql ░░░░░░░░░░░░░░░░░░░░
+create index if not exists follows_following_idx on public.follows (following_id, created_at desc);
+
+create or replace function public.list_follows(
+  p_target uuid,
+  p_direction text,
+  p_limit int default 30,
+  p_offset int default 0
+)
+returns table (
+  id uuid, full_name text, username text, avatar_url text, bio text,
+  country_id uuid, city_id uuid, followers_count int, following_count int,
+  listings_count int, completed_swaps_count int, rating numeric, ratings_count int,
+  created_at timestamptz, is_following boolean
+)
+language sql stable set search_path = public as $$
+  select
+    p.id, p.full_name, p.username, p.avatar_url, p.bio, p.country_id, p.city_id,
+    p.followers_count, p.following_count, p.listings_count, p.completed_swaps_count,
+    p.rating, p.ratings_count, p.created_at,
+    (auth.uid() is not null
+       and exists (select 1 from public.follows vf where vf.follower_id = auth.uid() and vf.following_id = p.id)) as is_following
+  from public.follows f
+  join public.profiles p
+    on p.id = case when p_direction = 'followers' then f.follower_id else f.following_id end
+  where (case when p_direction = 'followers' then f.following_id else f.follower_id end) = p_target
+    and p.is_admin = false
+    and p.is_banned = false
+    and (auth.uid() is null or not public.blocked_between(auth.uid(), p.id))
+  order by f.created_at desc, p.id
+  limit least(greatest(coalesce(p_limit, 30), 1), 100)
+  offset greatest(coalesce(p_offset, 0), 0);
+$$;
+grant execute on function public.list_follows(uuid, text, int, int) to anon, authenticated, service_role;
+
+-- FIX (0021): sync_follow_counts must be SECURITY DEFINER so follows done via the
+-- RLS client (mobile) update the FOLLOWED user's followers_count too. Overrides 0001.
+create or replace function public.sync_follow_counts()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if (tg_op = 'INSERT') then
+    update public.profiles set followers_count = followers_count + 1 where id = new.following_id;
+    update public.profiles set following_count = following_count + 1 where id = new.follower_id;
+  elsif (tg_op = 'DELETE') then
+    update public.profiles set followers_count = greatest(followers_count - 1, 0) where id = old.following_id;
+    update public.profiles set following_count = greatest(following_count - 1, 0) where id = old.follower_id;
+  end if;
+  return null;
+end;
+$$;
+
 -- ░░░░░░░░░░░░░░░░░░░░ seed.sql ░░░░░░░░░░░░░░░░░░░░
 
 -- ════════════════════════════════════════════════════════════════════════

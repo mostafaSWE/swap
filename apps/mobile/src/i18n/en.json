@@ -68,7 +68,8 @@
     "language": "Language",
     "arabic": "العربية",
     "english": "English",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "retry": "Try again"
   },
   "condition": {
     "new": "New",
@@ -337,6 +338,8 @@
     "edit": "Edit Profile",
     "followers": "Followers",
     "following": "Following",
+    "followersEmpty": "No followers yet",
+    "followingEmpty": "Not following anyone yet",
     "listings": "Listings",
     "bio": "Bio",
     "noBio": "No bio yet",

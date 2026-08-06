@@ -12,7 +12,7 @@ import * as SplashScreen from "expo-splash-screen";
 import * as Updates from "expo-updates";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { colors } from "../src/theme";
-import { isRTL } from "../src/i18n";
+import { isRTL, t } from "../src/i18n";
 import { TermsProvider } from "../src/lib/terms";
 import { BiometricLock } from "../src/components/BiometricLock";
 import { PushManager } from "../src/components/PushManager";
@@ -94,6 +94,9 @@ export default function RootLayout() {
           <Stack.Screen name="listings/[id]" options={{ title: "" }} />
           <Stack.Screen name="listings/[id]/edit" options={{ title: "" }} />
           <Stack.Screen name="users/[username]" options={{ title: "" }} />
+          <Stack.Screen name="connections/[username]" options={{ title: "" }} />
+          <Stack.Screen name="settings" options={{ title: "" }} />
+          <Stack.Screen name="notifications" options={{ title: t("mobile.tab.notifications") }} />
           <Stack.Screen name="saved" options={{ title: "" }} />
           <Stack.Screen name="blocked" options={{ title: "" }} />
           <Stack.Screen name="support" options={{ title: "" }} />
