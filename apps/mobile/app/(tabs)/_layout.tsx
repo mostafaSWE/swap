@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { Tabs } from "expo-router";
-import { Text } from "react-native";
+import { Bell, Home, MessageCircle, Search, UserRound } from "lucide-react-native";
+import type { LucideIcon } from "lucide-react-native";
 import { getUnreadNotificationCount, subscribeToNotifications } from "@swap/api";
 import { colors } from "../../src/theme";
 import { t } from "../../src/i18n";
 import { supabase } from "../../src/lib/supabase";
+import { Icon } from "../../src/components/ui/Icon";
 
-// Emoji tab icons for the M1 shell (zero-dependency). Swapping to
-// @expo/vector-icons is a small follow-up.
-const ICONS: Record<string, string> = {
-  index: "🏠",
-  browse: "🔍",
-  messages: "💬",
-  notifications: "🔔",
-  profile: "👤",
+const ICONS: Record<string, LucideIcon> = {
+  index: Home,
+  browse: Search,
+  messages: MessageCircle,
+  notifications: Bell,
+  profile: UserRound,
 };
 
 export default function TabsLayout() {
@@ -57,12 +57,11 @@ export default function TabsLayout() {
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
         tabBarActiveTintColor: colors.green,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarIcon: ({ color }) => (
-          <Text style={{ fontSize: 18, color }}>{ICONS[route.name] ?? "•"}</Text>
-        ),
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+        tabBarIcon: ({ color }) => <Icon icon={ICONS[route.name] ?? Home} size={24} color={color as string} />,
       })}
     >
-      <Tabs.Screen name="index" options={{ title: t("mobile.tab.home") }} />
+      <Tabs.Screen name="index" options={{ title: t("mobile.tab.home"), headerShown: false }} />
       <Tabs.Screen name="browse" options={{ title: t("mobile.tab.browse") }} />
       <Tabs.Screen name="messages" options={{ title: t("mobile.tab.messages") }} />
       <Tabs.Screen name="notifications" options={{ title: t("mobile.tab.notifications"), tabBarBadge: unread || undefined, tabBarBadgeStyle: { backgroundColor: colors.green, color: colors.navy, fontWeight: "800" } }} />

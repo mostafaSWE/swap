@@ -1,9 +1,11 @@
 import { Image, StyleSheet, Text, View } from "react-native";
+import { ImageOff } from "lucide-react-native";
 import type { ListingWithRelations } from "@swap/types";
 import { localizedName } from "@swap/ui";
 import { colors, spacing } from "../theme";
 import { locale } from "../i18n";
 import { Badge, Card } from "./ui";
+import { Icon } from "./ui/Icon";
 
 /** Listing card: cover image + title + category badge · city. Built on the Card
  *  + Badge primitives. Pass `onPress` to open the listing detail. */
@@ -15,7 +17,7 @@ export function ListingCard({ listing, onPress }: { listing: ListingWithRelation
         <Image source={{ uri: cover }} style={styles.image} resizeMode="cover" />
       ) : (
         <View style={[styles.image, styles.placeholder]}>
-          <Text style={styles.placeholderIcon}>🖼️</Text>
+          <Icon icon={ImageOff} size={28} color={colors.textFaint} />
         </View>
       )}
       <View style={styles.body}>
