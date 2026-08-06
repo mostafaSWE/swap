@@ -10,8 +10,9 @@ import { acquireImages, uploadAvatar } from "../../src/lib/upload";
 import { useTerms } from "../../src/lib/terms";
 import { locale, t } from "../../src/i18n";
 import { colors, spacing } from "../../src/theme";
+import { Check } from "lucide-react-native";
 import { AvatarUpload } from "../../src/components/AvatarUpload";
-import { Button, Input, Select, Textarea } from "../../src/components/ui";
+import { Button, FormAlert, Icon, Input, Select, Textarea } from "../../src/components/ui";
 
 /** Mobile counterpart to web EditProfileForm. Avatar replacement persists when
  * picked; the rest is saved together through the shared profile query. */
@@ -98,14 +99,19 @@ export default function EditProfile() {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <AvatarUpload uri={avatarUrl} name={fullName} onPick={chooseAvatar} busy={avatarBusy} error={avatarError} />
-          <Input label={t("auth.fullName")} value={fullName} onChangeText={setFullName} />
-          <Input label={t("auth.username")} value={username} onChangeText={setUsername} autoCapitalize="none" autoCorrect={false} />
-          <Input label={t("auth.phone")} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-          <Textarea label={t("profile.bio")} value={bio} onChangeText={setBio} maxLength={LIMITS.bioMax} />
+          <Input label={t("auth.fullName")} value={fullName} onChangeText={setFullName} textContentType="name" autoComplete="name" />
+          <Input label={t("auth.username")} value={username} onChangeText={setUsername} autoCapitalize="none" autoCorrect={false} textContentType="username" autoComplete="username" />
+          <Input label={t("auth.phone")} value={phone} onChangeText={setPhone} keyboardType="phone-pad" textContentType="telephoneNumber" autoComplete="tel" />
+          <Textarea label={t("profile.bio")} hint={`${bio.length}/${LIMITS.bioMax}`} value={bio} onChangeText={setBio} maxLength={LIMITS.bioMax} />
           <Select label={t("auth.country")} placeholder={t("common.selectCountry")} value={countryId} onChange={(value) => { setCountryId(value); setCityId(undefined); }} options={countries} />
-          {countryId ? <Select label={t("auth.city")} placeholder={t("common.selectCity")} value={cityId} onChange={setCityId} options={cities} /> : null}
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          {saved ? <Text style={styles.saved}>{t("common.save")} ✓</Text> : null}
+          <Select label={t("auth.city")} placeholder={t("common.selectCity")} value={cityId} onChange={setCityId} options={cities} disabled={!countryId} />
+          {error ? <FormAlert message={error} /> : null}
+          {saved ? (
+            <View style={styles.savedRow}>
+              <Icon icon={Check} size={16} color={colors.green} />
+              <Text style={styles.saved}>{t("common.saved")}</Text>
+            </View>
+          ) : null}
           <Button label={t("common.save")} onPress={save} loading={busy} fullWidth />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -118,5 +124,6 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing["3xl"] },
   center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
   error: { color: colors.danger, fontSize: 13, textAlign: "center" },
-  saved: { color: colors.green, fontSize: 13, fontWeight: "700", textAlign: "center" },
+  savedRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.xs },
+  saved: { color: colors.green, fontSize: 13, fontWeight: "700" },
 });

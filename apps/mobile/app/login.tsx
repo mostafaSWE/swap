@@ -5,7 +5,7 @@ import { supabase } from "../src/lib/supabase";
 import { authCallbackUrl } from "../src/lib/auth-redirect";
 import { t } from "../src/i18n";
 import { colors, spacing } from "../src/theme";
-import { Button, Input } from "../src/components/ui";
+import { Button, FormAlert, Input, PasswordInput } from "../src/components/ui";
 
 /** Email/username + password sign-in (web `LoginForm`). A username is resolved to
  *  its account email via the `email_for_username` RPC first. On success the
@@ -16,11 +16,19 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [idError, setIdError] = useState<string | null>(null);
+  const [pwError, setPwError] = useState<string | null>(null);
   const [resendEmail, setResendEmail] = useState<string | null>(null);
   const [resend, setResend] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   async function submit() {
     setError(null);
+    // Required-field validation first — never let an empty submit read as "invalid credentials".
+    const missingId = !identifier.trim();
+    const missingPw = !password;
+    setIdError(missingId ? t("auth.enterEmail") : null);
+    setPwError(missingPw ? t("auth.enterPassword") : null);
+    if (missingId || missingPw) return;
     setBusy(true);
     try {
       let email = identifier.trim();
@@ -72,17 +80,22 @@ export default function Login() {
           <Input
             label={t("auth.emailOrUsername")}
             value={identifier}
-            onChangeText={setIdentifier}
+            onChangeText={(v) => { setIdentifier(v); if (idError) setIdError(null); }}
+            error={idError ?? undefined}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
+            textContentType="username"
+            autoComplete="username"
             returnKeyType="next"
           />
-          <Input
+          <PasswordInput
             label={t("auth.password")}
             value={password}
-            onChangeText={setPassword}
-            secureTextEntry
+            onChangeText={(v) => { setPassword(v); if (pwError) setPwError(null); }}
+            error={pwError ?? undefined}
+            textContentType="password"
+            autoComplete="current-password"
             returnKeyType="go"
             onSubmitEditing={submit}
           />
@@ -91,7 +104,7 @@ export default function Login() {
             <Text style={styles.forgot}>{t("auth.forgotTitle")}</Text>
           </Pressable>
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <FormAlert message={error} /> : null}
           {resendEmail ? (
             <View style={styles.resend}>
               {resend === "sent" ? <Text style={styles.sent}>{t("auth.verifyBannerSent")}</Text> : <Pressable onPress={resendConfirmation} disabled={resend === "sending"}><Text style={styles.link}>{resend === "sending" ? t("auth.verifyBannerSending") : t("auth.resendConfirmation")}</Text></Pressable>}

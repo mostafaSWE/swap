@@ -10,7 +10,7 @@ import { buildPhone } from "../src/lib/phone";
 import { authCallbackUrl } from "../src/lib/auth-redirect";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
-import { Button, Checkbox, Icon, Input, Select, StrengthMeter } from "../src/components/ui";
+import { Button, Checkbox, FormAlert, Icon, Input, PasswordInput, PasswordRequirements, Select, StrengthMeter } from "../src/components/ui";
 
 // Password rules mirror the web (`PasswordStrength`): >=8 chars + a letter + a number.
 const pwOk = (v: string) => v.length >= 8 && /[a-zA-Z]/.test(v) && /[0-9]/.test(v);
@@ -52,7 +52,7 @@ export default function Register() {
   async function submit() {
     setError(null);
     if (!fullName.trim()) return setError(t("auth.errorGeneric"));
-    if (username.trim().length < 3 || !/^[a-zA-Z0-9_.]+$/.test(username.trim())) return setError(t("auth.usernameInvalid"));
+    if (username.trim().length < 3 || username.trim().length > 30 || !/^[a-zA-Z0-9_.]+$/.test(username.trim())) return setError(t("auth.usernameInvalid"));
     if (!email.includes("@")) return setError(t("auth.errorGeneric"));
     const normalizedPhone = buildPhone(phone, dialCode);
     if (!normalizedPhone) return setError(t("auth.phoneInvalid"));
@@ -121,24 +121,23 @@ export default function Register() {
           <Text style={styles.title}>{t("auth.registerTitle")}</Text>
           <Text style={styles.subtitle}>{t("auth.registerSubtitle")}</Text>
 
-          <Input label={t("auth.fullName")} value={fullName} onChangeText={setFullName} />
-          <Input label={t("auth.username")} value={username} onChangeText={setUsername} autoCapitalize="none" autoCorrect={false} />
-          <Select label={t("auth.country")} placeholder={t("auth.country")} value={countryId} onChange={setCountryId} options={countryOptions} />
-          {countryId ? (
-            <Select label={t("auth.city")} placeholder={t("auth.city")} value={cityId} onChange={setCityId} options={cityOptions} />
-          ) : null}
-          <Input label={t("auth.email")} value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" />
-          <Input label={`${t("auth.phone")} (${dialCode})`} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="5XXXXXXXX" />
+          <Input label={t("auth.fullName")} value={fullName} onChangeText={setFullName} textContentType="name" autoComplete="name" />
+          <Input label={t("auth.username")} value={username} onChangeText={setUsername} autoCapitalize="none" autoCorrect={false} textContentType="username" autoComplete="username" />
+          <Select label={t("auth.country")} placeholder={t("common.selectCountry")} value={countryId} onChange={setCountryId} options={countryOptions} />
+          <Select label={t("auth.city")} placeholder={t("common.selectCity")} value={cityId} onChange={setCityId} options={cityOptions} disabled={!countryId} />
+          <Input label={t("auth.email")} value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" autoComplete="email" />
+          <Input label={`${t("auth.phone")} (${dialCode})`} value={phone} onChangeText={setPhone} keyboardType="phone-pad" textContentType="telephoneNumber" autoComplete="tel" placeholder="5XXXXXXXX" />
 
           <View>
-            <Input label={t("auth.password")} value={password} onChangeText={setPassword} secureTextEntry />
+            <PasswordInput label={t("auth.password")} value={password} onChangeText={setPassword} textContentType="newPassword" autoComplete="new-password" />
             {password ? (
               <View style={styles.strength}>
                 <StrengthMeter score={score} label={score > 0 ? t(`auth.${STRENGTH[score]}`) : undefined} />
+                <PasswordRequirements value={password} />
               </View>
             ) : null}
           </View>
-          <Input label={t("auth.confirmPassword")} value={confirm} onChangeText={setConfirm} secureTextEntry />
+          <PasswordInput label={t("auth.confirmPassword")} value={confirm} onChangeText={setConfirm} textContentType="newPassword" autoComplete="new-password" />
 
           <Checkbox
             checked={terms}
@@ -146,7 +145,7 @@ export default function Register() {
             label={`${t("auth.termsAgreePrefix")} ${t("auth.termsLink")} ${t("auth.termsAgreeMiddle")} ${t("auth.privacyLink")}`}
           />
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <FormAlert message={error} /> : null}
           <Button label={t("auth.registerButton")} onPress={submit} loading={busy} fullWidth />
 
           <View style={styles.footer}>

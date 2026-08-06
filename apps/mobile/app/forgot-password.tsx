@@ -60,6 +60,8 @@ export default function ForgotPassword() {
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="email-address"
+                textContentType="emailAddress"
+                autoComplete="email"
                 returnKeyType="go"
                 onSubmitEditing={submit}
               />

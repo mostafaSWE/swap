@@ -103,9 +103,9 @@ export default function Onboarding() {
           <Text style={styles.title}>{t("onboarding.title")}</Text>
           <Text style={styles.subtitle}>{t("onboarding.subtitle")}</Text>
           <AvatarUpload uri={avatarUrl} name={name} onPick={chooseAvatar} busy={avatarBusy} error={avatarError} />
-          <Input label={t("auth.fullName")} value={name} onChangeText={setName} />
+          <Input label={t("auth.fullName")} value={name} onChangeText={setName} textContentType="name" autoComplete="name" />
           <Select label={t("auth.country")} placeholder={t("common.selectCountry")} value={countryId} onChange={(value) => { setCountryId(value); setCityId(undefined); }} options={countryOptions} />
-          {countryId ? <Select label={t("auth.city")} placeholder={t("common.selectCity")} value={cityId} onChange={setCityId} options={cityOptions} /> : null}
+          <Select label={t("auth.city")} placeholder={t("common.selectCity")} value={cityId} onChange={setCityId} options={cityOptions} disabled={!countryId} />
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <Button label={t("onboarding.complete")} onPress={save} loading={busy} fullWidth />
           <Button label={t("onboarding.skip")} variant="ghost" onPress={() => router.replace("/(tabs)")} disabled={busy} fullWidth />
