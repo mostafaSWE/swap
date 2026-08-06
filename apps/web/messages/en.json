@@ -200,6 +200,8 @@
     "title": "Listings",
     "resultsCount": "{count} results",
     "empty": "No matching listings",
+    "savedEmpty": "Nothing saved yet",
+    "savedEmptyHint": "Save listings you're interested in and they'll show up here.",
     "filters": "Filters",
     "featured": "Featured Status",
     "featuredOnly": "Featured only"
@@ -363,6 +365,8 @@
     "description": "Additional details",
     "submit": "Submit report",
     "success": "Your report was received, thank you",
+    "signInRequired": "Sign in to report this listing.",
+    "error": "Couldn't submit your report. Please try again.",
     "reasons": {
       "spam": "Spam / duplicate",
       "inappropriate": "Inappropriate content",

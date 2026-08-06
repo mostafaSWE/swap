@@ -21,10 +21,11 @@ export function ReportDialog({
   targetId: string;
 }) {
   const t = useTranslations("report");
+  const tn = useTranslations("nav");
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<string>(REASONS[0]);
   const [description, setDescription] = useState("");
-  const [state, setState] = useState<"idle" | "saving" | "done" | "error">("idle");
+  const [state, setState] = useState<"idle" | "saving" | "done" | "error" | "needauth">("idle");
 
   async function submit() {
     setState("saving");
@@ -34,7 +35,7 @@ export function ReportDialog({
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        setState("error");
+        setState("needauth");
         return;
       }
       const api = getApi();
@@ -78,6 +79,11 @@ export function ReportDialog({
 
             {state === "done" ? (
               <p className="py-6 text-center text-green-dark">{t("success")}</p>
+            ) : state === "needauth" ? (
+              <div className="space-y-4 py-4">
+                <p className="text-center text-ink/80">{t("signInRequired")}</p>
+                <CTAButton href="/login">{tn("login")}</CTAButton>
+              </div>
             ) : (
               <div className="space-y-3">
                 <SelectInput
@@ -91,6 +97,7 @@ export function ReportDialog({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
+                {state === "error" ? <p className="text-sm text-danger" role="alert">{t("error")}</p> : null}
                 <CTAButton onClick={submit} disabled={state === "saving"}>
                   {t("submit")}
                 </CTAButton>

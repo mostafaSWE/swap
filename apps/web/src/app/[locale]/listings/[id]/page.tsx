@@ -198,9 +198,11 @@ export default async function ListingDetailsPage({
 
             <SafetyNotes />
 
-            <div className="flex justify-center pt-1">
-              <ReportDialog targetType="listing" targetId={listing.id} />
-            </div>
+            {!isOwner ? (
+              <div className="flex justify-center pt-1">
+                <ReportDialog targetType="listing" targetId={listing.id} />
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

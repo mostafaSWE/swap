@@ -37,8 +37,9 @@ export default async function SavedPage({ params: { locale } }: { params: { loca
         ) : (
           <EmptyState
             icon={<Bookmark className="h-10 w-10" />}
-            title={t("empty")}
-            action={<CTAButton href="/listings">{tn("home")}</CTAButton>}
+            title={t("savedEmpty")}
+            description={t("savedEmptyHint")}
+            action={<CTAButton href="/listings">{t("title")}</CTAButton>}
           />
         )}
       </div>
