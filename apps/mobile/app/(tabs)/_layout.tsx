@@ -63,9 +63,14 @@ export default function TabsLayout() {
           title: t("newListing.title"),
           headerShown: false,
           tabBarLabel: () => null,
-          tabBarIcon: () => (
-            <View style={styles.addFab}>
-              <Icon icon={Plus} size={24} color={colors.navy} />
+          // Screen readers get the action name (the visible label is hidden).
+          tabBarAccessibilityLabel: t("newListing.title"),
+          // A raised green disc in the stock tabBarIcon slot — reads as a FAB without
+          // a custom tab bar (which native-crashes this Fabric build). `focused` is
+          // ignored: the tabPress listener prevents default, so Add never selects.
+          tabBarIcon: ({ focused }) => (
+            <View style={[styles.addFab, focused && styles.addFabPressed]}>
+              <Icon icon={Plus} size={26} color={colors.navy} />
             </View>
           ),
         }}
@@ -87,17 +92,20 @@ const styles = StyleSheet.create({
   // Prominent green center action. Rendered inside the stock tabBarIcon slot (a plain
   // View + Icon — the safe render path), so it reads as a raised FAB without a custom bar.
   addFab: {
-    width: 44,
-    height: 44,
+    width: 46,
+    height: 46,
     borderRadius: radii.pill,
-    marginTop: -6,
+    marginTop: -8,
     backgroundColor: colors.green,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 3,
+    borderColor: colors.background,
     shadowColor: colors.green,
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
+    shadowOpacity: 0.4,
+    shadowRadius: 7,
     shadowOffset: { width: 0, height: 2 },
-    elevation: 5,
+    elevation: 6,
   },
+  addFabPressed: { opacity: 0.85, transform: [{ scale: 0.94 }] },
 });

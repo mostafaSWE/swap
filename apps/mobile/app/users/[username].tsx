@@ -71,6 +71,13 @@ export default function PublicProfileScreen() {
     getListings(supabase, { ownerId: id, limit: 20 }).then(setListings).catch(() => setListings([]));
   }
 
+  /** Nudge the viewed profile's follower count by ±1 (never below 0). Keeps the
+   *  header count in sync with the Follow button optimistically; the server value
+   *  is authoritative on the next load. */
+  function bumpFollowers(delta: number) {
+    setProfile((p) => (p ? { ...p, followers_count: Math.max(0, p.followers_count + delta) } : p));
+  }
+
   async function toggleFollow() {
     if (!profile) return;
     if (!viewerId) {
@@ -80,11 +87,13 @@ export default function PublicProfileScreen() {
     if (followBusy) return;
     const next = !following;
     setFollowing(next);
+    bumpFollowers(next ? 1 : -1); // optimistic count
     setFollowBusy(true);
     try {
       await (next ? followUser(supabase, viewerId, profile.id) : unfollowUser(supabase, viewerId, profile.id));
     } catch {
       setFollowing(!next);
+      bumpFollowers(next ? -1 : 1); // roll back the count too
     } finally {
       setFollowBusy(false);
     }
@@ -106,11 +115,13 @@ export default function PublicProfileScreen() {
 
   async function runBlock() {
     if (!profile || !viewerId || blockBusy) return;
+    const wasFollowing = following;
     setBlockBusy(true);
     try {
       await api.block(profile.id);
       setBlocked(true);
       setFollowing(false); // blocking severs the follow edge both ways (DB trigger)
+      if (wasFollowing) bumpFollowers(-1); // my severed follow drops their follower count
       refetchListings(profile.id);
     } catch {
       Alert.alert(t("common.error"));
