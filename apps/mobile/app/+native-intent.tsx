@@ -12,13 +12,30 @@
  * RLS-protected client, so a non-participant sees nothing (the DB, not this file,
  * is the gate).
  */
+const APP_SCHEME = "justswap://";
+
 export function redirectSystemPath({ path }: { path: string; initial: boolean }): string {
   try {
-    // `path` may be a full URL (universal link) or a bare path (custom scheme).
-    const url = new URL(path, "https://justswap.me");
-    const stripped = url.pathname.replace(/^\/(ar|en)(?=\/|$)/, "");
+    let pathname: string;
+    let search: string;
+    if (path.startsWith(APP_SCHEME)) {
+      // Custom scheme: the WHOLE remainder is the intended route, not a host.
+      // `new URL("justswap://listings/123")` would treat "listings" as the host
+      // and drop it, so parse it by hand: justswap://listings/123 -> /listings/123
+      // (query preserved, e.g. justswap://auth/confirm?token_hash=… for email links).
+      const rest = path.slice(APP_SCHEME.length);
+      const q = rest.indexOf("?");
+      pathname = "/" + (q === -1 ? rest : rest.slice(0, q)).replace(/^\/+/, "");
+      search = q === -1 ? "" : rest.slice(q);
+    } else {
+      // Full https universal link OR a bare path — URL handles both.
+      const url = new URL(path, "https://justswap.me");
+      pathname = url.pathname;
+      search = url.search;
+    }
+    const stripped = pathname.replace(/^\/(ar|en)(?=\/|$)/, "");
     const normalized = stripped === "" ? "/" : stripped;
-    return normalized + url.search;
+    return normalized + search;
   } catch {
     return path;
   }
