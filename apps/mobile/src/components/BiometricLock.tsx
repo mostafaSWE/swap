@@ -21,11 +21,17 @@ import { Icon } from "./ui/Icon";
 export function BiometricLock({ children }: { children: ReactNode }) {
   const [locked, setLocked] = useState(false);
   const busy = useRef(false);
+  // Cached "session exists AND lock enabled" so we can lock the instant the app
+  // leaves the foreground — without awaiting async checks that would let a frame
+  // of content render on resume before the overlay mounts.
+  const shouldLock = useRef(false);
 
   const evaluate = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
     const enabled = await isAppLockEnabled();
-    setLocked(Boolean(data.session) && enabled);
+    shouldLock.current = Boolean(data.session) && enabled;
+    if (shouldLock.current) setLocked(true);
+    else setLocked(false);
   }, []);
 
   const unlock = useCallback(async () => {
@@ -41,7 +47,12 @@ export function BiometricLock({ children }: { children: ReactNode }) {
   useEffect(() => {
     void evaluate();
     const sub = AppState.addEventListener("change", (state) => {
-      if (state === "active") void evaluate();
+      if (state === "active") {
+        void evaluate();
+      } else if (shouldLock.current) {
+        // Leaving the foreground: lock synchronously so no content is visible on return.
+        setLocked(true);
+      }
     });
     return () => sub.remove();
   }, [evaluate]);

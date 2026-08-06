@@ -69,11 +69,18 @@ export async function captureImage(): Promise<PickedImage[]> {
  */
 export function acquireImages(limit: number): Promise<PickedImage[]> {
   return new Promise((resolve) => {
-    Alert.alert(t("imagePicker.title"), undefined, [
-      { text: t("imagePicker.takePhoto"), onPress: () => captureImage().then(resolve) },
-      { text: t("imagePicker.chooseLibrary"), onPress: () => pickImages(limit).then(resolve) },
-      { text: t("common.cancel"), style: "cancel", onPress: () => resolve([]) },
-    ]);
+    Alert.alert(
+      t("imagePicker.title"),
+      undefined,
+      [
+        { text: t("imagePicker.takePhoto"), onPress: () => captureImage().then(resolve) },
+        { text: t("imagePicker.chooseLibrary"), onPress: () => pickImages(limit).then(resolve) },
+        { text: t("common.cancel"), style: "cancel", onPress: () => resolve([]) },
+      ],
+      // Android lets the user dismiss by back-button / outside tap, which fires no
+      // onPress — resolve [] so the awaiting caller never hangs.
+      { cancelable: true, onDismiss: () => resolve([]) },
+    );
   });
 }
 
