@@ -161,7 +161,7 @@ export function ChatRoom({
           placeholder={t("placeholder")}
           className="input-field flex-1"
         />
-        <button type="submit" disabled={sending} className="btn-primary !px-3" aria-label={t("send")}>
+        <button type="submit" disabled={sending || !body.trim()} className="btn-primary !px-3" aria-label={t("send")}>
           <Send className="h-5 w-5 rtl:-scale-x-100" aria-hidden />
         </button>
       </form>

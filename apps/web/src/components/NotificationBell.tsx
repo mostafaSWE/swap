@@ -31,6 +31,7 @@ export function NotificationBell() {
 
   const [userId, setUserId] = useState<string | null>(null);
   const [items, setItems] = useState<NotificationWithActor[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -46,7 +47,7 @@ export function NotificationBell() {
       setUserId(id);
       if (!id) return;
       const refresh = () => {
-        getNotifications(sb, id).then(setItems).catch(() => {});
+        getNotifications(sb, id).then((n) => { setItems(n); setLoaded(true); }).catch(() => setLoaded(true));
         getUnreadNotificationCount(sb, id).then(setUnread).catch(() => {});
       };
       refresh();
@@ -111,7 +112,11 @@ export function NotificationBell() {
               {t("title")}
             </h2>
           </div>
-          {items.length === 0 ? (
+          {!loaded ? (
+            <div className="flex items-center justify-center px-4 py-10" aria-busy="true">
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-line border-t-accent" />
+            </div>
+          ) : items.length === 0 ? (
             <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
               <Bell className="h-8 w-8 text-muted" aria-hidden />
               <p className="text-sm text-muted">{t("empty")}</p>

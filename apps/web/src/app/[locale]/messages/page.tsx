@@ -19,7 +19,7 @@ export default async function MessagesPage({ params: { locale } }: { params: { l
     return (
       <EmptyState
         icon={<MessageCircle className="h-10 w-10" />}
-        title={t("empty")}
+        title={t("signInPrompt")}
         action={<CTAButton href="/login">{tn("login")}</CTAButton>}
       />
     );
