@@ -5,9 +5,7 @@
       "namespace": "android_app",
       "package_name": "me.justswap.app",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_EAS_DEVELOPMENT_SHA256",
-        "REPLACE_WITH_EAS_PREVIEW_SHA256",
-        "REPLACE_WITH_EAS_PRODUCTION_SHA256"
+        "7A:F9:FC:29:95:FA:66:AB:66:FE:23:DE:B0:3B:0A:85:FA:75:15:71:76:D7:3D:7B:55:C5:DC:EA:3A:E8:39:E7"
       ]
     }
   }
