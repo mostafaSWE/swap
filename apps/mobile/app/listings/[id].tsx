@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Heart, Repeat2, Share2 } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Bookmark, PackageX, Repeat2, Search, Share2, Star } from "lucide-react-native";
 import { localizedName } from "@swap/ui";
 import type { ListingWithRelations } from "@swap/types";
 import {
@@ -32,6 +33,7 @@ export default function ListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   // undefined = loading · null = not found
   const [listing, setListing] = useState<ListingWithRelations | null | undefined>(undefined);
   const [saved, setSaved] = useState(false);
@@ -40,6 +42,7 @@ export default function ListingDetail() {
   const [proposeOpen, setProposeOpen] = useState(false);
   const [following, setFollowing] = useState(false);
   const [followBusy, setFollowBusy] = useState(false);
+  const [activeImg, setActiveImg] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -74,7 +77,7 @@ export default function ListingDetail() {
   async function toggleSave() {
     const { data } = await supabase.auth.getUser();
     if (!data.user) {
-      router.push("/(tabs)/profile"); // real auth lands in M3
+      router.push("/login");
       return;
     }
     setSaveBusy(true);
@@ -109,6 +112,11 @@ export default function ListingDetail() {
     }
   }
 
+  function onGalleryScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
+    const page = Math.round(e.nativeEvent.contentOffset.x / width);
+    setActiveImg(Math.max(0, Math.min(page, (listing?.images?.length ?? 1) - 1)));
+  }
+
   if (listing === undefined) {
     return (
       <View style={styles.center}>
@@ -118,9 +126,20 @@ export default function ListingDetail() {
   }
   if (listing === null) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.notFound}>{t("mobile.detail.notFound")}</Text>
-      </View>
+      <>
+        <Stack.Screen options={{ title: "" }} />
+        <View style={styles.notFoundWrap}>
+          <View style={styles.notFoundIcon}>
+            <Icon icon={PackageX} size={30} color={colors.textMuted} />
+          </View>
+          <Text style={styles.notFoundTitle}>{t("mobile.detail.notFound")}</Text>
+          <Button
+            label={t("mobile.tab.browse")}
+            onPress={() => router.replace("/browse")}
+            leftIcon={<Icon icon={Search} size={16} color={colors.navy} />}
+          />
+        </View>
+      </>
     );
   }
 
@@ -142,14 +161,35 @@ export default function ListingDetail() {
       />
       <ScrollView style={styles.root} contentContainerStyle={styles.scroll}>
         {images.length > 0 ? (
-          <FlatList
-            data={images}
-            keyExtractor={(im) => im.id}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => <Image source={{ uri: item.image_url }} style={{ width, height: mediaH }} resizeMode="cover" />}
-          />
+          <View style={{ position: "relative" }}>
+            <FlatList
+              data={images}
+              keyExtractor={(im) => im.id}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={onGalleryScroll}
+              renderItem={({ item }) => <Image source={{ uri: item.image_url }} style={{ width, height: mediaH }} resizeMode="cover" />}
+            />
+            {images.length > 1 ? (
+              <>
+                <View style={styles.countPill} pointerEvents="none">
+                  <Text style={styles.countText}>{`${activeImg + 1}/${images.length}`}</Text>
+                </View>
+                <View style={styles.dots} pointerEvents="none">
+                  {images.map((im, i) => (
+                    <View key={im.id} style={[styles.dot, i === activeImg && styles.dotActive]} />
+                  ))}
+                </View>
+              </>
+            ) : null}
+            {listing.is_featured ? (
+              <View style={styles.featuredBadge} pointerEvents="none">
+                <Icon icon={Star} size={12} color={colors.navy} />
+                <Text style={styles.featuredText}>{t("listing.featured")}</Text>
+              </View>
+            ) : null}
+          </View>
         ) : (
           <ItemArtwork title={listing.title} categoryIcon={listing.category?.icon} style={{ width, height: mediaH }} />
         )}
@@ -165,7 +205,12 @@ export default function ListingDetail() {
 
           <WantedCard wanted={listing.wanted_exchange ?? ""} categoryIcon={listing.category?.icon ?? "other"} />
 
-          {listing.description ? <Text style={styles.desc}>{listing.description}</Text> : null}
+          {listing.description ? (
+            <View style={styles.descBlock}>
+              <Text style={styles.descHeading}>{t("listing.description")}</Text>
+              <Text style={styles.desc}>{listing.description}</Text>
+            </View>
+          ) : null}
 
           <Divider />
 
@@ -195,7 +240,7 @@ export default function ListingDetail() {
       </ScrollView>
 
       {/* Sticky action bar — Save + Message secondary; Propose is the primary CTA. */}
-      <View style={styles.actions}>
+      <View style={[styles.actions, { paddingBottom: insets.bottom || spacing.md }]}>
         {owner && myId === owner.id ? (
           <Button
             label={t("listing.editListing")}
@@ -210,7 +255,7 @@ export default function ListingDetail() {
               variant="secondary"
               fullWidth
               label={saved ? t("mobile.detail.saved") : t("mobile.detail.save")}
-              leftIcon={<Icon icon={Heart} size={18} color={saved ? colors.green : colors.text} />}
+              leftIcon={<Icon icon={Bookmark} size={18} color={saved ? colors.green : colors.text} />}
               onPress={toggleSave}
               loading={saveBusy}
             />
@@ -273,13 +318,25 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   scroll: { paddingBottom: spacing["3xl"] },
   center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
-  notFound: { color: colors.textMuted, fontSize: 15 },
+  notFoundWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: spacing.md, padding: spacing.xl, backgroundColor: colors.background },
+  notFoundIcon: { width: 64, height: 64, borderRadius: radii.pill, backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" },
+  notFoundTitle: { color: colors.text, fontSize: 17, fontWeight: "700", textAlign: "center" },
   body: { padding: spacing.lg, gap: spacing.md },
   title: { color: colors.text, fontSize: 22, fontWeight: "800" },
   metaRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: spacing.sm },
   city: { color: colors.textMuted, fontSize: 13, flex: 1 },
   views: { color: colors.textFaint, fontSize: 12 },
+  descBlock: { gap: spacing.xs },
+  descHeading: { color: colors.text, fontSize: 16, fontWeight: "800" },
   desc: { color: colors.text, fontSize: 15, lineHeight: 22 },
+  // Gallery overlays (logical insets → RTL-safe)
+  countPill: { position: "absolute", top: spacing.md, end: spacing.md, backgroundColor: "rgba(15,23,42,0.72)", paddingHorizontal: 10, paddingVertical: 4, borderRadius: radii.pill },
+  countText: { color: colors.white, fontSize: 12, fontWeight: "700" },
+  dots: { position: "absolute", bottom: spacing.md, alignSelf: "center", flexDirection: "row", gap: 6 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.5)" },
+  dotActive: { backgroundColor: colors.white, width: 18 },
+  featuredBadge: { position: "absolute", top: spacing.md, start: spacing.md, flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: colors.green, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radii.pill },
+  featuredText: { color: colors.navy, fontSize: 11, fontWeight: "800" },
   reportRow: { alignItems: "flex-start" },
   actions: {
     gap: spacing.sm,

@@ -201,6 +201,7 @@
   "listings": {
     "title": "Listings",
     "resultsCount": "{count} results",
+    "endOfResults": "You've reached the end",
     "empty": "No matching listings",
     "filters": "Filters",
     "featured": "Featured Status",

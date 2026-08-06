@@ -1,33 +1,58 @@
-import { Image, StyleSheet, Text, View } from "react-native";
-import { ImageOff } from "lucide-react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { Repeat2, Star } from "lucide-react-native";
 import type { ListingWithRelations } from "@swap/types";
 import { localizedName } from "@swap/ui";
-import { colors, spacing } from "../theme";
-import { locale } from "../i18n";
+import { colors, radii, spacing } from "../theme";
+import { locale, t } from "../i18n";
 import { Badge, Card } from "./ui";
 import { Icon } from "./ui/Icon";
+import { ItemArtwork } from "./ItemArtwork";
 
-/** Listing card: cover image + title + category badge · city. Built on the Card
- *  + Badge primitives. Pass `onPress` to open the listing detail. */
+/**
+ * Listing card — the single discovery card used by home rails, browse, saved and
+ * profiles. Cover artwork (category-tinted placeholder when imageless) with a
+ * Featured star + condition overlay, a two-line title, a category · city meta row,
+ * and a compact "wanted in exchange" line. The whole card is one accessible button.
+ */
 export function ListingCard({ listing, onPress }: { listing: ListingWithRelations; onPress?: () => void }) {
   const cover = [...(listing.images ?? [])].sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url;
+  const category = localizedName(listing.category, locale);
+  const city = localizedName(listing.city, locale);
+  const conditionLabel = t(`mobile.detail.conditions.${listing.condition}`);
+  const wanted = (listing.wanted_exchange ?? "").trim();
+  const wantedText = wanted === "__any__" ? t("listing.openToAnyExchange") : wanted || t("listing.openToOffers");
+  const a11yLabel = `${listing.title} · ${category} · ${conditionLabel} · ${city}`;
+
   return (
-    <Card padded={false} onPress={onPress}>
-      {cover ? (
-        <Image source={{ uri: cover }} style={styles.image} resizeMode="cover" />
-      ) : (
-        <View style={[styles.image, styles.placeholder]}>
-          <Icon icon={ImageOff} size={28} color={colors.textFaint} />
+    <Card padded={false} onPress={onPress} accessibilityLabel={a11yLabel}>
+      <View style={styles.artWrap}>
+        <ItemArtwork imageUrl={cover} title={listing.title} categoryIcon={listing.category?.icon} style={styles.art} />
+        {listing.is_featured ? (
+          <View style={styles.featured} pointerEvents="none">
+            <Icon icon={Star} size={12} color={colors.navy} />
+            <Text style={styles.featuredText}>{t("listing.featured")}</Text>
+          </View>
+        ) : null}
+        <View style={styles.conditionPill} pointerEvents="none">
+          <Text style={styles.conditionText}>{conditionLabel}</Text>
         </View>
-      )}
+      </View>
+
       <View style={styles.body}>
-        <Text numberOfLines={1} style={styles.title}>
+        <Text numberOfLines={2} style={styles.title}>
           {listing.title}
         </Text>
         <View style={styles.metaRow}>
-          <Badge label={localizedName(listing.category, locale)} tone="positive" />
+          <Badge label={category} tone="neutral" />
           <Text numberOfLines={1} style={styles.city}>
-            {localizedName(listing.city, locale)}
+            {city}
+          </Text>
+        </View>
+        <View style={styles.wantedRow}>
+          <Icon icon={Repeat2} size={14} color={colors.green} />
+          <Text numberOfLines={1} style={styles.wantedText}>
+            <Text style={styles.wantedLabel}>{t("listing.wantedExchange")}: </Text>
+            {wantedText}
           </Text>
         </View>
       </View>
@@ -36,12 +61,38 @@ export function ListingCard({ listing, onPress }: { listing: ListingWithRelation
 }
 
 const styles = StyleSheet.create({
-  image: { width: "100%", aspectRatio: 16 / 10, backgroundColor: colors.elevated },
-  placeholder: { alignItems: "center", justifyContent: "center" },
-  placeholderIcon: { fontSize: 32, opacity: 0.5 },
+  artWrap: { position: "relative" },
+  art: { width: "100%", aspectRatio: 16 / 10 },
+  // Overlays sit on the leading/trailing top of the artwork (logical insets → RTL-safe).
+  featured: {
+    position: "absolute",
+    top: spacing.sm,
+    start: spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: colors.green,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: radii.pill,
+  },
+  featuredText: { color: colors.navy, fontSize: 11, fontWeight: "800" },
+  conditionPill: {
+    position: "absolute",
+    top: spacing.sm,
+    end: spacing.sm,
+    backgroundColor: "rgba(15,23,42,0.78)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: radii.pill,
+  },
+  conditionText: { color: colors.white, fontSize: 11, fontWeight: "700" },
+
   body: { padding: spacing.md, gap: spacing.xs },
-  title: { color: colors.text, fontSize: 15, fontWeight: "700" },
+  title: { color: colors.text, fontSize: 15, fontWeight: "700", lineHeight: 20, minHeight: 40 },
   metaRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
-  // `flex:1` lets the city fill the remaining space; text aligns to start (RTL-aware) by default.
   city: { color: colors.textMuted, fontSize: 12, flex: 1 },
+  wantedRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs, marginTop: 2 },
+  wantedText: { color: colors.textMuted, fontSize: 12, flex: 1 },
+  wantedLabel: { color: colors.green, fontWeight: "700" },
 });

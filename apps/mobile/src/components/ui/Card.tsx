@@ -2,22 +2,32 @@ import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View, type ViewStyle } from "react-native";
 import { colors, radii, spacing } from "../../theme";
 
-/** Bordered surface (web `.card`). Pressable when `onPress` is given. */
+/** Bordered surface (web `.card`). Pressable when `onPress` is given; forwards an
+ *  accessibility label/role to the press target so cards announce their content. */
 export function Card({
   children,
   onPress,
   padded = true,
   style,
+  accessibilityLabel,
+  accessibilityRole = "button",
 }: {
   children: ReactNode;
   onPress?: () => void;
   padded?: boolean;
   style?: ViewStyle;
+  accessibilityLabel?: string;
+  accessibilityRole?: "button" | "link" | "none";
 }) {
   const content = <View style={[styles.card, padded && styles.padded, style]}>{children}</View>;
   if (!onPress) return content;
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => (pressed ? styles.pressed : undefined)}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel}
+      style={({ pressed }) => (pressed ? styles.pressed : undefined)}
+    >
       {content}
     </Pressable>
   );

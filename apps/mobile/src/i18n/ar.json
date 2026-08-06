@@ -201,6 +201,7 @@
   "listings": {
     "title": "الإعلانات",
     "resultsCount": "{count} نتيجة",
+    "endOfResults": "وصلت إلى النهاية",
     "empty": "لا توجد إعلانات مطابقة",
     "filters": "الفلاتر",
     "featured": "حالة التمييز",
