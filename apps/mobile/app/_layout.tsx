@@ -96,7 +96,7 @@ export default function RootLayout() {
           <Stack.Screen name="users/[username]" options={{ title: "" }} />
           <Stack.Screen name="connections/[username]" options={{ title: "" }} />
           <Stack.Screen name="settings" options={{ title: "" }} />
-          <Stack.Screen name="notifications" options={{ title: t("mobile.tab.notifications") }} />
+          <Stack.Screen name="notifications" options={{ title: t("notifications.title") }} />
           <Stack.Screen name="saved" options={{ title: "" }} />
           <Stack.Screen name="blocked" options={{ title: "" }} />
           <Stack.Screen name="support" options={{ title: "" }} />

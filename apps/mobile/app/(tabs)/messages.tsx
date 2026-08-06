@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
+import { LogIn, MessageCircle } from "lucide-react-native";
 import type { ConversationPreview } from "@swap/types";
 import { supabase } from "../../src/lib/supabase";
 import { fetchConversations } from "../../src/lib/chat";
@@ -8,9 +9,12 @@ import { locale, t } from "../../src/i18n";
 import { timeAgo } from "../../src/lib/format";
 import { colors, spacing } from "../../src/theme";
 import { ConversationCard } from "../../src/components/ConversationCard";
+import { ConversationCardSkeleton } from "../../src/components/ConversationCardSkeleton";
 import { EmptyState } from "../../src/components/EmptyState";
+import { ErrorState } from "../../src/components/ErrorState";
 import { Screen } from "../../src/components/Screen";
-import { Button } from "../../src/components/ui";
+import { Button } from "../../src/components/ui/Button";
+import { Icon } from "../../src/components/ui/Icon";
 
 type Sess = { user: { id: string } } | null;
 
@@ -18,40 +22,85 @@ export default function MessagesTab() {
   const router = useRouter();
   const [session, setSession] = useState<Sess | undefined>(undefined);
   const [items, setItems] = useState<ConversationPreview[] | null>(null);
+  const [error, setError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
+    } = supabase.auth.onAuthStateChange((_e, s) => {
+      setItems(null);
+      setSession(s);
+    });
     return () => subscription.unsubscribe();
   }, []);
 
   const uid = session?.user?.id;
-  const load = useCallback(() => {
+  const load = useCallback(async () => {
     if (!uid) {
       setItems(null);
       return;
     }
-    fetchConversations(uid).then(setItems).catch(() => setItems([]));
+    setError(false);
+    try {
+      setItems(await fetchConversations(uid));
+    } catch {
+      setError(true);
+    }
   }, [uid]);
 
   // Refetch whenever the tab regains focus (covers new messages / read state).
-  useFocusEffect(useCallback(() => load(), [load]));
+  useFocusEffect(useCallback(() => void load(), [load]));
 
-  if (session === undefined) return <View style={styles.center}><ActivityIndicator color={colors.green} /></View>;
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  }, [load]);
+
+  if (session === undefined || (uid && items === null && !error)) {
+    return (
+      <View style={styles.skeletonWrap}>
+        {[0, 1, 2, 3, 4].map((i) => (
+          <ConversationCardSkeleton key={i} />
+        ))}
+      </View>
+    );
+  }
   if (!session) {
     return (
       <Screen>
         <View style={styles.signedOut}>
-          <EmptyState icon="💬" title={t("mobile.profile.signInPrompt")} />
-          <Button label={t("mobile.profile.signIn")} onPress={() => router.push("/login")} fullWidth />
+          <EmptyState
+            icon={<Icon icon={MessageCircle} size={26} color={colors.green} />}
+            title={t("chat.signInPrompt")}
+            action={
+              <Button
+                label={t("mobile.profile.signIn")}
+                onPress={() => router.push("/login")}
+                leftIcon={<Icon icon={LogIn} size={16} color={colors.navy} />}
+              />
+            }
+          />
         </View>
       </Screen>
     );
   }
-  if (items === null) return <View style={styles.center}><ActivityIndicator color={colors.green} /></View>;
-  if (items.length === 0) return <Screen><EmptyState icon="💬" title={t("chat.empty")} /></Screen>;
+  if (error) {
+    return (
+      <View style={styles.centerWrap}>
+        <ErrorState onRetry={load} />
+      </View>
+    );
+  }
+  if (!items?.length) {
+    return (
+      <Screen>
+        <EmptyState icon={<Icon icon={MessageCircle} size={26} color={colors.green} />} title={t("chat.empty")} />
+      </Screen>
+    );
+  }
 
   return (
     <FlatList
@@ -72,13 +121,16 @@ export default function MessagesTab() {
       )}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={styles.sep} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.green} colors={[colors.green]} />}
+      showsVerticalScrollIndicator={false}
     />
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
+  centerWrap: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg, justifyContent: "center" },
+  skeletonWrap: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   signedOut: { gap: spacing.lg },
   list: { paddingHorizontal: spacing.lg },
   sep: { height: 1, backgroundColor: colors.border },

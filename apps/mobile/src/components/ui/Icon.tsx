@@ -14,13 +14,16 @@ export function Icon({
   size = 20,
   color = colors.text,
   mirror = false,
+  fill,
 }: {
   icon: LucideIcon;
   size?: number;
   color?: string;
   mirror?: boolean;
+  /** SVG fill (e.g. a filled star/heart). Defaults to none (outline only). */
+  fill?: string;
 }) {
-  const glyph = <LucideCmp size={size} color={color} strokeWidth={2} />;
+  const glyph = <LucideCmp size={size} color={color} strokeWidth={2} fill={fill ?? "none"} />;
   return mirror && I18nManager.isRTL ? <View style={styles.flip}>{glyph}</View> : glyph;
 }
 

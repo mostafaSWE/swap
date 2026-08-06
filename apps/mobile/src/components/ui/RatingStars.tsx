@@ -1,13 +1,15 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Star } from "lucide-react-native";
 import { colors } from "../../theme";
+import { Icon } from "./Icon";
 
 const SIZES = { sm: 14, md: 20, lg: 28 } as const;
+const STAR_FILL = "#FBBF24"; // amber-400, the conventional rating gold
 
 /** 1–5 star control (web `RatingStars`). Read-only, or interactive when
- *  `onChange` is given (touch — keyboard nav is web-only). Uses ★/☆ glyphs so no
- *  icon library is needed. The `row` auto-flips under RTL (intended): filled
- *  stars fill from the leading edge — the right in Arabic — so the rating reads
- *  as a quantity growing outward from where the eye starts. */
+ *  `onChange` is given (touch — keyboard nav is web-only). Filled stars fill from
+ *  the leading edge (the right in Arabic) so the rating reads as a quantity
+ *  growing outward from where the eye starts. */
 export function RatingStars({
   value,
   onChange,
@@ -29,17 +31,20 @@ export function RatingStars({
     >
       {[1, 2, 3, 4, 5].map((n) => {
         const filled = n <= Math.round(value);
-        const glyph = (
-          <Text style={[{ fontSize: px }, filled ? styles.filled : styles.empty]}>
-            {filled ? "★" : "☆"}
-          </Text>
+        const star = (
+          <Icon
+            icon={Star}
+            size={px}
+            color={filled ? STAR_FILL : colors.textFaint}
+            fill={filled ? STAR_FILL : "transparent"}
+          />
         );
         return interactive ? (
           <Pressable key={n} onPress={() => onChange(n)} hitSlop={4} accessibilityLabel={`${n}`}>
-            {glyph}
+            {star}
           </Pressable>
         ) : (
-          <View key={n}>{glyph}</View>
+          <View key={n}>{star}</View>
         );
       })}
     </View>
@@ -48,6 +53,4 @@ export function RatingStars({
 
 const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: 2 },
-  filled: { color: colors.warning },
-  empty: { color: colors.textFaint },
 });

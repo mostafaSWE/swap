@@ -352,6 +352,7 @@
   "chat": {
     "title": "Messages",
     "empty": "No conversations yet",
+    "signInPrompt": "Sign in to see your messages",
     "placeholder": "Type a message...",
     "send": "Send",
     "you": "You",

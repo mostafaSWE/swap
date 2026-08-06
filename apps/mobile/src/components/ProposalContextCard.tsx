@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import { ArrowLeftRight } from "lucide-react-native";
 import {
   getConfirmations,
@@ -56,6 +57,7 @@ export function ProposalContextCard({
   onChange: (updated: SwapProposalWithRelations) => void;
 }) {
   const { ensureAccepted } = useTerms();
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [counterOpen, setCounterOpen] = useState(false);
@@ -86,6 +88,8 @@ export function ProposalContextCard({
   const give: Item[] = (isProposer ? proposal.offered_items : [proposal.listing]).filter(Boolean);
   const get: Item[] = (isProposer ? [proposal.listing] : proposal.offered_items).filter(Boolean);
   const showWithdraw = (isOpen && !isMyTurn) || (!isOpen && CANCELLABLE.includes(proposal.status));
+
+  const openItem = (id: string) => router.push({ pathname: "/listings/[id]", params: { id } });
 
   // Confirmation rows are RLS-scoped to the two swap parties. The signed URLs
   // intentionally expose both photos to both parties as agreed for this flow.
@@ -262,9 +266,9 @@ export function ProposalContextCard({
       </View>
 
       <View style={styles.exchange}>
-        <ItemColumn label={t("proposal.youGive")} items={give} />
+        <ItemColumn label={t("proposal.youGive")} items={give} onItemPress={openItem} />
         <Icon icon={ArrowLeftRight} size={18} color={colors.textMuted} mirror />
-        <ItemColumn label={t("proposal.youGet")} items={get} accent />
+        <ItemColumn label={t("proposal.youGet")} items={get} accent onItemPress={openItem} />
       </View>
 
       {proposal.note ? <Text style={styles.note}>“{proposal.note}”</Text> : null}
@@ -528,15 +532,31 @@ function ConfirmationPhotos({
   );
 }
 
-function ItemColumn({ label, items, accent }: { label: string; items: Item[]; accent?: boolean }) {
+function ItemColumn({
+  label,
+  items,
+  accent,
+  onItemPress,
+}: {
+  label: string;
+  items: Item[];
+  accent?: boolean;
+  onItemPress?: (id: string) => void;
+}) {
   return (
     <View style={styles.col}>
       <Text style={[styles.colLabel, accent && styles.colLabelAccent]}>{label}</Text>
       <View style={styles.thumbs}>
         {items.map((item) => (
-          <View key={item.id} style={styles.thumbWrap}>
+          <Pressable
+            key={item.id}
+            style={({ pressed }) => [styles.thumbWrap, pressed && styles.thumbPressed]}
+            onPress={onItemPress ? () => onItemPress(item.id) : undefined}
+            accessibilityRole="button"
+            accessibilityLabel={item.title}
+          >
             <ItemArtwork imageUrl={cover(item)} title={item.title} categoryIcon={catIcon(item)} style={styles.thumb} />
-          </View>
+          </Pressable>
         ))}
       </View>
     </View>
@@ -618,6 +638,7 @@ const styles = StyleSheet.create({
   colLabelAccent: { color: colors.green },
   thumbs: { flexDirection: "row", flexWrap: "wrap", gap: spacing.xs },
   thumbWrap: { width: 44 },
+  thumbPressed: { opacity: 0.7 },
   thumb: { width: 44, height: 44, borderRadius: radii.sm },
   note: { color: colors.textMuted, fontSize: 13, fontStyle: "italic" },
   banner: { color: colors.text, fontSize: 13, fontWeight: "600" },

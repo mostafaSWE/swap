@@ -7,6 +7,7 @@ import { t } from "../i18n";
 import { colors, spacing } from "../theme";
 import { BottomSheet, Button, Textarea } from "./ui";
 import { ListingPicker } from "./ListingPicker";
+import { SafetyDisclaimer } from "./SafetyDisclaimer";
 
 // Re-export the shared contract for the counter-offer sheet. This must stay in
 // the same package as the API validation rather than becoming a mobile copy.
@@ -59,7 +60,9 @@ export function ProposeSwapSheet({
   return (
     <BottomSheet visible={visible} onClose={onClose} title={t("proposal.title")}>
       <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <Text style={styles.safety}>{t("safety.points.meetPublic")}</Text>
+        <View style={styles.safetyWrap}>
+          <SafetyDisclaimer text={t("safety.points.userResponsibility")} />
+        </View>
 
         <Text style={styles.section}>{t("proposal.chooseItems")}</Text>
         <Text style={styles.hint}>{t("proposal.chooseItemsHint")}</Text>
@@ -96,7 +99,7 @@ export function ProposeSwapSheet({
 }
 
 const styles = StyleSheet.create({
-  safety: { color: colors.textMuted, fontSize: 12, lineHeight: 17, marginBottom: spacing.md },
+  safetyWrap: { marginBottom: spacing.md },
   section: { color: colors.text, fontSize: 15, fontWeight: "700" },
   hint: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md },
   count: { color: colors.green, fontSize: 13, fontWeight: "600", marginTop: spacing.sm },

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MoreVertical, Send } from "lucide-react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import type { Message, PublicProfile, ReportTargetType, SwapProposalWithRelations } from "@swap/types";
@@ -14,15 +15,20 @@ import { colors, radii, spacing } from "../../src/theme";
 import { ChatBubble } from "../../src/components/ChatBubble";
 import { ProposalContextCard } from "../../src/components/ProposalContextCard";
 import { ReportSheet } from "../../src/components/ReportDialog";
-import { Icon, Input } from "../../src/components/ui";
+import { ErrorState } from "../../src/components/ErrorState";
+import { SafetyDisclaimer } from "../../src/components/SafetyDisclaimer";
+import { Avatar, Icon } from "../../src/components/ui";
 
 export default function Conversation() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { ensureAccepted } = useTerms();
   const [uid, setUid] = useState<string | null>(null);
   const [other, setOther] = useState<PublicProfile | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [proposal, setProposal] = useState<SwapProposalWithRelations | null>(null);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
@@ -31,6 +37,20 @@ export default function Conversation() {
   const [reportTarget, setReportTarget] = useState<{ type: ReportTargetType; id: string } | null>(null);
   const listRef = useRef<FlatList<Message>>(null);
 
+  function loadMessages() {
+    if (!id) return;
+    setLoadError(false);
+    getMessages(supabase, id)
+      .then((rows) => {
+        setMessages(rows);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoadError(true);
+        setLoading(false);
+      });
+  }
+
   useEffect(() => {
     if (!id) return;
     supabase.auth.getSession().then(({ data }) => {
@@ -38,7 +58,7 @@ export default function Conversation() {
       setUid(myId);
       if (myId) fetchOtherParticipant(id, myId).then(setOther).catch(() => undefined);
     });
-    getMessages(supabase, id).then(setMessages).catch(() => undefined);
+    loadMessages();
     // The proposal (if any) pinned to this conversation.
     getProposalByConversationId(supabase, id).then(setProposal).catch(() => undefined);
     // Realtime: append inserts we don't already have (dedupe vs our optimistic add).
@@ -128,6 +148,20 @@ export default function Conversation() {
       <Stack.Screen
         options={{
           title: other?.full_name ?? t("chat.title"),
+          headerTitle: () =>
+            other ? (
+              <Pressable
+                onPress={() => router.push({ pathname: "/users/[username]", params: { username: other.username } })}
+                style={styles.headerTitle}
+                accessibilityRole="button"
+                accessibilityLabel={other.full_name}
+              >
+                <Avatar uri={other.avatar_url} name={other.full_name} size="sm" />
+                <Text style={styles.headerName} numberOfLines={1}>{other.full_name}</Text>
+              </Pressable>
+            ) : (
+              <Text style={styles.headerName}>{t("chat.title")}</Text>
+            ),
           headerRight: () => (
             <Pressable onPress={openMenu} hitSlop={10} accessibilityRole="button" accessibilityLabel={t("chat.reportConversation")}>
               <Icon icon={MoreVertical} size={22} color={colors.white} />
@@ -143,35 +177,46 @@ export default function Conversation() {
         {proposal && uid ? (
           <ProposalContextCard proposal={proposal} currentUserId={uid} onChange={setProposal} />
         ) : null}
-        <FlatList
-          ref={listRef}
-          data={messages}
-          keyExtractor={(m) => m.id}
-          renderItem={({ item }) => {
-            const isOwn = item.sender_id === uid;
-            return (
-              <Pressable
-                onLongPress={isOwn ? undefined : () => setReportTarget({ type: "message", id: item.id })}
-                delayLongPress={350}
-                accessibilityHint={isOwn ? undefined : t("chat.reportMessage")}
-              >
-                <ChatBubble body={item.body} time={timeAgo(item.created_at, locale)} isOwn={isOwn} />
-              </Pressable>
-            );
-          }}
-          contentContainerStyle={styles.list}
-          ListHeaderComponent={<Text style={styles.disclaimer}>{t("chat.disclaimerBeforeChat")}</Text>}
-          onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
-          ItemSeparatorComponent={() => <View style={styles.gap} />}
-          keyboardShouldPersistTaps="handled"
-        />
+        {loading ? (
+          <View style={styles.centerFill}><ActivityIndicator color={colors.green} /></View>
+        ) : loadError ? (
+          <View style={styles.centerFill}><ErrorState onRetry={loadMessages} /></View>
+        ) : (
+          <FlatList
+            ref={listRef}
+            data={messages}
+            keyExtractor={(m) => m.id}
+            renderItem={({ item }) => {
+              const isOwn = item.sender_id === uid;
+              return (
+                <Pressable
+                  onLongPress={isOwn ? undefined : () => setReportTarget({ type: "message", id: item.id })}
+                  delayLongPress={350}
+                  accessibilityHint={isOwn ? undefined : t("chat.reportMessage")}
+                >
+                  <ChatBubble body={item.body} time={timeAgo(item.created_at, locale)} isOwn={isOwn} isRead={item.is_read} />
+                </Pressable>
+              );
+            }}
+            contentContainerStyle={styles.list}
+            ListHeaderComponent={<View style={styles.disclaimerWrap}><SafetyDisclaimer text={t("chat.disclaimerBeforeChat")} /></View>}
+            onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+            ItemSeparatorComponent={() => <View style={styles.gap} />}
+            keyboardShouldPersistTaps="handled"
+          />
+        )}
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <View style={styles.composer}>
-          <View style={styles.inputWrap}>
-            <Input placeholder={t("chat.placeholder")} value={draft} onChangeText={setDraft} multiline />
-          </View>
-          <Pressable onPress={send} disabled={!canSend} style={[styles.send, !canSend && styles.sendDisabled]} accessibilityRole="button">
-            <Icon icon={Send} size={20} color={colors.navy} mirror />
+        <View style={[styles.composer, { paddingBottom: (insets.bottom || spacing.md) }]}>
+          <TextInput
+            style={styles.chatInput}
+            placeholder={t("chat.placeholder")}
+            placeholderTextColor={colors.textFaint}
+            value={draft}
+            onChangeText={setDraft}
+            multiline
+          />
+          <Pressable onPress={send} disabled={!canSend} style={[styles.send, !canSend && styles.sendDisabled]} accessibilityRole="button" accessibilityLabel={t("common.send")}>
+            {sending ? <ActivityIndicator color={colors.navy} size="small" /> : <Icon icon={Send} size={20} color={colors.navy} mirror />}
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -189,8 +234,11 @@ export default function Conversation() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
+  centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.lg },
+  headerTitle: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  headerName: { color: colors.white, fontSize: 17, fontWeight: "700", maxWidth: 200 },
   list: { padding: spacing.lg },
-  disclaimer: { color: colors.textMuted, backgroundColor: colors.elevated, borderRadius: radii.md, padding: spacing.sm, fontSize: 12, lineHeight: 17, marginBottom: spacing.md },
+  disclaimerWrap: { marginBottom: spacing.md },
   gap: { height: 6 },
   error: { color: colors.danger, backgroundColor: colors.surface, paddingHorizontal: spacing.md, paddingTop: spacing.xs, textAlign: "center", fontSize: 13 },
   composer: {
@@ -202,7 +250,20 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     backgroundColor: colors.surface,
   },
-  inputWrap: { flex: 1 },
-  send: { width: 48, height: 48, borderRadius: radii.md, backgroundColor: colors.green, alignItems: "center", justifyContent: "center" },
+  chatInput: {
+    flex: 1,
+    minHeight: 44,
+    maxHeight: 120,
+    backgroundColor: colors.elevated,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.pill,
+    color: colors.text,
+    paddingHorizontal: spacing.md,
+    paddingTop: Platform.OS === "ios" ? 12 : 8,
+    paddingBottom: Platform.OS === "ios" ? 12 : 8,
+    fontSize: 15,
+  },
+  send: { width: 44, height: 44, borderRadius: radii.pill, backgroundColor: colors.green, alignItems: "center", justifyContent: "center" },
   sendDisabled: { opacity: 0.5 },
 });
