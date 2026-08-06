@@ -8,14 +8,13 @@ import type { Locale } from "@swap/types";
 import { createClient } from "@/lib/supabase/client";
 import { Link } from "@/i18n/navigation";
 import { AuthShell } from "@/components/AuthShell";
-import { FormAlert, FormInput } from "@/components/forms";
+import { FormInput } from "@/components/forms";
 import { CTAButton } from "@/components/CTAButton";
 
 export function ForgotPasswordForm() {
   const t = useTranslations("auth");
   const locale = useLocale() as Locale;
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -23,7 +22,6 @@ export function ForgotPasswordForm() {
   } = useForm<{ email: string }>();
 
   async function onSubmit({ email }: { email: string }) {
-    setError(null);
     const supabase = createClient();
     const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -59,7 +57,6 @@ export function ForgotPasswordForm() {
               error={errors.email && t("errorGeneric")}
               {...register("email", { required: true })}
             />
-            {error ? <FormAlert>{error}</FormAlert> : null}
             <CTAButton type="submit" disabled={isSubmitting} className="w-full">
               {t("forgotSubmit")}
             </CTAButton>

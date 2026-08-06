@@ -96,7 +96,8 @@ export function OnboardingForm({ profile, confirmed }: { profile: Profile; confi
         <button
           type="button"
           onClick={() => router.push("/")}
-          className="w-full rounded-pill py-2 text-sm font-semibold text-muted hover:bg-elevated"
+          disabled={isSubmitting}
+          className="w-full rounded-pill py-2 text-sm font-semibold text-muted hover:bg-elevated disabled:opacity-50"
         >
           {t("skip")}
         </button>
