@@ -16,6 +16,7 @@ import {
   getListings,
   getPublicProfileByUsername,
   getRatingsForUser,
+  OWNER_VISIBLE_STATUSES,
   type ListingFilters,
 } from "@swap/api";
 import type { ListingWithRelations, PublicProfile, RatingWithRater } from "@swap/types";
@@ -100,13 +101,29 @@ export async function fetchPublicProfile(username: string): Promise<PublicProfil
   }
 }
 
-/** Listings owned by a user (active only via RLS for the public). */
+/** Listings owned by a user, ACTIVE ONLY — the public view (used by the public
+ *  profile page). Never widen this: the public `users/[username]` page calls it
+ *  even when the viewer is the owner, so paused/completed must stay hidden here. */
 export async function fetchUserListings(ownerId: string): Promise<ListingWithRelations[]> {
   if (isDemoMode()) return DEMO_LISTINGS.filter((l) => l.owner_id === ownerId);
   try {
     return await getListings(createClient(), { ownerId });
   } catch (e) {
     console.error("[data] fetchUserListings failed:", e);
+    return [];
+  }
+}
+
+/** The signed-in owner's own listings INCLUDING paused/completed — for the
+ *  owner-self management surfaces (/profile, /my-listings) ONLY. Must NEVER be
+ *  called from a public surface (it would expose non-active listings). RLS still
+ *  guarantees only the owner's own non-active rows are returned. */
+export async function fetchMyListings(ownerId: string): Promise<ListingWithRelations[]> {
+  if (isDemoMode()) return DEMO_LISTINGS.filter((l) => l.owner_id === ownerId);
+  try {
+    return await getListings(createClient(), { ownerId, statuses: OWNER_VISIBLE_STATUSES });
+  } catch (e) {
+    console.error("[data] fetchMyListings failed:", e);
     return [];
   }
 }

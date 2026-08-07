@@ -5,7 +5,7 @@ import { ListingGrid } from "@/components/ListingGrid";
 import { EmptyState } from "@/components/primitives";
 import { CTAButton } from "@/components/CTAButton";
 import { getCurrentUser } from "@/lib/auth";
-import { fetchUserListings } from "@/lib/data";
+import { fetchMyListings } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/env";
 
 export default async function MyListingsPage({ params: { locale } }: { params: { locale: Locale } }) {
@@ -14,7 +14,7 @@ export default async function MyListingsPage({ params: { locale } }: { params: {
   const tn = await getTranslations("nav");
 
   const user = isSupabaseConfigured() ? await getCurrentUser() : null;
-  const listings = user ? await fetchUserListings(user.id) : [];
+  const listings = user ? await fetchMyListings(user.id) : [];
 
   return (
     <AppShell>

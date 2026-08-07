@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, MapPin, Repeat2, Star } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, MapPin, Repeat2, Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { localizedName } from "@swap/ui";
 import type { Locale, ListingWithRelations } from "@swap/types";
@@ -22,11 +22,23 @@ export function ListingCard({ listing }: { listing: ListingWithRelations }) {
         <ItemArtwork
           listing={listing}
           sizes="(max-width: 640px) 82vw, (max-width: 1024px) 33vw, 260px"
-          className="h-full w-full transition-transform duration-300 group-hover:scale-[1.04]"
+          className={`h-full w-full transition-transform duration-300 group-hover:scale-[1.04] ${listing.status !== "active" ? "opacity-80" : ""}`}
         />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/45 to-transparent" />
         <div className="absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-2 sm:inset-x-3 sm:top-3">
           <div className="flex gap-1.5 flex-wrap">
+            {/* Owner-only status pill (paused/completed reach a card only via the owner-self wrappers). */}
+            {listing.status === "hidden" ? (
+              <span className="inline-flex items-center gap-1 rounded-pill bg-warning px-2 py-1 text-[11px] font-bold text-white shadow-sm ring-1 ring-white/20 backdrop-blur-sm">
+                <EyeOff className="h-3 w-3" aria-hidden />
+                {t("listing.statusPaused")}
+              </span>
+            ) : listing.status === "completed" ? (
+              <span className="inline-flex items-center gap-1 rounded-pill bg-night/80 px-2 py-1 text-[11px] font-bold text-ink shadow-sm ring-1 ring-white/10 backdrop-blur-sm">
+                <CheckCircle2 className="h-3 w-3" aria-hidden />
+                {t("listing.statusCompleted")}
+              </span>
+            ) : null}
             <span className="rounded-pill bg-night/70 px-2.5 py-1 text-[11px] font-bold text-ink shadow-sm ring-1 ring-white/10 backdrop-blur-sm">
               {t(`condition.${listing.condition}`)}
             </span>

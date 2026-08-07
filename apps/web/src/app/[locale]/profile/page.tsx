@@ -10,7 +10,7 @@ import { CTAButton } from "@/components/CTAButton";
 import { LogoutButton } from "@/components/LogoutButton";
 import { Link } from "@/i18n/navigation";
 import { getCurrentProfile } from "@/lib/auth";
-import { fetchUserListings, fetchUserReviews } from "@/lib/data";
+import { fetchMyListings, fetchUserReviews } from "@/lib/data";
 
 export default async function ProfilePage({ params: { locale } }: { params: { locale: Locale } }) {
   setRequestLocale(locale);
@@ -33,7 +33,7 @@ export default async function ProfilePage({ params: { locale } }: { params: { lo
   }
 
   const [listings, reviews] = await Promise.all([
-    fetchUserListings(profile.id),
+    fetchMyListings(profile.id),
     fetchUserReviews(profile.id),
   ]);
   const publicProfile = profile as unknown as PublicProfile;
