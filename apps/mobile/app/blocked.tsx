@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { Undo2 } from "lucide-react-native";
+import { Ban, Undo2 } from "lucide-react-native";
 import type { PublicProfile } from "@swap/types";
 import { getBlockedUsers } from "@swap/api";
 import { supabase } from "../src/lib/supabase";
@@ -55,9 +55,15 @@ export default function BlockedScreen() {
       {uid === undefined || users === null ? (
         <View style={styles.center}><ActivityIndicator color={colors.green} /></View>
       ) : !uid ? (
-        <Screen><EmptyState icon="🚫" title={t("mobile.profile.signInPrompt")} /></Screen>
+        <Screen>
+          <EmptyState
+            icon={<Icon icon={Ban} size={26} color={colors.green} />}
+            title={t("mobile.profile.signInPrompt")}
+            action={<Button label={t("nav.login")} onPress={() => router.push("/login")} />}
+          />
+        </Screen>
       ) : users.length === 0 ? (
-        <Screen><EmptyState icon="🚫" title={t("block.blockedEmpty")} /></Screen>
+        <Screen><EmptyState icon={<Icon icon={Ban} size={26} color={colors.green} />} title={t("block.blockedEmpty")} /></Screen>
       ) : (
         <ScrollView style={styles.root} contentContainerStyle={styles.content}>
           {users.map((u) => (
@@ -65,6 +71,8 @@ export default function BlockedScreen() {
               <Pressable
                 style={styles.person}
                 onPress={() => router.push({ pathname: "/users/[username]", params: { username: u.username } })}
+                accessibilityRole="button"
+                accessibilityLabel={u.full_name}
               >
                 <Avatar uri={u.avatar_url} name={u.full_name} size="md" />
                 <View style={styles.names}>
