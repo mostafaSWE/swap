@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Bookmark, LogOut, PackageOpen, PackagePlus, Pencil, Settings as SettingsIcon, UserRound } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
@@ -14,6 +14,7 @@ import { Icon } from "../../src/components/ui/Icon";
 import { ProfileHeader } from "../../src/components/ProfileHeader";
 import { ListingCard } from "../../src/components/ListingCard";
 import { EmptyState } from "../../src/components/EmptyState";
+import { ErrorState } from "../../src/components/ErrorState";
 import { Screen } from "../../src/components/Screen";
 
 type Sess = { user: { id: string } } | null;
@@ -22,8 +23,10 @@ export default function ProfileTab() {
   const router = useRouter();
   const [session, setSession] = useState<Sess | undefined>(undefined); // undefined = resolving
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileError, setProfileError] = useState(false);
   const [listings, setListings] = useState<ListingWithRelations[] | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -34,10 +37,24 @@ export default function ProfileTab() {
   const uid = session?.user?.id;
   const load = useCallback((id: string) => {
     return Promise.all([
-      getProfileById(supabase, id).then(setProfile).catch(() => undefined),
+      getProfileById(supabase, id)
+        .then((p) => { setProfile(p); setProfileError(false); })
+        .catch(() => { setProfile(null); setProfileError(true); }),
       getListings(supabase, { ownerId: id, limit: 20 }).then(setListings).catch(() => setListings([])),
     ]);
   }, []);
+
+  async function signOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      Alert.alert(t("common.error"));
+    } finally {
+      setSigningOut(false);
+    }
+  }
 
   useEffect(() => {
     if (!uid) { setProfile(null); setListings(null); return; }
@@ -92,6 +109,8 @@ export default function ProfileTab() {
           onPressFollowers={() => goConnections("followers")}
           onPressFollowing={() => goConnections("following")}
         />
+      ) : profileError ? (
+        <ErrorState onRetry={() => uid && load(uid)} />
       ) : (
         <ActivityIndicator color={colors.green} />
       )}
@@ -129,7 +148,7 @@ export default function ProfileTab() {
         </View>
       )}
 
-      <Button variant="ghost" label={t("mobile.profile.signOut")} onPress={() => supabase.auth.signOut()} leftIcon={<Icon icon={LogOut} size={18} color={colors.danger} mirror />} fullWidth />
+      <Button variant="ghost" label={t("mobile.profile.signOut")} onPress={signOut} loading={signingOut} leftIcon={<Icon icon={LogOut} size={18} color={colors.danger} mirror />} fullWidth />
     </ScrollView>
   );
 }

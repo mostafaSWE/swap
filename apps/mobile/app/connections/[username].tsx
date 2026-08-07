@@ -11,6 +11,7 @@ import { SegmentedControl } from "../../src/components/ui/SegmentedControl";
 import { FollowButton } from "../../src/components/FollowButton";
 import { UserRow } from "../../src/components/UserRow";
 import { EmptyState } from "../../src/components/EmptyState";
+import { ErrorState } from "../../src/components/ErrorState";
 
 const LIMIT = 30;
 
@@ -29,6 +30,7 @@ export default function ConnectionsScreen() {
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [tab, setTab] = useState<FollowDirection>(tabParam === "following" ? "following" : "followers");
   const [rows, setRows] = useState<PublicProfileWithFollow[] | null>(null);
+  const [rowsError, setRowsError] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [busy, setBusy] = useState<Record<string, boolean>>({});
@@ -59,6 +61,7 @@ export default function ConnectionsScreen() {
     if (!profile) return;
     let active = true;
     setRows(null);
+    setRowsError(false);
     setHasMore(true);
     fetchPage(profile.id, tab, 0)
       .then((page) => {
@@ -66,11 +69,22 @@ export default function ConnectionsScreen() {
         setRows(page);
         setHasMore(page.length === LIMIT);
       })
-      .catch(() => active && setRows([]));
+      // A failed first page must surface a retryable error, not a fake "no followers yet" empty.
+      .catch(() => active && setRowsError(true));
     return () => {
       active = false;
     };
   }, [profile?.id, tab, fetchPage]);
+
+  function reloadFirstPage() {
+    if (!profile) return;
+    setRows(null);
+    setRowsError(false);
+    setHasMore(true);
+    fetchPage(profile.id, tab, 0)
+      .then((page) => { setRows(page); setHasMore(page.length === LIMIT); })
+      .catch(() => setRowsError(true));
+  }
 
   async function loadMore() {
     if (!profile || !rows || loadingMore || !hasMore) return;
@@ -132,7 +146,11 @@ export default function ConnectionsScreen() {
       {rows === null ? (
         <View style={styles.root}>
           {header}
-          <ActivityIndicator color={colors.green} style={{ marginTop: spacing.xl }} />
+          {rowsError ? (
+            <ErrorState onRetry={reloadFirstPage} />
+          ) : (
+            <ActivityIndicator color={colors.green} style={{ marginTop: spacing.xl }} />
+          )}
         </View>
       ) : (
         <FlatList
