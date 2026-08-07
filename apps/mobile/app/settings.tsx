@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Switch, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { Ban, ChevronRight, FileText, Fingerprint, LifeBuoy } from "lucide-react-native";
+import { Ban, ChevronRight, FileText, Fingerprint, LifeBuoy, Lock, ShieldAlert } from "lucide-react-native";
 import { isAppLockEnabled, isBiometricAvailable, setAppLockEnabled } from "../src/lib/biometrics";
 import { t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
@@ -63,6 +63,10 @@ export default function SettingsScreen() {
           <Row icon={LifeBuoy} label={t("support.title")} onPress={() => router.push("/support")} />
           <Divider />
           <Row icon={FileText} label={t("terms.title")} onPress={() => router.push("/terms")} />
+          <Divider />
+          <Row icon={Lock} label={t("privacy.title")} onPress={() => router.push("/privacy")} />
+          <Divider />
+          <Row icon={ShieldAlert} label={t("safety.title")} onPress={() => router.push("/safety")} />
         </View>
       </ScrollView>
     </>

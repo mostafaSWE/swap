@@ -144,6 +144,11 @@ export default function Register() {
             onChange={setTerms}
             label={`${t("auth.termsAgreePrefix")} ${t("auth.termsLink")} ${t("auth.termsAgreeMiddle")} ${t("auth.privacyLink")}`}
           />
+          <View style={styles.legalLinks}>
+            <Text style={styles.link} onPress={() => router.push("/terms")} accessibilityRole="link">{t("auth.termsLink")}</Text>
+            <Text style={styles.legalDot}>·</Text>
+            <Text style={styles.link} onPress={() => router.push("/privacy")} accessibilityRole="link">{t("auth.privacyLink")}</Text>
+          </View>
 
           {error ? <FormAlert message={error} /> : null}
           <Button label={t("auth.registerButton")} onPress={submit} loading={busy} fullWidth />
@@ -168,6 +173,8 @@ const styles = StyleSheet.create({
   footer: { flexDirection: "row", justifyContent: "center", marginTop: spacing.sm, flexWrap: "wrap" },
   muted: { color: colors.textMuted, fontSize: 14 },
   link: { color: colors.green, fontSize: 14, fontWeight: "700" },
+  legalLinks: { flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingStart: 30, marginTop: -spacing.xs },
+  legalDot: { color: colors.textFaint, fontSize: 14 },
   sentWrap: { flex: 1, backgroundColor: colors.background, alignItems: "center", justifyContent: "center", gap: spacing.md, padding: spacing.xl },
   sentIcon: { width: 56, height: 56, borderRadius: radii.pill, backgroundColor: colors.greenLight, alignItems: "center", justifyContent: "center" },
   sentTitle: { color: colors.text, fontSize: 20, fontWeight: "800", textAlign: "center" },
