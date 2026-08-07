@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { ArrowLeftRight, ImagePlus, Repeat2, X } from "lucide-react-native";
+import { ArrowLeftRight, Check, ChevronLeft, ChevronRight, ImagePlus, Repeat2, X } from "lucide-react-native";
 import type { ListingCondition } from "@swap/types";
 import { COUNTRIES, COUNTRY_BY_ID, FREE_PLAN_MAX_IMAGES, TOP_LEVEL_CATEGORIES, citiesByCountry } from "@swap/config";
 import { localizedName } from "@swap/ui";
@@ -11,8 +11,9 @@ import { acquireImages, uploadListingImage, type PickedImage } from "../src/lib/
 import { useTerms } from "../src/lib/terms";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
-import { Button, Checkbox, Icon, Input, SegmentedControl, Select, Textarea } from "../src/components/ui";
+import { Button, Checkbox, FormAlert, Icon, Input, SegmentedControl, Select, Textarea } from "../src/components/ui";
 import { ItemArtwork } from "../src/components/ItemArtwork";
+import { SafetyDisclaimer } from "../src/components/SafetyDisclaimer";
 
 /**
  * Create a listing (web `NewListingForm`) in the same three phone-width steps:
@@ -38,6 +39,7 @@ export default function NewListing() {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [titleError, setTitleError] = useState<string | null>(null);
 
   const categoryOptions = useMemo(
     () => TOP_LEVEL_CATEGORIES.map((c) => ({ value: c.id, label: localizedName(c, locale) })),
@@ -57,10 +59,23 @@ export default function NewListing() {
     if (picked.length) setImages((prev) => [...prev, ...picked].slice(0, FREE_PLAN_MAX_IMAGES));
   }
 
+  /** Reorder photos locally (index 0 = cover). Purely local — these upload in
+   *  order on submit, so no API call is needed until publish. */
+  function movePhoto(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= images.length) return;
+    setImages((prev) => {
+      const next = [...prev];
+      [next[index], next[target]] = [next[target]!, next[index]!];
+      return next;
+    });
+  }
+
   function next() {
     setError(null);
+    setTitleError(null);
     if (step === 1) {
-      if (title.trim().length < 3) return setError(t("auth.errorGeneric"));
+      if (title.trim().length < 3) return setTitleError(t("newListing.titleShort"));
       if (!categoryId) return setError(t("common.selectCategory"));
     }
     if (step === 2 && (!countryId || !cityId)) return setError(t("common.selectCity"));
@@ -75,9 +90,11 @@ export default function NewListing() {
 
   async function submit() {
     setError(null);
-    if (title.trim().length < 3) return setError(t("auth.errorGeneric"));
-    if (!categoryId) return setError(t("common.selectCategory"));
-    if (!countryId || !cityId) return setError(t("common.selectCity"));
+    setTitleError(null);
+    // Jump back to the offending step so the user can fix it.
+    if (title.trim().length < 3) { setStep(1); return setTitleError(t("newListing.titleShort")); }
+    if (!categoryId) { setStep(1); return setError(t("common.selectCategory")); }
+    if (!countryId || !cityId) { setStep(2); return setError(t("common.selectCity")); }
 
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
@@ -143,6 +160,16 @@ export default function NewListing() {
                       <Pressable onPress={() => setImages((prev) => prev.filter((_, j) => j !== i))} style={styles.removeBtn} accessibilityRole="button" accessibilityLabel={t("newListing.removeImage")}>
                         <Icon icon={X} size={14} color={colors.white} />
                       </Pressable>
+                      {images.length > 1 ? (
+                        <View style={styles.moveRow}>
+                          <Pressable onPress={() => movePhoto(i, -1)} disabled={i === 0} hitSlop={4} accessibilityRole="button" accessibilityLabel={t("newListing.moveBack")}>
+                            <Icon icon={ChevronLeft} size={16} color={i === 0 ? colors.textFaint : colors.white} mirror />
+                          </Pressable>
+                          <Pressable onPress={() => movePhoto(i, 1)} disabled={i === images.length - 1} hitSlop={4} accessibilityRole="button" accessibilityLabel={t("newListing.moveForward")}>
+                            <Icon icon={ChevronRight} size={16} color={i === images.length - 1 ? colors.textFaint : colors.white} mirror />
+                          </Pressable>
+                        </View>
+                      ) : null}
                     </View>
                   ))}
                   {images.length < FREE_PLAN_MAX_IMAGES ? (
@@ -152,7 +179,7 @@ export default function NewListing() {
                   ) : null}
                 </ScrollView>
               </View>
-              <Input label={t("newListing.fieldTitle")} value={title} onChangeText={setTitle} />
+              <Input label={t("newListing.fieldTitle")} value={title} error={titleError ?? undefined} onChangeText={(v) => { setTitle(v); if (titleError) setTitleError(null); }} />
               <Select label={t("newListing.fieldCategory")} placeholder={t("common.selectCategory")} value={categoryId} onChange={setCategoryId} options={categoryOptions} />
             </>
           ) : null}
@@ -163,9 +190,9 @@ export default function NewListing() {
                 <Text style={styles.label}>{t("newListing.fieldCondition")}</Text>
                 <SegmentedControl segments={[{ value: "new", label: t("mobile.detail.conditions.new") }, { value: "used", label: t("mobile.detail.conditions.used") }]} value={condition} onChange={setCondition} />
               </View>
-              <Select label={t("newListing.fieldCountry")} placeholder={t("auth.country")} value={countryId} onChange={setCountryId} options={countryOptions} />
-              {countryId ? <Select label={t("newListing.fieldCity")} placeholder={t("auth.city")} value={cityId} onChange={setCityId} options={cityOptions} /> : null}
-              <Textarea label={t("newListing.fieldDescription")} value={description} onChangeText={setDescription} maxLength={2000} />
+              <Select label={t("newListing.fieldCountry")} placeholder={t("common.selectCountry")} value={countryId} onChange={setCountryId} options={countryOptions} />
+              <Select label={t("newListing.fieldCity")} placeholder={t("common.selectCity")} value={cityId} onChange={setCityId} options={cityOptions} disabled={!countryId} />
+              <Textarea label={t("newListing.fieldDescription")} hint={`${description.length}/2000`} value={description} onChangeText={setDescription} maxLength={2000} />
             </>
           ) : null}
 
@@ -175,19 +202,16 @@ export default function NewListing() {
                 <Checkbox checked={openToAny} onChange={setOpenToAny} label={t("newListing.fieldOpenToAny")} />
                 <Text style={styles.hint}>{t("newListing.fieldOpenToAnyHint")}</Text>
               </View>
-              <Textarea label={t("newListing.fieldWanted")} value={wanted} onChangeText={setWanted} maxLength={500} editable={!openToAny} />
+              <Textarea label={t("newListing.fieldWanted")} hint={openToAny ? undefined : `${wanted.length}/500`} value={wanted} onChangeText={setWanted} maxLength={500} editable={!openToAny} />
               <ExchangePreview title={title.trim() || t("newListing.yourItem")} imageUrl={images[0]?.uri} categoryId={categoryId} wanted={openToAny ? t("listing.openToAnyExchange") : wanted.trim() || t("listing.openToOffers")} />
-              <View style={styles.safetyCard}>
-                <Text style={styles.safetyTitle}>{t("safety.disclaimerTitle")}</Text>
-                <Text style={styles.safety}>{t("safety.points.meetPublic")}</Text>
-              </View>
+              <SafetyDisclaimer text={t("safety.points.userResponsibility")} />
             </>
           ) : null}
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <FormAlert message={error} /> : null}
           <View style={styles.footer}>
             <View style={styles.footerButton}><Button label={t("common.back")} onPress={back} variant="secondary" fullWidth /></View>
-            <View style={styles.footerButton}><Button label={step === 3 ? t("newListing.submit") : t("common.next")} onPress={step === 3 ? submit : next} loading={busy} fullWidth /></View>
+            <View style={styles.footerButton}><Button label={step === 3 ? t("newListing.submit") : t("common.next")} onPress={step === 3 ? submit : next} loading={busy} leftIcon={step === 3 ? <Icon icon={Check} size={18} color={colors.navy} /> : undefined} fullWidth /></View>
           </View>
           {busy && status ? <Text style={styles.status}>{status}</Text> : null}
         </ScrollView>
@@ -233,8 +257,8 @@ const styles = StyleSheet.create({
   thumb: { width: 96, height: 96, borderRadius: radii.md, backgroundColor: colors.elevated },
   coverTag: {
     position: "absolute",
-    bottom: spacing.xs,
-    left: spacing.xs,
+    top: spacing.xs,
+    start: spacing.xs,
     backgroundColor: colors.green,
     borderRadius: radii.sm,
     paddingHorizontal: 6,
@@ -244,13 +268,24 @@ const styles = StyleSheet.create({
   removeBtn: {
     position: "absolute",
     top: -6,
-    right: -6,
+    end: -6,
     width: 24,
     height: 24,
     borderRadius: 12,
     backgroundColor: "rgba(0,0,0,0.75)",
     alignItems: "center",
     justifyContent: "center",
+  },
+  moveRow: {
+    position: "absolute",
+    bottom: 0,
+    start: 0,
+    end: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   addTile: {
     width: 96,
@@ -274,10 +309,6 @@ const styles = StyleSheet.create({
   previewTitle: { color: colors.text, fontSize: 12, fontWeight: "800", textAlign: "center" },
   swapIcon: { width: 40, height: 40, borderRadius: radii.pill, backgroundColor: colors.green, alignItems: "center", justifyContent: "center" },
   repeatIcon: { width: 56, height: 56, borderRadius: radii.md, backgroundColor: colors.green, alignItems: "center", justifyContent: "center" },
-  safetyCard: { gap: spacing.xs, borderWidth: 1, borderColor: colors.border, borderRadius: radii.md, backgroundColor: colors.surface, padding: spacing.md },
-  safetyTitle: { color: colors.text, fontSize: 13, fontWeight: "800" },
-  safety: { color: colors.textMuted, fontSize: 12, lineHeight: 17 },
-  error: { color: colors.danger, fontSize: 13 },
   status: { color: colors.textMuted, fontSize: 13, textAlign: "center" },
   footer: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm },
   footerButton: { flex: 1 },

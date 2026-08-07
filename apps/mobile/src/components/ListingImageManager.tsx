@@ -10,7 +10,7 @@ import { supabase } from "../lib/supabase";
 import { useTerms } from "../lib/terms";
 import { t } from "../i18n";
 import { colors, radii, spacing } from "../theme";
-import { Icon } from "./ui";
+import { FormAlert, Icon } from "./ui";
 
 /** Native implementation of the web ListingImageManager. Every add/remove/order
  * operation uses the owner-checked API and persists immediately. */
@@ -32,14 +32,18 @@ export function ListingImageManager({ listingId, initialImages }: { listingId: s
     if (!selected.length) return;
     setBusy(true);
     setError(null);
-    try {
-      for (const image of selected) await uploadListingImage(listingId, image);
-      await refresh();
-    } catch {
-      setError(t("editListing.imageError"));
-    } finally {
-      setBusy(false);
+    // Upload each independently — one failure shouldn't drop the rest silently.
+    let failed = 0;
+    for (const image of selected) {
+      try {
+        await uploadListingImage(listingId, image);
+      } catch {
+        failed++;
+      }
     }
+    await refresh().catch(() => undefined);
+    if (failed) setError(t("editListing.imageError"));
+    setBusy(false);
   }
 
   async function remove(imageId: string) {
@@ -94,7 +98,7 @@ export function ListingImageManager({ listingId, initialImages }: { listingId: s
           {busy ? <ActivityIndicator color={colors.green} /> : <Icon icon={ImagePlus} size={25} color={colors.textMuted} />}
         </Pressable> : null}
       </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <FormAlert message={error} /> : null}
     </View>
   );
 }
@@ -104,7 +108,7 @@ const styles = StyleSheet.create({
   grid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
   tile: { width: "23%", aspectRatio: 1, position: "relative", overflow: "hidden", borderRadius: radii.md, backgroundColor: colors.elevated },
   image: { width: "100%", height: "100%" },
-  cover: { position: "absolute", top: 4, left: 4, backgroundColor: colors.green, borderRadius: radii.sm, paddingHorizontal: 4, paddingVertical: 2 },
+  cover: { position: "absolute", top: 4, start: 4, backgroundColor: colors.green, borderRadius: radii.sm, paddingHorizontal: 4, paddingVertical: 2 },
   coverText: { color: colors.navy, fontSize: 9, fontWeight: "800" },
   remove: { position: "absolute", top: 4, end: 4, width: 22, height: 22, borderRadius: radii.pill, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.65)" },
   order: { position: "absolute", bottom: 0, start: 0, end: 0, flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 4, paddingVertical: 3, backgroundColor: "rgba(0,0,0,0.52)" },
