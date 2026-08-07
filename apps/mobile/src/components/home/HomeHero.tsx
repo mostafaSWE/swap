@@ -16,7 +16,7 @@ import { HeaderBell } from "../HeaderBell";
  * safe on the New Architecture (no SVG fill-on-Fabric issues). A restrained
  * entrance (fade + rise) runs once and is skipped when Reduce Motion is on.
  */
-export function HomeHero({ isAuthenticated }: { isAuthenticated: boolean }) {
+export function HomeHero() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const anim = useRef(new Animated.Value(0)).current;
@@ -34,7 +34,8 @@ export function HomeHero({ isAuthenticated }: { isAuthenticated: boolean }) {
   }, [anim]);
 
   const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [14, 0] });
-  const goAdd = () => router.push(isAuthenticated ? "/new-listing" : "/login");
+  // /new-listing self-guards (signed-out → sign-in gate), so route there uniformly.
+  const goAdd = () => router.push("/new-listing");
 
   return (
     <View style={styles.wrap}>
@@ -82,7 +83,7 @@ export function HomeHero({ isAuthenticated }: { isAuthenticated: boolean }) {
             <Button
               label={t("home.browseCategories")}
               variant="secondary"
-              onPress={() => router.push("/browse")}
+              onPress={() => router.push("/categories")}
               leftIcon={<Icon icon={ArrowRight} size={18} color={colors.text} mirror />}
               fullWidth
             />

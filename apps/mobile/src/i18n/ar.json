@@ -214,6 +214,8 @@
     "title": "أضف إعلان جديد",
     "fieldTitle": "عنوان الإعلان",
     "titleShort": "يجب ألا يقل العنوان عن 3 أحرف",
+    "signInTitle": "سجّل الدخول لنشر إعلان",
+    "signInBody": "تحتاج إلى حساب لعرض غرض للمبادلة. لا يستغرق الأمر سوى دقيقة.",
     "fieldDescription": "الوصف",
     "fieldCondition": "الحالة",
     "fieldCategory": "التصنيف",

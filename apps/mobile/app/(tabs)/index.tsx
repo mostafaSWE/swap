@@ -27,7 +27,6 @@ export default function Home() {
   const [latest, setLatest] = useState<ListingWithRelations[] | null>(null);
   const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [authed, setAuthed] = useState(false);
 
   const load = useCallback(async () => {
     setError(false);
@@ -46,12 +45,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    let active = true;
-    supabase.auth.getSession().then(({ data }) => active && setAuthed(Boolean(data.session)));
     load();
-    return () => {
-      active = false;
-    };
   }, [load]);
 
   const onRefresh = useCallback(async () => {
@@ -63,7 +57,7 @@ export default function Home() {
   const openBrowse = (categoryId?: string) =>
     router.push({ pathname: "/browse", params: categoryId ? { categoryId } : {} });
   const openListing = (id: string) => router.push({ pathname: "/listings/[id]", params: { id } });
-  const goAdd = () => router.push(authed ? "/new-listing" : "/login");
+  const goAdd = () => router.push("/new-listing");
 
   const steps = [
     { icon: PackagePlus, title: t("home.how.step1Title"), body: t("home.how.step1Body") },
@@ -126,7 +120,7 @@ export default function Home() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.green} colors={[colors.green]} />}
     >
-      <HomeHero isAuthenticated={authed} />
+      <HomeHero />
 
       <View style={styles.body}>
         {/* Search + location — a tappable bar that opens Browse (native pattern). */}
@@ -186,7 +180,7 @@ export default function Home() {
           eyebrow={t("home.categoriesEyebrow")}
           title={t("home.categories")}
           actionLabel={t("common.viewAll")}
-          onAction={() => openBrowse()}
+          onAction={() => router.push("/categories")}
         >
           <View style={styles.catGrid}>
             {TOP_LEVEL_CATEGORIES.slice(0, 6).map((cat) => (

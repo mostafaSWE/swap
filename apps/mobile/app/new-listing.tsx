@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { ArrowLeftRight, Check, ChevronLeft, ChevronRight, ImagePlus, Repeat2, X } from "lucide-react-native";
+import { ArrowLeftRight, Check, ChevronLeft, ChevronRight, ImagePlus, PackagePlus, Repeat2, X } from "lucide-react-native";
 import type { ListingCondition } from "@swap/types";
 import { COUNTRIES, COUNTRY_BY_ID, FREE_PLAN_MAX_IMAGES, TOP_LEVEL_CATEGORIES, citiesByCountry } from "@swap/config";
 import { localizedName } from "@swap/ui";
@@ -11,9 +11,63 @@ import { acquireImages, uploadListingImage, type PickedImage } from "../src/lib/
 import { useTerms } from "../src/lib/terms";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
-import { Button, Checkbox, FormAlert, Icon, Input, SegmentedControl, Select, Textarea } from "../src/components/ui";
+import { AuthCard, Button, Checkbox, FormAlert, Icon, Input, SegmentedControl, Select, Textarea } from "../src/components/ui";
 import { ItemArtwork } from "../src/components/ItemArtwork";
 import { SafetyDisclaimer } from "../src/components/SafetyDisclaimer";
+import { BrandBackground } from "../src/components/BrandBackground";
+import { useAuth } from "../src/lib/useAuth";
+
+/**
+ * Route-level auth guard (§ signed-out Add-Listing correction). Publishing a
+ * listing requires an account — a signed-out user must NEVER reach the wizard.
+ * Every Add entry point (center tab, home CTA, profile button, deep link) routes
+ * here, so guarding the route once is the single, defense-in-depth enforcement
+ * point (the getUser() check inside submit() is now only a redundant safety net).
+ */
+export default function NewListing() {
+  const { status } = useAuth();
+  const router = useRouter();
+  if (status === "loading") {
+    return (
+      <View style={styles.gateCenter}>
+        <ActivityIndicator color={colors.green} />
+      </View>
+    );
+  }
+  if (status === "guest") {
+    return (
+      <>
+        <Stack.Screen options={{ title: "" }} />
+        <BrandBackground>
+          <View style={styles.gateWrap}>
+            <AuthCard>
+              <View style={styles.gateIcon}>
+                <Icon icon={PackagePlus} size={26} color={colors.green} />
+              </View>
+              <Text style={styles.gateTitle}>{t("newListing.signInTitle")}</Text>
+              <Text style={styles.gateBody}>{t("newListing.signInBody")}</Text>
+              <View style={styles.gateActions}>
+                <Button
+                  label={t("mobile.profile.signIn")}
+                  onPress={() => router.push({ pathname: "/login", params: { next: "/new-listing" } })}
+                  pill
+                  fullWidth
+                />
+                <Button
+                  label={t("auth.registerButton")}
+                  variant="secondary"
+                  onPress={() => router.push({ pathname: "/register", params: { next: "/new-listing" } })}
+                  fullWidth
+                />
+              </View>
+            </AuthCard>
+          </View>
+        </BrandBackground>
+      </>
+    );
+  }
+  return <NewListingForm />;
+}
 
 /**
  * Create a listing (web `NewListingForm`) in the same three phone-width steps:
@@ -23,7 +77,7 @@ import { SafetyDisclaimer } from "../src/components/SafetyDisclaimer";
  * first) → route into the new listing. Images upload via the shared
  * sign→uploadToSignedUrl→addListingImage pipeline (see src/lib/upload).
  */
-export default function NewListing() {
+function NewListingForm() {
   const router = useRouter();
   const { ensureAccepted } = useTerms();
   const [step, setStep] = useState(1);
@@ -249,6 +303,13 @@ function ExchangePreview({ title, imageUrl, categoryId, wanted }: { title: strin
 }
 
 const styles = StyleSheet.create({
+  // Signed-out gate
+  gateCenter: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
+  gateWrap: { flex: 1, justifyContent: "center", padding: spacing.lg },
+  gateIcon: { width: 56, height: 56, borderRadius: radii.pill, backgroundColor: colors.greenLight, alignItems: "center", justifyContent: "center", alignSelf: "center", marginBottom: spacing.md },
+  gateTitle: { color: colors.text, fontSize: 20, fontWeight: "800", textAlign: "center" },
+  gateBody: { color: colors.textMuted, fontSize: 14, lineHeight: 21, textAlign: "center", marginTop: spacing.sm },
+  gateActions: { gap: spacing.sm, marginTop: spacing.lg },
   root: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing["3xl"] },
   heading: { gap: 2 },

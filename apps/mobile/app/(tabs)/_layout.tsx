@@ -4,7 +4,6 @@ import { Home, MessageCircle, Plus, Search, UserRound } from "lucide-react-nativ
 import type { LucideIcon } from "lucide-react-native";
 import { colors, radii } from "../../src/theme";
 import { t } from "../../src/i18n";
-import { supabase } from "../../src/lib/supabase";
 import { Icon } from "../../src/components/ui/Icon";
 import { HeaderBell } from "../../src/components/HeaderBell";
 
@@ -30,9 +29,10 @@ const ICONS: Record<string, LucideIcon> = {
 export default function TabsLayout() {
   const router = useRouter();
 
-  async function onAddPress() {
-    const { data } = await supabase.auth.getSession();
-    router.push(data.session ? "/new-listing" : "/login");
+  // The /new-listing route self-guards (signed-out → a polished sign-in gate),
+  // so every Add entry point routes there uniformly.
+  function onAddPress() {
+    router.push("/new-listing");
   }
 
   return (

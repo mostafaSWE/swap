@@ -214,6 +214,8 @@
     "title": "Add New Listing",
     "fieldTitle": "Listing title",
     "titleShort": "Title must be at least 3 characters",
+    "signInTitle": "Sign in to publish a listing",
+    "signInBody": "You need an account to list an item for swap. It only takes a minute.",
     "fieldDescription": "Description",
     "fieldCondition": "Condition",
     "fieldCategory": "Category",
