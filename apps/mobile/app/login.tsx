@@ -22,6 +22,7 @@ export default function Login() {
   const [resend, setResend] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   async function submit() {
+    if (busy) return; // defensive re-entrancy guard (login also submits via the password field's onSubmitEditing)
     setError(null);
     // Required-field validation first — never let an empty submit read as "invalid credentials".
     const missingId = !identifier.trim();

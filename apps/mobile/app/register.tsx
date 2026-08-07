@@ -50,6 +50,7 @@ export default function Register() {
   useEffect(() => setCityId(undefined), [countryId]);
 
   async function submit() {
+    if (busy) return; // defensive re-entrancy guard, matching the sibling auth screens
     setError(null);
     if (!fullName.trim()) return setError(t("auth.errorGeneric"));
     if (username.trim().length < 3 || username.trim().length > 30 || !/^[a-zA-Z0-9_.]+$/.test(username.trim())) return setError(t("auth.usernameInvalid"));
