@@ -288,7 +288,7 @@ export function ProposalContextCard({
           <Button
             label={t("proposal.accept")}
             onPress={() => run(() => api.acceptProposal(proposal.id))}
-            loading={busy}
+            disabled={busy}
             style={styles.flex}
           />
           <Button

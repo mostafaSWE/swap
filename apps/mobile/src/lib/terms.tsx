@@ -115,11 +115,13 @@ export function TermsProvider({ children }: { children: ReactNode }) {
               settle(false);
               router.push("/terms");
             }}
+            disabled={busy}
             fullWidth
           />
           {error ? <Text style={styles.error}>{t("termsGate.error")}</Text> : null}
           <Button label={t("termsGate.accept")} onPress={accept} loading={busy} fullWidth />
-          <Button variant="secondary" label={t("termsGate.decline")} onPress={() => settle(false)} fullWidth />
+          {/* Disabled while the acceptance POST is in flight — else a mis-tap here silently aborts the pending UGC write. */}
+          <Button variant="secondary" label={t("termsGate.decline")} onPress={() => settle(false)} disabled={busy} fullWidth />
         </ScrollView>
       </BottomSheet>
     </TermsContext.Provider>
