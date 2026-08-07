@@ -101,6 +101,8 @@ export default function RootLayout() {
           <Stack.Screen name="blocked" options={{ title: "" }} />
           <Stack.Screen name="support" options={{ title: "" }} />
           <Stack.Screen name="terms" options={{ title: "" }} />
+          <Stack.Screen name="privacy" options={{ title: "" }} />
+          <Stack.Screen name="safety" options={{ title: "" }} />
           <Stack.Screen name="login" options={{ title: "" }} />
           <Stack.Screen name="register" options={{ title: "" }} />
           <Stack.Screen name="forgot-password" options={{ title: "" }} />
