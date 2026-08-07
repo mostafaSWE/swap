@@ -1,5 +1,13 @@
-import type { ListingCondition, ListingWithRelations, SortOption } from "@swap/types";
+import type { ListingCondition, ListingStatus, ListingWithRelations, SortOption } from "@swap/types";
 import type { SwapClient } from "../client";
+
+/**
+ * The listing statuses an owner may see on their OWN management surfaces
+ * (profile "My listings" / web My Listings). Excludes `removed` (soft-deleted).
+ * PUBLIC surfaces must NOT use this — they pass no `statuses` and stay active-only.
+ * Shared so web + mobile can't drift.
+ */
+export const OWNER_VISIBLE_STATUSES: ListingStatus[] = ["active", "hidden", "completed"];
 
 /** Columns selected when we need a listing plus its joined relations. */
 const LISTING_SELECT = `
@@ -31,17 +39,25 @@ export interface ListingFilters {
   limit?: number;
   offset?: number;
   isFeatured?: boolean;
+  /**
+   * Explicit status allow-list — OWNER-SELF surfaces only (e.g. OWNER_VISIBLE_STATUSES).
+   * Omitted/empty → active-only, the public default. RLS still blocks a foreign
+   * owner's non-active rows even if they are requested here, so this is leak-safe.
+   */
+  statuses?: ListingStatus[];
 }
 
-/** Browse active listings with optional filters. Respects RLS (active only for the public). */
+/** Browse listings with optional filters. Default = active-only (public); pass
+ *  `statuses` (owner-self only) to include paused/completed. RLS enforces that
+ *  non-active rows are only ever returned for the owner/admin. */
 export async function getListings(
   supabase: SwapClient,
   filters: ListingFilters = {},
 ): Promise<ListingWithRelations[]> {
-  let query = supabase
-    .from("listings")
-    .select(LISTING_SELECT)
-    .eq("status", "active");
+  let query = supabase.from("listings").select(LISTING_SELECT);
+  query = filters.statuses?.length
+    ? query.in("status", filters.statuses)
+    : query.eq("status", "active");
 
   if (filters.search) {
     query = query.or(
