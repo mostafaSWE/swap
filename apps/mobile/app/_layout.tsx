@@ -72,6 +72,13 @@ export default function RootLayout() {
     };
   }, []);
 
+  // Dev-only build provenance — lets us confirm the running bundle matches a known
+  // git HEAD during device QA. Injected via EXPO_PUBLIC_GIT_SHA at Metro start.
+  // Never rendered in the UI / never shipped to production output.
+  useEffect(() => {
+    if (__DEV__) console.log("[boot] git HEAD:", process.env.EXPO_PUBLIC_GIT_SHA ?? "(unset)");
+  }, []);
+
   // Stay behind the native splash until the direction is confirmed correct.
   if (!ready) return null;
 
@@ -85,6 +92,9 @@ export default function RootLayout() {
           screenOptions={{
             headerStyle: { backgroundColor: colors.navy },
             headerTintColor: colors.white,
+            // Match the tabs' flat, bold navy bar (mirrors the web's single dark header).
+            headerTitleStyle: { fontWeight: "800", fontSize: 20 },
+            headerShadowVisible: false,
             contentStyle: { backgroundColor: colors.background },
           }}
         >
@@ -96,6 +106,7 @@ export default function RootLayout() {
           <Stack.Screen name="users/[username]" options={{ title: "" }} />
           <Stack.Screen name="connections/[username]" options={{ title: "" }} />
           <Stack.Screen name="settings" options={{ title: "" }} />
+          <Stack.Screen name="categories/index" options={{ title: "" }} />
           <Stack.Screen name="notifications" options={{ title: t("notifications.title") }} />
           <Stack.Screen name="saved" options={{ title: "" }} />
           <Stack.Screen name="blocked" options={{ title: "" }} />

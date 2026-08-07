@@ -3,6 +3,8 @@
 // I18nManager.isRTL), spacing is symmetric or logical, no hardcoded left/right;
 // directional icons pass `mirror` to flip.
 export { Button } from "./Button";
+export { AuthCard } from "./AuthCard";
+export { FormSection } from "./FormSection";
 export { Card } from "./Card";
 export { Avatar } from "./Avatar";
 export { Badge, PROPOSAL_STATUS_TONE, STATUS_TONE, type BadgeTone } from "./Badge";
@@ -20,6 +22,7 @@ export { PasswordRequirements } from "./PasswordRequirements";
 export { FormAlert } from "./FormAlert";
 export { Checkbox } from "./Checkbox";
 export { CategoryIcon } from "./CategoryIcon";
+export { CategoryCard } from "./CategoryCard";
 export { Skeleton } from "./Skeleton";
 export { SegmentedControl, type Segment } from "./SegmentedControl";
 export { Accordion } from "./Accordion";

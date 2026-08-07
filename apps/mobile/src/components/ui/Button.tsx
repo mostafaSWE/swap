@@ -14,6 +14,7 @@ export function Button({
   loading,
   disabled,
   leftIcon,
+  pill,
   style,
 }: {
   label: string;
@@ -23,6 +24,8 @@ export function Button({
   loading?: boolean;
   disabled?: boolean;
   leftIcon?: ReactNode;
+  /** Fully-rounded pill (web `.btn-primary` is `rounded-pill`). Opt-in — base stays radii.md. */
+  pill?: boolean;
   style?: ViewStyle;
 }) {
   const v = VARIANTS[variant];
@@ -36,6 +39,7 @@ export function Button({
       style={({ pressed }) => [
         styles.base,
         v.container,
+        pill && styles.pill,
         fullWidth && styles.fullWidth,
         pressed && styles.pressed,
         isDisabled && styles.disabled,
@@ -76,6 +80,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 48,
   },
+  pill: { borderRadius: radii.pill },
   fullWidth: { alignSelf: "stretch" },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },
