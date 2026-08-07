@@ -1,17 +1,20 @@
-import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Stack, useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { AccessibilityInfo, Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../src/lib/supabase";
 import { authCallbackUrl } from "../src/lib/auth-redirect";
 import { t } from "../src/i18n";
 import { colors, spacing } from "../src/theme";
-import { Button, FormAlert, Input, PasswordInput } from "../src/components/ui";
+import { AuthCard, Button, FormAlert, Input, PasswordInput } from "../src/components/ui";
+import { BrandBackground } from "../src/components/BrandBackground";
 
 /** Email/username + password sign-in (web `LoginForm`). A username is resolved to
  *  its account email via the `email_for_username` RPC first. On success the
- *  persisted session updates every auth-reactive screen (e.g. the Profile tab). */
+ *  persisted session updates every auth-reactive screen; if opened with a `next`
+ *  target (e.g. from the Add-listing guard) it returns there. */
 export default function Login() {
   const router = useRouter();
+  const { next } = useLocalSearchParams<{ next?: string }>();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -20,6 +23,26 @@ export default function Login() {
   const [pwError, setPwError] = useState<string | null>(null);
   const [resendEmail, setResendEmail] = useState<string | null>(null);
   const [resend, setResend] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  // Restrained fade+rise entrance, skipped under Reduce Motion (matches HomeHero / web).
+  const anim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    let mounted = true;
+    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
+      if (!mounted) return;
+      if (reduce) return anim.setValue(1);
+      Animated.timing(anim, { toValue: 1, duration: 420, delay: 40, useNativeDriver: true }).start();
+    });
+    return () => { mounted = false; };
+  }, [anim]);
+  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] });
+
+  /** Where to land after a successful sign-in. */
+  function goNext() {
+    if (typeof next === "string" && next.startsWith("/")) return router.replace(next as never);
+    if (router.canGoBack()) return router.back();
+    router.replace("/(tabs)/profile");
+  }
 
   async function submit() {
     if (busy) return; // defensive re-entrancy guard (login also submits via the password field's onSubmitEditing)
@@ -52,9 +75,7 @@ export default function Login() {
         } else setError(t("auth.errorInvalid"));
         return;
       }
-      // Session set → onAuthStateChange updates the app. Return to where we came from.
-      if (router.canGoBack()) router.back();
-      else router.replace("/(tabs)/profile");
+      goNext(); // session set → onAuthStateChange updates the app
     } catch {
       setError(t("auth.errorGeneric"));
     } finally {
@@ -70,72 +91,89 @@ export default function Login() {
     setResend(resendError ? "error" : "sent");
   }
 
+  const registerHref = typeof next === "string" ? { pathname: "/register" as const, params: { next } } : "/register";
+
   return (
     <>
-      <Stack.Screen options={{ title: t("auth.loginTitle") }} />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>{t("auth.loginTitle")}</Text>
-          <Text style={styles.subtitle}>{t("auth.loginSubtitle")}</Text>
+      <Stack.Screen options={{ title: "" }} />
+      <BrandBackground>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <Animated.View style={{ opacity: anim, transform: [{ translateY }] }}>
+              <Text style={styles.wordmark} accessibilityRole="header">
+                Just<Text style={styles.wordmarkAccent}>Swap</Text>
+              </Text>
 
-          <Input
-            label={t("auth.emailOrUsername")}
-            value={identifier}
-            onChangeText={(v) => { setIdentifier(v); if (idError) setIdError(null); }}
-            error={idError ?? undefined}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            textContentType="username"
-            autoComplete="username"
-            returnKeyType="next"
-          />
-          <PasswordInput
-            label={t("auth.password")}
-            value={password}
-            onChangeText={(v) => { setPassword(v); if (pwError) setPwError(null); }}
-            error={pwError ?? undefined}
-            textContentType="password"
-            autoComplete="current-password"
-            returnKeyType="go"
-            onSubmitEditing={submit}
-          />
+              <AuthCard>
+                <Text style={styles.title}>{t("auth.loginTitle")}</Text>
+                <Text style={styles.subtitle}>{t("auth.loginSubtitle")}</Text>
 
-          <Pressable onPress={() => router.push("/forgot-password")} hitSlop={8} style={styles.forgotWrap}>
-            <Text style={styles.forgot}>{t("auth.forgotTitle")}</Text>
-          </Pressable>
+                <View style={styles.fields}>
+                  <Input
+                    label={t("auth.emailOrUsername")}
+                    value={identifier}
+                    onChangeText={(v) => { setIdentifier(v); if (idError) setIdError(null); }}
+                    error={idError ?? undefined}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="email-address"
+                    textContentType="username"
+                    autoComplete="username"
+                    returnKeyType="next"
+                  />
+                  <PasswordInput
+                    label={t("auth.password")}
+                    value={password}
+                    onChangeText={(v) => { setPassword(v); if (pwError) setPwError(null); }}
+                    error={pwError ?? undefined}
+                    textContentType="password"
+                    autoComplete="current-password"
+                    returnKeyType="go"
+                    onSubmitEditing={submit}
+                  />
 
-          {error ? <FormAlert message={error} /> : null}
-          {resendEmail ? (
-            <View style={styles.resend}>
-              {resend === "sent" ? <Text style={styles.sent}>{t("auth.verifyBannerSent")}</Text> : <Pressable onPress={resendConfirmation} disabled={resend === "sending"}><Text style={styles.link}>{resend === "sending" ? t("auth.verifyBannerSending") : t("auth.resendConfirmation")}</Text></Pressable>}
-              {resend === "error" ? <Text style={styles.error}>{t("auth.verifyBannerError")}</Text> : null}
-            </View>
-          ) : null}
+                  <Pressable onPress={() => router.push("/forgot-password")} hitSlop={8} style={styles.forgotWrap}>
+                    <Text style={styles.forgot}>{t("auth.forgotTitle")}</Text>
+                  </Pressable>
 
-          <Button label={t("auth.loginButton")} onPress={submit} loading={busy} fullWidth />
+                  {error ? <FormAlert message={error} /> : null}
+                  {resendEmail ? (
+                    <View style={styles.resend}>
+                      {resend === "sent" ? <Text style={styles.sent}>{t("auth.verifyBannerSent")}</Text> : <Pressable onPress={resendConfirmation} disabled={resend === "sending"}><Text style={styles.link}>{resend === "sending" ? t("auth.verifyBannerSending") : t("auth.resendConfirmation")}</Text></Pressable>}
+                      {resend === "error" ? <Text style={styles.errorText}>{t("auth.verifyBannerError")}</Text> : null}
+                    </View>
+                  ) : null}
 
-          <View style={styles.footer}>
-            <Text style={styles.muted}>{t("auth.noAccount")} </Text>
-            <Text style={styles.link} onPress={() => router.push("/register")}>{t("auth.createOne")}</Text>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+                  <Button label={t("auth.loginButton")} onPress={submit} loading={busy} pill fullWidth />
+                </View>
+              </AuthCard>
+
+              <View style={styles.footer}>
+                <Text style={styles.muted}>{t("auth.noAccount")} </Text>
+                <Text style={styles.link} onPress={() => router.push(registerHref as never)}>{t("auth.createOne")}</Text>
+              </View>
+            </Animated.View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </BrandBackground>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.md, flexGrow: 1, justifyContent: "center" },
-  title: { color: colors.text, fontSize: 26, fontWeight: "800" },
-  subtitle: { color: colors.textMuted, fontSize: 14, marginBottom: spacing.sm },
-  error: { color: colors.danger, fontSize: 13 },
+  flex: { flex: 1 },
+  content: { padding: spacing.lg, flexGrow: 1, justifyContent: "center", paddingBottom: spacing["2xl"] },
+  wordmark: { color: colors.white, fontSize: 30, fontWeight: "800", letterSpacing: 0.2, textAlign: "center", marginBottom: spacing.xl },
+  wordmarkAccent: { color: colors.green },
+  title: { color: colors.text, fontSize: 24, fontWeight: "700", letterSpacing: -0.2 },
+  subtitle: { color: colors.textMuted, fontSize: 14, marginTop: 6, lineHeight: 20 },
+  fields: { gap: spacing.md, marginTop: spacing.lg },
+  errorText: { color: colors.danger, fontSize: 13 },
   resend: { gap: spacing.xs, borderWidth: 1, borderColor: colors.warning, borderRadius: 10, padding: spacing.sm },
   sent: { color: colors.green, fontSize: 13, fontWeight: "700" },
   forgotWrap: { alignSelf: "flex-end", paddingVertical: spacing.xs },
   forgot: { color: colors.green, fontSize: 13, fontWeight: "600" },
-  footer: { flexDirection: "row", justifyContent: "center", marginTop: spacing.md, flexWrap: "wrap" },
+  footer: { flexDirection: "row", justifyContent: "center", marginTop: spacing.xl, flexWrap: "wrap" },
   muted: { color: colors.textMuted, fontSize: 14 },
   link: { color: colors.green, fontSize: 14, fontWeight: "700" },
 });
