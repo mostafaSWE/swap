@@ -76,8 +76,8 @@ export default function EditListing() {
     setTitleError(null);
     if (title.trim().length < 3) return setTitleError(t("newListing.titleShort"));
     if (!categoryId || !countryId || !cityId) return setError(t("common.selectCity"));
-    if (!(await ensureAccepted())) return; // Apple 1.2 — accept Terms before editing content
-    setBusy(true);
+    setBusy(true); // flip before the ensureAccepted await so the guard closes immediately
+    if (!(await ensureAccepted())) { setBusy(false); return; } // Apple 1.2 — accept Terms before editing content
     try {
       await api.updateListing(listing.id, { title: title.trim(), description: description.trim(), wanted_exchange: openToAny ? "__any__" : wanted.trim(), condition, category_id: categoryId, country_id: countryId, city_id: cityId, status: paused ? "hidden" : "active" });
       router.replace({ pathname: "/listings/[id]", params: { id: listing.id } });

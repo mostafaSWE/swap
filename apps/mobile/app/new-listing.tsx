@@ -89,6 +89,7 @@ export default function NewListing() {
   }
 
   async function submit() {
+    if (busy) return; // guard the async prelude below — a fast double-tap must not create two listings
     setError(null);
     setTitleError(null);
     // Jump back to the offending step so the user can fix it.
@@ -96,15 +97,20 @@ export default function NewListing() {
     if (!categoryId) { setStep(1); return setError(t("common.selectCategory")); }
     if (!countryId || !cityId) { setStep(2); return setError(t("common.selectCity")); }
 
+    // Flip busy BEFORE the awaits so the Button's loading/disabled guard engages immediately (web parity).
+    setBusy(true);
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
+      setBusy(false);
       router.push("/login");
       return;
     }
     // Apple 1.2 — a listing is UGC; require accepted Terms before publishing.
-    if (!(await ensureAccepted())) return;
+    if (!(await ensureAccepted())) {
+      setBusy(false);
+      return;
+    }
 
-    setBusy(true);
     setStatus(t("newListing.submit"));
     try {
       const listing = await api.createListing({

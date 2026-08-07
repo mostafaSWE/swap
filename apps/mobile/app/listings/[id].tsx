@@ -75,12 +75,14 @@ export default function ListingDetail() {
   }, [myId, listing?.owner?.id]);
 
   async function toggleSave() {
+    if (saveBusy) return; // guard before the getUser await so a double-tap can't race save/unsave
+    setSaveBusy(true);
     const { data } = await supabase.auth.getUser();
     if (!data.user) {
+      setSaveBusy(false);
       router.push("/login");
       return;
     }
-    setSaveBusy(true);
     const next = !saved;
     setSaved(next);
     try {
