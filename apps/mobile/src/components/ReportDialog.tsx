@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { useRouter } from "expo-router";
 import { Flag } from "lucide-react-native";
 import { SwapApiError } from "@swap/api";
 import type { ReportTargetType } from "@swap/types";
@@ -40,6 +41,7 @@ export function ReportSheet({
   targetType: ReportTargetType;
   targetId: string;
 }) {
+  const router = useRouter();
   const [reason, setReason] = useState<string>(REASONS[0]);
   const [description, setDescription] = useState("");
   const [state, setState] = useState<State>("idle");
@@ -55,14 +57,17 @@ export function ReportSheet({
   }
 
   async function submit() {
+    if (state === "saving") return; // guard against a double-tap firing two report POSTs
     setState("saving");
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
-      setState("unauth");
-      return;
-    }
     const trimmed = description.trim();
+    // The auth read lives INSIDE the try so a rejected getSession falls to the
+    // catch (→ retryable "error") instead of stranding the sheet on "saving".
     try {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        setState("unauth");
+        return;
+      }
       if (targetType === "listing") {
         await api.reportListing(targetId, { reason, description: trimmed || undefined });
       } else {
@@ -89,6 +94,18 @@ export function ReportSheet({
         <Text style={styles.success}>
           {state === "duplicate" ? t("report.duplicate") : t("report.success")}
         </Text>
+      ) : state === "unauth" ? (
+        <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
+          <Text style={styles.error}>{t("report.signInRequired")}</Text>
+          <Button
+            label={t("nav.login")}
+            onPress={() => {
+              close();
+              router.push("/login");
+            }}
+            fullWidth
+          />
+        </ScrollView>
       ) : (
         <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
           <Select
@@ -104,7 +121,6 @@ export function ReportSheet({
             placeholder={t("report.description")}
           />
           {state === "error" ? <Text style={styles.error}>{t("common.error")}</Text> : null}
-          {state === "unauth" ? <Text style={styles.error}>{t("report.signInRequired")}</Text> : null}
           <Button label={t("report.submit")} onPress={submit} loading={busy} fullWidth />
         </ScrollView>
       )}

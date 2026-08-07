@@ -34,17 +34,24 @@ export default function ResetPassword() {
   }, []);
 
   async function submit() {
+    if (busy) return;
     setError(null);
     if (!passwordOk(password)) return setError(t("auth.passwordWeak"));
     if (password !== confirm) return setError(t("auth.passwordMismatch"));
     setBusy(true);
-    const { error: updateError } = await supabase.auth.updateUser({ password });
-    if (updateError) setError(t("auth.resetError"));
-    else {
-      setDone(true);
-      setTimeout(() => router.replace("/(tabs)/profile"), 1200);
+    // try/catch/finally so a thrown updateUser can't leave the button spinning forever with the error swallowed.
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      if (updateError) setError(t("auth.resetError"));
+      else {
+        setDone(true);
+        setTimeout(() => router.replace("/(tabs)/profile"), 1200);
+      }
+    } catch {
+      setError(t("auth.resetError"));
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   }
 
   return (
