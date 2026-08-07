@@ -195,6 +195,8 @@
     "viewProfile": "View profile",
     "postedOn": "Posted {date}",
     "featured": "Featured",
+    "statusPaused": "Paused",
+    "statusCompleted": "Completed",
     "prevImage": "Previous image",
     "nextImage": "Next image",
     "galleryLabel": "Listing images"

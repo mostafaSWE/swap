@@ -193,6 +193,8 @@
     "viewProfile": "عرض الملف الشخصي",
     "postedOn": "نُشر في {date}",
     "featured": "مميّز",
+    "statusPaused": "متوقف",
+    "statusCompleted": "مكتملة",
     "prevImage": "الصورة السابقة",
     "nextImage": "الصورة التالية",
     "galleryLabel": "صور الإعلان"
