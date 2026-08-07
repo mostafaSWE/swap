@@ -244,11 +244,15 @@ export default function ListingDetail() {
       {/* Sticky action bar — Save + Message secondary; Propose is the primary CTA. */}
       <View style={[styles.actions, { paddingBottom: insets.bottom || spacing.md }]}>
         {owner && myId === owner.id ? (
-          <Button
-            label={t("listing.editListing")}
-            onPress={() => router.push({ pathname: "/listings/[id]/edit", params: { id: listing.id } })}
-            fullWidth
-          />
+          // Only active/paused listings are editable; a completed listing has no
+          // Edit CTA (the edit screen rejects it → would dead-end on not-found).
+          listing.status === "active" || listing.status === "hidden" ? (
+            <Button
+              label={t("listing.editListing")}
+              onPress={() => router.push({ pathname: "/listings/[id]/edit", params: { id: listing.id } })}
+              fullWidth
+            />
+          ) : null
         ) : (
           <>
         <View style={styles.row}>

@@ -48,11 +48,13 @@ export const PROPOSAL_STATUS_TONE: Record<string, BadgeTone> = {
   cancelled: "neutral",
 };
 
-/** Generic listing/report status → tone. */
+/** Generic listing/report status → tone (aligned with web STATUS_STYLES:
+ *  hidden/paused = amber, completed = neutral). */
 export const STATUS_TONE: Record<string, BadgeTone> = {
   active: "positive",
   pending: "warning",
-  hidden: "neutral",
+  hidden: "warning",
+  completed: "neutral",
   removed: "danger",
   resolved: "positive",
   rejected: "danger",

@@ -21,12 +21,21 @@ export function ListingCard({ listing, onPress }: { listing: ListingWithRelation
   const conditionLabel = t(`mobile.detail.conditions.${listing.condition}`);
   const wanted = (listing.wanted_exchange ?? "").trim();
   const wantedText = wanted === "__any__" ? t("listing.openToAnyExchange") : wanted || t("listing.openToOffers");
-  const a11yLabel = `${listing.title} · ${category} · ${conditionLabel} · ${city}`;
+  // Owner-only status pill via an explicit allow-map (never `!== "active"`, so a
+  // stray `removed`/unknown status paints nothing). Non-active cards only ever
+  // reach here through the owner-self "My listings" query.
+  const statusBadge =
+    listing.status === "hidden"
+      ? { tone: "warning" as const, label: t("listing.statusPaused") }
+      : listing.status === "completed"
+        ? { tone: "neutral" as const, label: t("listing.statusCompleted") }
+        : null;
+  const a11yLabel = `${listing.title} · ${category} · ${conditionLabel} · ${city}${statusBadge ? ` · ${statusBadge.label}` : ""}`;
 
   return (
     <Card padded={false} onPress={onPress} accessibilityLabel={a11yLabel}>
       <View style={styles.artWrap}>
-        <ItemArtwork imageUrl={cover} title={listing.title} categoryIcon={listing.category?.icon} style={styles.art} />
+        <ItemArtwork imageUrl={cover} title={listing.title} categoryIcon={listing.category?.icon} style={StyleSheet.flatten([styles.art, statusBadge && styles.artDim])} />
         {listing.is_featured ? (
           <View style={styles.featured} pointerEvents="none">
             <Icon icon={Star} size={12} color={colors.navy} />
@@ -43,6 +52,7 @@ export function ListingCard({ listing, onPress }: { listing: ListingWithRelation
           {listing.title}
         </Text>
         <View style={styles.metaRow}>
+          {statusBadge ? <Badge label={statusBadge.label} tone={statusBadge.tone} /> : null}
           <Badge label={category} tone="neutral" />
           <Text numberOfLines={1} style={styles.city}>
             {city}
@@ -63,6 +73,7 @@ export function ListingCard({ listing, onPress }: { listing: ListingWithRelation
 const styles = StyleSheet.create({
   artWrap: { position: "relative" },
   art: { width: "100%", aspectRatio: 16 / 10 },
+  artDim: { opacity: 0.8 },
   // Overlays sit on the leading/trailing top of the artwork (logical insets → RTL-safe).
   featured: {
     position: "absolute",

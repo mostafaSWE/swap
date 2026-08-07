@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { Bookmark, LogOut, PackageOpen, PackagePlus, Pencil, Settings as SettingsIcon, UserRound } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
 import type { ListingWithRelations, Profile } from "@swap/types";
-import { getListings, getProfileById } from "@swap/api";
+import { getListings, getProfileById, OWNER_VISIBLE_STATUSES } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
 import { locale, t } from "../../src/i18n";
 import { monthYear } from "../../src/lib/format";
@@ -40,7 +40,8 @@ export default function ProfileTab() {
       getProfileById(supabase, id)
         .then((p) => { setProfile(p); setProfileError(false); })
         .catch(() => { setProfile(null); setProfileError(true); }),
-      getListings(supabase, { ownerId: id, limit: 20 }).then(setListings).catch(() => setListings([])),
+      // Owner-self view — include paused/completed so the owner can find & re-activate them.
+      getListings(supabase, { ownerId: id, limit: 20, statuses: OWNER_VISIBLE_STATUSES }).then(setListings).catch(() => setListings([])),
     ]);
   }, []);
 
