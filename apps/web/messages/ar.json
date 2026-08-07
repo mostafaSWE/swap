@@ -210,6 +210,7 @@
   "newListing": {
     "title": "أضف إعلان جديد",
     "fieldTitle": "عنوان الإعلان",
+    "titleShort": "يجب ألا يقل العنوان عن 3 أحرف",
     "fieldDescription": "الوصف",
     "fieldCondition": "الحالة",
     "fieldCategory": "التصنيف",

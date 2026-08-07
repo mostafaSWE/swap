@@ -263,6 +263,7 @@ export function NewListingForm() {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
+      setSubmitting(false);
       router.push("/login");
       return;
     }
@@ -370,8 +371,8 @@ export function NewListingForm() {
 
             <FormInput
               label={t("fieldTitle")}
-              error={errors.title && t("fieldTitle")}
-              {...register("title", { required: true })}
+              error={errors.title && t("titleShort")}
+              {...register("title", { required: true, minLength: 3, setValueAs: (v: string) => v.trim() })}
             />
 
             <Field label={t("fieldCategory")}>

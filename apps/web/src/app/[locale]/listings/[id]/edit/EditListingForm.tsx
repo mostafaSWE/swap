@@ -128,8 +128,8 @@ export function EditListingForm({ listing }: { listing: ListingWithRelations }) 
 
         <FormInput
           label={tn("fieldTitle")}
-          error={errors.title && tn("fieldTitle")}
-          {...register("title", { required: true })}
+          error={errors.title && tn("titleShort")}
+          {...register("title", { required: true, minLength: 3, setValueAs: (v: string) => v.trim() })}
         />
 
         <div>
@@ -249,7 +249,8 @@ export function EditListingForm({ listing }: { listing: ListingWithRelations }) 
           <button
             type="button"
             onClick={() => setConfirmDelete(true)}
-            className="flex w-full items-center justify-center gap-2 rounded-pill py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
+            disabled={saving}
+            className="flex w-full items-center justify-center gap-2 rounded-pill py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50 dark:text-red-300 dark:hover:bg-red-500/10"
           >
             <Trash2 className="h-4 w-4" aria-hidden />
             {t("delete")}
