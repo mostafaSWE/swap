@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { CircleCheck } from "lucide-react-native";
 import { COUNTRIES, citiesByCountry } from "@swap/config";
 import type { Profile } from "@swap/types";
 import { getProfileById, updateProfile } from "@swap/api";
@@ -8,12 +9,15 @@ import { localizedName } from "@swap/ui";
 import { supabase } from "../src/lib/supabase";
 import { acquireImages, uploadAvatar } from "../src/lib/upload";
 import { locale, t } from "../src/i18n";
-import { colors, spacing } from "../src/theme";
+import { colors, radii, spacing } from "../src/theme";
 import { AvatarUpload } from "../src/components/AvatarUpload";
-import { Button, Input, Select } from "../src/components/ui";
+import { AuthCard, Button, FormSection, Icon, Input, Select } from "../src/components/ui";
+import { BrandBackground } from "../src/components/BrandBackground";
+import { Reveal } from "../src/components/motion";
 
 /** Native version of web OnboardingForm: avatar upload persists immediately;
- * the remaining optional trust profile fields save on Continue. */
+ * the remaining optional trust profile fields save on Continue. Presented on the
+ * branded shell so first-run matches the auth screens. */
 export default function Onboarding() {
   const router = useRouter();
   const { confirmed } = useLocalSearchParams<{ confirmed?: string }>();
@@ -91,36 +95,96 @@ export default function Onboarding() {
     }
   }
 
-  if (profile === undefined) return <View style={styles.center}><ActivityIndicator color={colors.green} /></View>;
-  if (!profile) return <View style={styles.center}><Text style={styles.error}>{t("onboarding.error")}</Text></View>;
+  if (profile === undefined) {
+    return (
+      <BrandBackground>
+        <View style={styles.center}><ActivityIndicator color={colors.green} /></View>
+      </BrandBackground>
+    );
+  }
+  if (!profile) {
+    return (
+      <BrandBackground>
+        <View style={styles.center}><Text style={styles.error}>{t("onboarding.error")}</Text></View>
+      </BrandBackground>
+    );
+  }
 
   return (
     <>
-      <Stack.Screen options={{ title: t("onboarding.title") }} />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          {confirmed ? <Text style={styles.confirmed}>{t(confirmed === "email_change" ? "onboarding.emailChangedBanner" : "onboarding.emailConfirmedBanner")}</Text> : null}
-          <Text style={styles.title}>{t("onboarding.title")}</Text>
-          <Text style={styles.subtitle}>{t("onboarding.subtitle")}</Text>
-          <AvatarUpload uri={avatarUrl} name={name} onPick={chooseAvatar} busy={avatarBusy} error={avatarError} />
-          <Input label={t("auth.fullName")} value={name} onChangeText={setName} textContentType="name" autoComplete="name" />
-          <Select label={t("auth.country")} placeholder={t("common.selectCountry")} value={countryId} onChange={(value) => { setCountryId(value); setCityId(undefined); }} options={countryOptions} />
-          <Select label={t("auth.city")} placeholder={t("common.selectCity")} value={cityId} onChange={setCityId} options={cityOptions} disabled={!countryId} />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Button label={t("onboarding.complete")} onPress={save} loading={busy} fullWidth />
-          <Button label={t("onboarding.skip")} variant="ghost" onPress={() => router.replace("/(tabs)")} disabled={busy} fullWidth />
-        </ScrollView>
-      </KeyboardAvoidingView>
+      <Stack.Screen options={{ title: "" }} />
+      <BrandBackground>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <Reveal delay={0}>
+              <Text style={styles.wordmark} accessibilityRole="header">
+                Just<Text style={styles.wordmarkAccent}>Swap</Text>
+              </Text>
+            </Reveal>
+
+            <Reveal delay={90}>
+              <AuthCard>
+                {confirmed ? (
+                  <View style={styles.confirmed}>
+                    <Icon icon={CircleCheck} size={18} color={colors.green} />
+                    <Text style={styles.confirmedText}>{t(confirmed === "email_change" ? "onboarding.emailChangedBanner" : "onboarding.emailConfirmedBanner")}</Text>
+                  </View>
+                ) : null}
+
+                <Text style={styles.title}>{t("onboarding.title")}</Text>
+                <Text style={styles.subtitle}>{t("onboarding.subtitle")}</Text>
+
+                <View style={styles.avatarWrap}>
+                  <AvatarUpload uri={avatarUrl} name={name} onPick={chooseAvatar} busy={avatarBusy} error={avatarError} />
+                </View>
+
+                <View style={styles.sections}>
+                  <FormSection label={t("auth.secPersonal")}>
+                    <Input label={t("auth.fullName")} value={name} onChangeText={setName} textContentType="name" autoComplete="name" />
+                  </FormSection>
+                  <FormSection label={t("auth.secLocation")}>
+                    <Select label={t("auth.country")} placeholder={t("common.selectCountry")} value={countryId} onChange={(value) => { setCountryId(value); setCityId(undefined); }} options={countryOptions} />
+                    <Select label={t("auth.city")} placeholder={t("common.selectCity")} value={cityId} onChange={setCityId} options={cityOptions} disabled={!countryId} />
+                  </FormSection>
+                </View>
+
+                {error ? <Text style={styles.error}>{error}</Text> : null}
+
+                <View style={styles.actions}>
+                  <Button label={t("onboarding.complete")} onPress={save} loading={busy} pill fullWidth />
+                  <Button label={t("onboarding.skip")} variant="ghost" onPress={() => router.replace("/(tabs)")} disabled={busy} fullWidth />
+                </View>
+              </AuthCard>
+            </Reveal>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </BrandBackground>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing["3xl"] },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.lg, backgroundColor: colors.background },
-  title: { color: colors.text, fontSize: 25, fontWeight: "800", textAlign: "center" },
-  subtitle: { color: colors.textMuted, fontSize: 14, textAlign: "center", marginBottom: spacing.sm },
-  confirmed: { color: colors.green, backgroundColor: colors.greenLight, borderRadius: 10, padding: spacing.md, fontSize: 14, fontWeight: "700" },
-  error: { color: colors.danger, fontSize: 13, textAlign: "center" },
+  flex: { flex: 1 },
+  content: { padding: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing["3xl"] },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.lg },
+  wordmark: { color: colors.white, fontSize: 28, fontWeight: "800", letterSpacing: 0.2, textAlign: "center", marginBottom: spacing.lg },
+  wordmarkAccent: { color: colors.green },
+  title: { color: colors.text, fontSize: 24, fontWeight: "700", letterSpacing: -0.2, textAlign: "center" },
+  subtitle: { color: colors.textMuted, fontSize: 14, textAlign: "center", marginTop: 6, marginBottom: spacing.lg, lineHeight: 20 },
+  avatarWrap: { alignItems: "center", marginBottom: spacing.lg },
+  sections: { gap: spacing.xl },
+  confirmed: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    backgroundColor: colors.greenLight,
+    borderWidth: 1,
+    borderColor: "rgba(24,182,106,0.25)",
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  confirmedText: { color: colors.green, fontSize: 13, fontWeight: "700", flex: 1 },
+  actions: { marginTop: spacing.lg, gap: spacing.sm },
+  error: { color: colors.danger, fontSize: 13, textAlign: "center", marginTop: spacing.md },
 });

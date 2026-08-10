@@ -5,7 +5,9 @@ import { CircleCheckBig } from "lucide-react-native";
 import { supabase } from "../src/lib/supabase";
 import { t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
-import { Button, FormAlert, Icon, PasswordInput, PasswordRequirements, StrengthMeter } from "../src/components/ui";
+import { AuthCard, Button, FormAlert, Icon, PasswordInput, PasswordRequirements, StrengthMeter } from "../src/components/ui";
+import { BrandBackground } from "../src/components/BrandBackground";
+import { Reveal } from "../src/components/motion";
 
 const passwordOk = (value: string) => value.length >= 8 && /[a-zA-Z]/.test(value) && /[0-9]/.test(value);
 const STRENGTH = ["", "strengthWeak", "strengthFair", "strengthGood", "strengthStrong"] as const;
@@ -19,7 +21,8 @@ const pwScore = (v: string) => {
 };
 
 /** Native recovery destination: callback verifies the recovery link first, then
- * this screen updates the password within the resulting Supabase session. */
+ * this screen updates the password within the resulting Supabase session.
+ * Presented on the branded shell to match the sibling auth screens. */
 export default function ResetPassword() {
   const router = useRouter();
   const [hasSession, setHasSession] = useState<boolean | null>(null);
@@ -54,48 +57,73 @@ export default function ResetPassword() {
     }
   }
 
+  const score = pwScore(password);
   return (
     <>
-      <Stack.Screen options={{ title: t("auth.resetTitle") }} />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>{t("auth.resetTitle")}</Text>
-          {done ? (
-            <View style={styles.doneWrap}>
-              <View style={styles.doneBadge}><Icon icon={CircleCheckBig} size={30} color={colors.green} /></View>
-              <Text style={styles.done}>{t("auth.resetDone")}</Text>
-            </View>
-          ) : hasSession === false ? (
-            <><Text style={styles.hint}>{t("auth.resetExpired")}</Text><Button label={t("auth.forgotTitle")} onPress={() => router.replace("/forgot-password")} fullWidth /></>
-          ) : (
-            <>
-              <View>
-                <PasswordInput label={t("auth.newPassword")} value={password} onChangeText={setPassword} textContentType="newPassword" autoComplete="new-password" returnKeyType="next" />
-                {password ? (
-                  <View style={styles.strength}>
-                    <StrengthMeter score={pwScore(password)} label={pwScore(password) > 0 ? t(`auth.${STRENGTH[pwScore(password)]}`) : undefined} />
-                    <PasswordRequirements value={password} />
+      <Stack.Screen options={{ title: "" }} />
+      <BrandBackground>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <Reveal delay={0}>
+              <Text style={styles.wordmark} accessibilityRole="header">
+                Just<Text style={styles.wordmarkAccent}>Swap</Text>
+              </Text>
+            </Reveal>
+
+            <Reveal delay={90}>
+              <AuthCard>
+                {done ? (
+                  <View style={styles.centerCol}>
+                    <View style={styles.successBadge}><Icon icon={CircleCheckBig} size={28} color={colors.green} /></View>
+                    <Text style={styles.title}>{t("auth.resetTitle")}</Text>
+                    <Text style={styles.sentText}>{t("auth.resetDone")}</Text>
                   </View>
-                ) : null}
-              </View>
-              <PasswordInput label={t("auth.confirmPassword")} value={confirm} onChangeText={setConfirm} textContentType="newPassword" autoComplete="new-password" returnKeyType="go" onSubmitEditing={submit} />
-              {error ? <FormAlert message={error} /> : null}
-              <Button label={t("auth.resetSubmit")} onPress={submit} loading={busy} disabled={hasSession === null} fullWidth />
-            </>
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+                ) : hasSession === false ? (
+                  <View style={styles.centerCol}>
+                    <Text style={styles.title}>{t("auth.resetTitle")}</Text>
+                    <Text style={styles.sentText}>{t("auth.resetExpired")}</Text>
+                    <View style={styles.action}>
+                      <Button label={t("auth.forgotTitle")} onPress={() => router.replace("/forgot-password")} pill fullWidth />
+                    </View>
+                  </View>
+                ) : (
+                  <>
+                    <Text style={styles.title}>{t("auth.resetTitle")}</Text>
+                    <View style={styles.fields}>
+                      <View>
+                        <PasswordInput label={t("auth.newPassword")} value={password} onChangeText={setPassword} textContentType="newPassword" autoComplete="new-password" returnKeyType="next" />
+                        {password ? (
+                          <View style={styles.strength}>
+                            <StrengthMeter score={score} label={score > 0 ? t(`auth.${STRENGTH[score]}`) : undefined} />
+                            <PasswordRequirements value={password} />
+                          </View>
+                        ) : null}
+                      </View>
+                      <PasswordInput label={t("auth.confirmPassword")} value={confirm} onChangeText={setConfirm} textContentType="newPassword" autoComplete="new-password" returnKeyType="go" onSubmitEditing={submit} />
+                      {error ? <FormAlert message={error} /> : null}
+                      <Button label={t("auth.resetSubmit")} onPress={submit} loading={busy} disabled={hasSession === null} pill fullWidth />
+                    </View>
+                  </>
+                )}
+              </AuthCard>
+            </Reveal>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </BrandBackground>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
-  content: { flexGrow: 1, justifyContent: "center", padding: spacing.lg, gap: spacing.md },
-  title: { color: colors.text, fontSize: 26, fontWeight: "800" },
-  hint: { color: colors.textMuted, fontSize: 14, textAlign: "center" },
+  flex: { flex: 1 },
+  content: { padding: spacing.lg, flexGrow: 1, justifyContent: "center", paddingBottom: spacing["2xl"] },
+  wordmark: { color: colors.white, fontSize: 30, fontWeight: "800", letterSpacing: 0.2, textAlign: "center", marginBottom: spacing.xl },
+  wordmarkAccent: { color: colors.green },
+  title: { color: colors.text, fontSize: 24, fontWeight: "700", letterSpacing: -0.2, textAlign: "center" },
+  fields: { gap: spacing.md, marginTop: spacing.lg },
   strength: { marginTop: 6, gap: spacing.xs },
-  doneWrap: { alignItems: "center", gap: spacing.md },
-  doneBadge: { width: 64, height: 64, borderRadius: radii.pill, backgroundColor: colors.greenLight, alignItems: "center", justifyContent: "center" },
-  done: { color: colors.green, fontSize: 15, fontWeight: "700", textAlign: "center" },
+  centerCol: { alignItems: "center" },
+  successBadge: { width: 56, height: 56, borderRadius: radii.pill, backgroundColor: colors.greenLight, borderWidth: 1, borderColor: "rgba(24,182,106,0.25)", alignItems: "center", justifyContent: "center", marginBottom: spacing.md },
+  sentText: { color: colors.textMuted, fontSize: 14, textAlign: "center", lineHeight: 21, marginTop: spacing.sm },
+  action: { marginTop: spacing.lg, alignSelf: "stretch" },
 });

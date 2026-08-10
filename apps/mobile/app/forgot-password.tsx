@@ -6,7 +6,9 @@ import { supabase } from "../src/lib/supabase";
 import { authCallbackUrl } from "../src/lib/auth-redirect";
 import { t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
-import { Button, Icon, Input } from "../src/components/ui";
+import { AuthCard, Button, Icon, Input } from "../src/components/ui";
+import { BrandBackground } from "../src/components/BrandBackground";
+import { Reveal } from "../src/components/motion";
 
 /**
  * Request a password-reset email (web `ForgotPasswordForm`). We **always** show
@@ -34,76 +36,71 @@ export default function ForgotPassword() {
 
   return (
     <>
-      <Stack.Screen options={{ title: t("auth.forgotTitle") }} />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          {sent ? (
-            <View style={styles.sentWrap}>
-              <View style={styles.mailBadge}>
-                <Icon icon={MailCheck} size={30} color={colors.green} />
-              </View>
-              <Text style={styles.title}>{t("auth.forgotTitle")}</Text>
-              <Text style={styles.sentText}>{t("auth.forgotSent")}</Text>
-              <Text style={styles.link} onPress={() => router.replace("/login")}>
-                {t("auth.backToLogin")}
+      <Stack.Screen options={{ title: "" }} />
+      <BrandBackground>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <Reveal delay={0}>
+              <Text style={styles.wordmark} accessibilityRole="header">
+                Just<Text style={styles.wordmarkAccent}>Swap</Text>
               </Text>
-            </View>
-          ) : (
-            <>
-              <Text style={styles.title}>{t("auth.forgotTitle")}</Text>
-              <Text style={styles.subtitle}>{t("auth.forgotHint")}</Text>
+            </Reveal>
 
-              <Input
-                label={t("auth.email")}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="email-address"
-                textContentType="emailAddress"
-                autoComplete="email"
-                returnKeyType="go"
-                onSubmitEditing={submit}
-              />
-
-              <Button
-                label={t("auth.forgotSubmit")}
-                onPress={submit}
-                loading={busy}
-                disabled={!email.trim()}
-                fullWidth
-              />
-
-              <View style={styles.footer}>
-                <Text style={styles.link} onPress={() => router.back()}>
-                  {t("auth.backToLogin")}
-                </Text>
-              </View>
-            </>
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+            <Reveal delay={90}>
+              <AuthCard>
+                {sent ? (
+                  <View style={styles.sentWrap}>
+                    <View style={styles.successBadge}>
+                      <Icon icon={MailCheck} size={26} color={colors.green} />
+                    </View>
+                    <Text style={styles.title}>{t("auth.forgotTitle")}</Text>
+                    <Text style={styles.sentText}>{t("auth.forgotSent")}</Text>
+                    <View style={styles.sentAction}>
+                      <Button label={t("auth.backToLogin")} variant="secondary" onPress={() => router.replace("/login")} fullWidth />
+                    </View>
+                  </View>
+                ) : (
+                  <>
+                    <Text style={styles.title}>{t("auth.forgotTitle")}</Text>
+                    <Text style={styles.subtitle}>{t("auth.forgotHint")}</Text>
+                    <View style={styles.fields}>
+                      <Input
+                        label={t("auth.email")}
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        keyboardType="email-address"
+                        textContentType="emailAddress"
+                        autoComplete="email"
+                        returnKeyType="go"
+                        onSubmitEditing={submit}
+                      />
+                      <Button label={t("auth.forgotSubmit")} onPress={submit} loading={busy} disabled={!email.trim()} pill fullWidth />
+                      <Text style={styles.link} onPress={() => router.back()}>{t("auth.backToLogin")}</Text>
+                    </View>
+                  </>
+                )}
+              </AuthCard>
+            </Reveal>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </BrandBackground>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.md, flexGrow: 1, justifyContent: "center" },
-  title: { color: colors.text, fontSize: 26, fontWeight: "800" },
-  subtitle: { color: colors.textMuted, fontSize: 14, marginBottom: spacing.sm },
-  footer: { flexDirection: "row", justifyContent: "center", marginTop: spacing.md },
-  link: { color: colors.green, fontSize: 14, fontWeight: "700" },
-  sentWrap: { alignItems: "center", gap: spacing.md },
-  mailBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: radii.pill,
-    backgroundColor: colors.elevated,
-    borderWidth: 1,
-    borderColor: colors.green,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sentText: { color: colors.textMuted, fontSize: 14, textAlign: "center", lineHeight: 20 },
+  flex: { flex: 1 },
+  content: { padding: spacing.lg, flexGrow: 1, justifyContent: "center", paddingBottom: spacing["2xl"] },
+  wordmark: { color: colors.white, fontSize: 30, fontWeight: "800", letterSpacing: 0.2, textAlign: "center", marginBottom: spacing.xl },
+  wordmarkAccent: { color: colors.green },
+  title: { color: colors.text, fontSize: 24, fontWeight: "700", letterSpacing: -0.2, textAlign: "center" },
+  subtitle: { color: colors.textMuted, fontSize: 14, marginTop: 6, lineHeight: 20, textAlign: "center" },
+  fields: { gap: spacing.md, marginTop: spacing.lg },
+  link: { color: colors.green, fontSize: 14, fontWeight: "700", textAlign: "center", paddingVertical: spacing.xs },
+  sentWrap: { alignItems: "center" },
+  successBadge: { width: 56, height: 56, borderRadius: radii.pill, backgroundColor: colors.greenLight, borderWidth: 1, borderColor: "rgba(24,182,106,0.25)", alignItems: "center", justifyContent: "center", marginBottom: spacing.md },
+  sentText: { color: colors.textMuted, fontSize: 14, textAlign: "center", lineHeight: 21, marginTop: spacing.sm },
+  sentAction: { marginTop: spacing.lg, alignSelf: "stretch" },
 });
