@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { PackageSearch } from "lucide-react-native";
+import { PackageSearch, SlidersHorizontal } from "lucide-react-native";
 import { TOP_LEVEL_CATEGORIES, COUNTRIES, citiesByCountry } from "@swap/config";
 import { localizedName } from "@swap/ui";
 import type { ListingCondition, ListingWithRelations, SortOption } from "@swap/types";
 import { getListings } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
 import { locale, t } from "../../src/i18n";
-import { colors, spacing } from "../../src/theme";
-import { Button, Chip, Input, SegmentedControl, Select } from "../../src/components/ui";
+import { colors, radii, spacing } from "../../src/theme";
+import { Button, Chip, Input, Select } from "../../src/components/ui";
 import { Icon } from "../../src/components/ui/Icon";
 import { ListingCard } from "../../src/components/ListingCard";
 import { ListingCardSkeleton } from "../../src/components/ListingCardSkeleton";
@@ -68,6 +68,10 @@ export default function Browse() {
   );
 
   const hasFilters = Boolean(debounced || categoryId || countryId || cityId || condition || featuredOnly);
+  // Count only the *advanced* filters (the ones behind the Filters panel) for its badge —
+  // search + category have their own visible controls (the box + the chip row).
+  const advancedCount = [countryId, cityId, condition].filter(Boolean).length + (featuredOnly ? 1 : 0);
+  const filtersActive = filtersOpen || advancedCount > 0;
 
   const loadFirst = useCallback(() => {
     let cancelled = false;
@@ -136,46 +140,90 @@ export default function Browse() {
     <View style={styles.root}>
       <View style={styles.controls}>
         <Input placeholder={t("mobile.browse.search")} value={search} onChangeText={setSearch} returnKeyType="search" />
+
+        {/* Category chips — the website's top scroller. */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} keyboardShouldPersistTaps="handled">
           <Chip label={t("mobile.browse.all")} active={!categoryId} onPress={() => setCategoryId(undefined)} />
           {TOP_LEVEL_CATEGORIES.map((c) => (
             <Chip key={c.id} label={localizedName(c, locale)} active={categoryId === c.id} onPress={() => setCategoryId(c.id)} />
           ))}
         </ScrollView>
-        <View style={styles.row}>
-          <View style={{ flex: 1 }}>
-            <SegmentedControl
-              segments={[
-                { value: "newest", label: t("mobile.browse.newest") },
-                { value: "most_viewed", label: t("mobile.browse.mostViewed") },
-              ]}
+
+        {/* Filters (icon+text toggle, left) ⟷ compact sort dropdown (right) — the website toolbar row. */}
+        <View style={styles.toolRow}>
+          <Pressable
+            onPress={() => setFiltersOpen((open) => !open)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: filtersOpen }}
+            hitSlop={8}
+            style={({ pressed }) => [styles.filtersBtn, filtersActive && styles.filtersBtnActive, pressed && styles.pressed]}
+          >
+            <Icon icon={SlidersHorizontal} size={16} color={filtersActive ? colors.green : colors.text} />
+            <Text style={[styles.filtersLabel, filtersActive && styles.filtersLabelActive]}>{t("listings.filters")}</Text>
+            {advancedCount > 0 ? (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{advancedCount}</Text>
+              </View>
+            ) : null}
+          </Pressable>
+
+          <View style={styles.sortSelect}>
+            <Select
               value={sort}
               onChange={(v) => setSort(v as SortOption)}
+              sheetTitle={t("sort.label")}
+              options={[
+                { value: "newest", label: t("sort.newest") },
+                { value: "most_viewed", label: t("sort.most_viewed") },
+              ]}
             />
           </View>
-          <Button
-            label={hasFilters ? `${t("listings.filters")} ·` : t("listings.filters")}
-            variant={filtersOpen || hasFilters ? "primary" : "secondary"}
-            onPress={() => setFiltersOpen((open) => !open)}
-          />
         </View>
+
+        {/* Expandable filter card — stacked Selects, mirroring the website's phone-width filter panel. */}
         {filtersOpen ? (
           <View style={styles.filters}>
-            <Select label={t("newListing.fieldCountry")} placeholder={t("auth.country")} value={countryId} onChange={setCountryId} options={countryOptions} />
-            {countryId ? <Select label={t("newListing.fieldCity")} placeholder={t("auth.city")} value={cityId} onChange={setCityId} options={cityOptions} /> : null}
-            <SegmentedControl
-              segments={[
-                { value: "", label: t("mobile.browse.all") },
-                { value: "new", label: t("mobile.detail.conditions.new") },
-                { value: "used", label: t("mobile.detail.conditions.used") },
-              ]}
-              value={condition ?? ""}
-              onChange={(value) => setCondition((value || undefined) as ListingCondition | undefined)}
+            <Select
+              label={t("common.country")}
+              placeholder={t("common.all")}
+              value={countryId ?? ""}
+              onChange={(v) => { setCountryId(v || undefined); setCityId(undefined); }}
+              options={[{ value: "", label: t("common.all") }, ...countryOptions]}
             />
-            <View style={styles.filterFooter}>
-              <Chip label={t("listings.featuredOnly")} active={featuredOnly} onPress={() => setFeaturedOnly((value) => !value)} />
-              {hasFilters ? <Button label={t("common.reset")} variant="ghost" onPress={resetFilters} /> : null}
-            </View>
+            <Select
+              label={t("common.city")}
+              placeholder={t("common.all")}
+              value={cityId ?? ""}
+              onChange={(v) => setCityId(v || undefined)}
+              options={[{ value: "", label: t("common.all") }, ...cityOptions]}
+              disabled={!countryId}
+            />
+            <Select
+              label={t("common.condition")}
+              placeholder={t("common.all")}
+              value={condition ?? ""}
+              onChange={(v) => setCondition((v || undefined) as ListingCondition | undefined)}
+              options={[
+                { value: "", label: t("common.all") },
+                { value: "new", label: t("condition.new") },
+                { value: "used", label: t("condition.used") },
+              ]}
+            />
+            <Select
+              label={t("listings.featured")}
+              placeholder={t("common.all")}
+              value={featuredOnly ? "true" : ""}
+              onChange={(v) => setFeaturedOnly(v === "true")}
+              options={[
+                { value: "", label: t("common.all") },
+                { value: "true", label: t("listings.featuredOnly") },
+              ]}
+            />
+            {hasFilters ? (
+              <View style={styles.filterFooter}>
+                <Button label={t("common.reset")} variant="ghost" onPress={resetFilters} />
+              </View>
+            ) : null}
           </View>
         ) : null}
       </View>
@@ -226,9 +274,33 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   controls: { padding: spacing.lg, gap: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   chips: { gap: spacing.sm, paddingVertical: 2 },
-  row: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
-  filters: { gap: spacing.md, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.md },
-  filterFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: spacing.sm },
+  toolRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.sm },
+  filtersBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    minHeight: 44,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  filtersBtnActive: { backgroundColor: colors.greenLight, borderColor: "rgba(24,182,106,0.35)" },
+  filtersLabel: { color: colors.text, fontSize: 14, fontWeight: "700" },
+  filtersLabelActive: { color: colors.green },
+  badge: { minWidth: 20, height: 20, borderRadius: radii.pill, backgroundColor: colors.green, alignItems: "center", justifyContent: "center", paddingHorizontal: 6, marginStart: 2 },
+  badgeText: { color: colors.navy, fontSize: 12, fontWeight: "800" },
+  sortSelect: { width: 168 },
+  pressed: { opacity: 0.7 },
+  filters: {
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.lg,
+    padding: spacing.md,
+  },
+  filterFooter: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", flexWrap: "wrap", gap: spacing.sm },
   list: { padding: spacing.lg, gap: spacing.lg },
   count: { color: colors.textMuted, fontSize: 13, fontWeight: "600", marginBottom: spacing.xs },
   endText: { color: colors.textFaint, fontSize: 13, textAlign: "center", marginVertical: spacing.lg },
