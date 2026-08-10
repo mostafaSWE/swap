@@ -11,11 +11,10 @@ import { acquireImages, uploadListingImage, type PickedImage } from "../src/lib/
 import { useTerms } from "../src/lib/terms";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
-import { AuthCard, Button, Checkbox, FormAlert, Icon, Input, SegmentedControl, Select, Textarea } from "../src/components/ui";
+import { Button, Checkbox, FormAlert, Icon, Input, SegmentedControl, Select, Textarea } from "../src/components/ui";
 import { ItemArtwork } from "../src/components/ItemArtwork";
 import { SafetyDisclaimer } from "../src/components/SafetyDisclaimer";
-import { BrandBackground } from "../src/components/BrandBackground";
-import { Reveal } from "../src/components/motion";
+import { SignInGate } from "../src/components/SignInGate";
 import { useAuth } from "../src/lib/useAuth";
 
 /**
@@ -27,7 +26,6 @@ import { useAuth } from "../src/lib/useAuth";
  */
 export default function NewListing() {
   const { status } = useAuth();
-  const router = useRouter();
   if (status === "loading") {
     return (
       <View style={styles.gateCenter}>
@@ -39,33 +37,7 @@ export default function NewListing() {
     return (
       <>
         <Stack.Screen options={{ title: "" }} />
-        <BrandBackground>
-          <View style={styles.gateWrap}>
-            <Reveal delay={60}>
-            <AuthCard>
-              <View style={styles.gateIcon}>
-                <Icon icon={PackagePlus} size={26} color={colors.green} />
-              </View>
-              <Text style={styles.gateTitle}>{t("newListing.signInTitle")}</Text>
-              <Text style={styles.gateBody}>{t("newListing.signInBody")}</Text>
-              <View style={styles.gateActions}>
-                <Button
-                  label={t("mobile.profile.signIn")}
-                  onPress={() => router.push({ pathname: "/login", params: { next: "/new-listing" } })}
-                  pill
-                  fullWidth
-                />
-                <Button
-                  label={t("auth.registerButton")}
-                  variant="secondary"
-                  onPress={() => router.push({ pathname: "/register", params: { next: "/new-listing" } })}
-                  fullWidth
-                />
-              </View>
-            </AuthCard>
-            </Reveal>
-          </View>
-        </BrandBackground>
+        <SignInGate icon={PackagePlus} title={t("newListing.signInTitle")} body={t("newListing.signInBody")} next="/new-listing" />
       </>
     );
   }
@@ -306,13 +278,8 @@ function ExchangePreview({ title, imageUrl, categoryId, wanted }: { title: strin
 }
 
 const styles = StyleSheet.create({
-  // Signed-out gate
+  // Signed-out gate loading spinner (the gate itself is the shared <SignInGate/>)
   gateCenter: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
-  gateWrap: { flex: 1, justifyContent: "center", padding: spacing.lg },
-  gateIcon: { width: 56, height: 56, borderRadius: radii.pill, backgroundColor: colors.greenLight, alignItems: "center", justifyContent: "center", alignSelf: "center", marginBottom: spacing.md },
-  gateTitle: { color: colors.text, fontSize: 20, fontWeight: "800", textAlign: "center" },
-  gateBody: { color: colors.textMuted, fontSize: 14, lineHeight: 21, textAlign: "center", marginTop: spacing.sm },
-  gateActions: { gap: spacing.sm, marginTop: spacing.lg },
   root: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing["3xl"] },
   heading: { gap: 2 },

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Bookmark, LogIn, Search } from "lucide-react-native";
+import { Bookmark, Search } from "lucide-react-native";
 import type { ListingWithRelations } from "@swap/types";
 import { getSavedListings } from "@swap/api";
 import { supabase } from "../src/lib/supabase";
@@ -14,6 +14,7 @@ import { ListingCard } from "../src/components/ListingCard";
 import { ListingCardSkeleton } from "../src/components/ListingCardSkeleton";
 import { EmptyState } from "../src/components/EmptyState";
 import { ErrorState } from "../src/components/ErrorState";
+import { SignInGate } from "../src/components/SignInGate";
 
 /** Saved / wishlist listings for the signed-in user (web `/saved`). Refetches on
  *  focus so items unsaved from a detail screen (or now-unavailable) drop on return. */
@@ -68,19 +69,7 @@ export default function SavedScreen() {
           ))}
         </View>
       ) : !uid ? (
-        <View style={styles.center}>
-          <EmptyState
-            icon={<Icon icon={Bookmark} size={26} color={colors.textMuted} />}
-            title={t("mobile.profile.signInPrompt")}
-            action={
-              <Button
-                label={t("mobile.profile.signIn")}
-                onPress={() => router.push("/login")}
-                leftIcon={<Icon icon={LogIn} size={16} color={colors.navy} />}
-              />
-            }
-          />
-        </View>
+        <SignInGate icon={Bookmark} title={t("mobile.saved.signInTitle")} body={t("mobile.saved.signInBody")} next="/saved" />
       ) : error ? (
         <View style={styles.center}>
           <ErrorState onRetry={load} />

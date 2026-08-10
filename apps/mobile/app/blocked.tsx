@@ -11,6 +11,7 @@ import { colors, spacing } from "../src/theme";
 import { Avatar, Button, Icon } from "../src/components/ui";
 import { EmptyState } from "../src/components/EmptyState";
 import { Screen } from "../src/components/Screen";
+import { SignInGate } from "../src/components/SignInGate";
 
 /** Blocked-users management (web `/settings/blocked`): list + per-row Unblock. */
 export default function BlockedScreen() {
@@ -55,13 +56,7 @@ export default function BlockedScreen() {
       {uid === undefined || users === null ? (
         <View style={styles.center}><ActivityIndicator color={colors.green} /></View>
       ) : !uid ? (
-        <Screen>
-          <EmptyState
-            icon={<Icon icon={Ban} size={26} color={colors.green} />}
-            title={t("mobile.profile.signInPrompt")}
-            action={<Button label={t("nav.login")} onPress={() => router.push("/login")} />}
-          />
-        </Screen>
+        <SignInGate icon={Ban} title={t("mobile.profile.signInTitle")} body={t("mobile.profile.signInPrompt")} next="/blocked" />
       ) : users.length === 0 ? (
         <Screen><EmptyState icon={<Icon icon={Ban} size={26} color={colors.green} />} title={t("block.blockedEmpty")} /></Screen>
       ) : (

@@ -34,6 +34,8 @@
     "title": "Notifications",
     "empty": "No notifications yet",
     "someone": "Someone",
+    "signInTitle": "Sign in to see notifications",
+    "signInBody": "Get notified about swap proposals, messages, and new followers.",
     "type": {
       "proposal_received": "{name} sent you a swap proposal",
       "proposal_countered": "{name} countered your proposal",
@@ -368,6 +370,7 @@
     "title": "Messages",
     "empty": "No conversations yet",
     "signInPrompt": "Sign in to see your messages",
+    "signInTitle": "Sign in to message",
     "placeholder": "Type a message...",
     "send": "Send",
     "you": "You",

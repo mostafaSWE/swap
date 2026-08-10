@@ -60,8 +60,8 @@ const mobile = {
     home: { categories: "التصنيفات", featured: "إعلانات مميّزة", empty: "لا توجد إعلانات بعد" },
     browse: { search: "ابحث عن غرض…", all: "الكل", newest: "الأحدث", mostViewed: "الأكثر مشاهدة", empty: "لا توجد إعلانات تطابق بحثك", emptyHint: "جرّب تعديل عوامل التصفية أو البحث." },
     detail: { save: "حفظ", saved: "محفوظ", views: "{count} مشاهدة", notFound: "لم يُعثر على الإعلان", conditions: { new: "جديد", used: "مستعمل" } },
-    profile: { signInPrompt: "سجّل الدخول لعرض ملفك وإعلاناتك ومحفوظاتك", signIn: "تسجيل الدخول", signOut: "تسجيل الخروج", saved: "المحفوظات", myListings: "إعلاناتي" },
-    saved: { title: "المحفوظات", empty: "لم تحفظ أي شيء بعد" },
+    profile: { signInPrompt: "سجّل الدخول لعرض ملفك وإعلاناتك ومحفوظاتك", signInTitle: "سجّل الدخول إلى حسابك", signIn: "تسجيل الدخول", signOut: "تسجيل الخروج", saved: "المحفوظات", myListings: "إعلاناتي" },
+    saved: { title: "المحفوظات", empty: "لم تحفظ أي شيء بعد", signInTitle: "سجّل الدخول لعرض المحفوظات", signInBody: "احفظ الإعلانات التي تعجبك واعثر عليها هنا في أي وقت." },
     soon: {
       title: "قريبًا",
       browse: "التصفّح والبحث — المرحلة M2",
@@ -75,8 +75,8 @@ const mobile = {
     home: { categories: "Categories", featured: "Featured listings", empty: "No listings yet" },
     browse: { search: "Search for an item…", all: "All", newest: "Newest", mostViewed: "Most viewed", empty: "No listings match your search", emptyHint: "Try adjusting your filters or search." },
     detail: { save: "Save", saved: "Saved", views: "{count} views", notFound: "Listing not found", conditions: { new: "New", used: "Used" } },
-    profile: { signInPrompt: "Sign in to see your profile, listings, and saved items", signIn: "Sign in", signOut: "Sign out", saved: "Saved", myListings: "My listings" },
-    saved: { title: "Saved", empty: "You haven't saved anything yet" },
+    profile: { signInPrompt: "Sign in to see your profile, listings, and saved items", signInTitle: "Sign in to your account", signIn: "Sign in", signOut: "Sign out", saved: "Saved", myListings: "My listings" },
+    saved: { title: "Saved", empty: "You haven't saved anything yet", signInTitle: "Sign in to see saved items", signInBody: "Save listings you like and find them here anytime." },
     soon: {
       title: "Coming soon",
       browse: "Browse & search — Phase M2",

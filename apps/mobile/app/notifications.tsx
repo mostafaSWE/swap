@@ -16,6 +16,7 @@ import { Skeleton } from "../src/components/ui/Skeleton";
 import { EmptyState } from "../src/components/EmptyState";
 import { ErrorState } from "../src/components/ErrorState";
 import { Screen } from "../src/components/Screen";
+import { SignInGate } from "../src/components/SignInGate";
 
 type Sess = { user: { id: string } } | null;
 
@@ -100,7 +101,7 @@ export default function Notifications() {
       </View>
     );
   }
-  if (!session) return <Screen><EmptyState icon={<Icon icon={Bell} size={26} color={colors.green} />} title={t("mobile.profile.signInPrompt")} /></Screen>;
+  if (!session) return <SignInGate icon={Bell} title={t("notifications.signInTitle")} body={t("notifications.signInBody")} next="/notifications" />;
   if (error) return <View style={styles.center}><ErrorState onRetry={refresh} /></View>;
   if (!items?.length) return <Screen><EmptyState icon={<Icon icon={Bell} size={26} color={colors.green} />} title={t("notifications.empty")} /></Screen>;
 

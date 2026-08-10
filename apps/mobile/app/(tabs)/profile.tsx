@@ -15,7 +15,7 @@ import { ProfileHeader } from "../../src/components/ProfileHeader";
 import { ListingCard } from "../../src/components/ListingCard";
 import { EmptyState } from "../../src/components/EmptyState";
 import { ErrorState } from "../../src/components/ErrorState";
-import { Screen } from "../../src/components/Screen";
+import { SignInGate } from "../../src/components/SignInGate";
 
 type Sess = { user: { id: string } } | null;
 
@@ -74,15 +74,7 @@ export default function ProfileTab() {
   }
 
   if (!session) {
-    return (
-      <Screen>
-        <EmptyState
-          icon={<Icon icon={UserRound} size={26} color={colors.green} />}
-          title={t("mobile.profile.signInPrompt")}
-          action={<Button label={t("mobile.profile.signIn")} onPress={() => router.push("/login")} fullWidth />}
-        />
-      </Screen>
-    );
+    return <SignInGate icon={UserRound} title={t("mobile.profile.signInTitle")} body={t("mobile.profile.signInPrompt")} next="/(tabs)/profile" />;
   }
 
   const goConnections = (tab: "followers" | "following") =>

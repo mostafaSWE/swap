@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
-import { LogIn, MessageCircle } from "lucide-react-native";
+import { MessageCircle } from "lucide-react-native";
 import type { ConversationPreview } from "@swap/types";
 import { supabase } from "../../src/lib/supabase";
 import { fetchConversations } from "../../src/lib/chat";
@@ -13,7 +13,7 @@ import { ConversationCardSkeleton } from "../../src/components/ConversationCardS
 import { EmptyState } from "../../src/components/EmptyState";
 import { ErrorState } from "../../src/components/ErrorState";
 import { Screen } from "../../src/components/Screen";
-import { Button } from "../../src/components/ui/Button";
+import { SignInGate } from "../../src/components/SignInGate";
 import { Icon } from "../../src/components/ui/Icon";
 
 type Sess = { user: { id: string } } | null;
@@ -69,23 +69,7 @@ export default function MessagesTab() {
     );
   }
   if (!session) {
-    return (
-      <Screen>
-        <View style={styles.signedOut}>
-          <EmptyState
-            icon={<Icon icon={MessageCircle} size={26} color={colors.green} />}
-            title={t("chat.signInPrompt")}
-            action={
-              <Button
-                label={t("mobile.profile.signIn")}
-                onPress={() => router.push("/login")}
-                leftIcon={<Icon icon={LogIn} size={16} color={colors.navy} />}
-              />
-            }
-          />
-        </View>
-      </Screen>
-    );
+    return <SignInGate icon={MessageCircle} title={t("chat.signInTitle")} body={t("chat.signInPrompt")} next="/(tabs)/messages" />;
   }
   if (error) {
     return (
@@ -131,7 +115,6 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   centerWrap: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg, justifyContent: "center" },
   skeletonWrap: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
-  signedOut: { gap: spacing.lg },
   list: { paddingHorizontal: spacing.lg },
   sep: { height: 1, backgroundColor: colors.border },
 });
