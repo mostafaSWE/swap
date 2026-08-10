@@ -15,6 +15,7 @@ import { AuthCard, Button, Checkbox, FormAlert, Icon, Input, SegmentedControl, S
 import { ItemArtwork } from "../src/components/ItemArtwork";
 import { SafetyDisclaimer } from "../src/components/SafetyDisclaimer";
 import { BrandBackground } from "../src/components/BrandBackground";
+import { Reveal } from "../src/components/motion";
 import { useAuth } from "../src/lib/useAuth";
 
 /**
@@ -40,6 +41,7 @@ export default function NewListing() {
         <Stack.Screen options={{ title: "" }} />
         <BrandBackground>
           <View style={styles.gateWrap}>
+            <Reveal delay={60}>
             <AuthCard>
               <View style={styles.gateIcon}>
                 <Icon icon={PackagePlus} size={26} color={colors.green} />
@@ -61,6 +63,7 @@ export default function NewListing() {
                 />
               </View>
             </AuthCard>
+            </Reveal>
           </View>
         </BrandBackground>
       </>

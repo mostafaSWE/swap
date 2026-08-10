@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../src/lib/supabase";
 import { authCallbackUrl } from "../src/lib/auth-redirect";
@@ -7,6 +7,7 @@ import { t } from "../src/i18n";
 import { colors, spacing } from "../src/theme";
 import { AuthCard, Button, FormAlert, Input, PasswordInput } from "../src/components/ui";
 import { BrandBackground } from "../src/components/BrandBackground";
+import { Reveal } from "../src/components/motion";
 
 /** Email/username + password sign-in (web `LoginForm`). A username is resolved to
  *  its account email via the `email_for_username` RPC first. On success the
@@ -23,19 +24,6 @@ export default function Login() {
   const [pwError, setPwError] = useState<string | null>(null);
   const [resendEmail, setResendEmail] = useState<string | null>(null);
   const [resend, setResend] = useState<"idle" | "sending" | "sent" | "error">("idle");
-
-  // Restrained fade+rise entrance, skipped under Reduce Motion (matches HomeHero / web).
-  const anim = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    let mounted = true;
-    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
-      if (!mounted) return;
-      if (reduce) return anim.setValue(1);
-      Animated.timing(anim, { toValue: 1, duration: 420, delay: 40, useNativeDriver: true }).start();
-    });
-    return () => { mounted = false; };
-  }, [anim]);
-  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] });
 
   /** Where to land after a successful sign-in. */
   function goNext() {
@@ -99,11 +87,13 @@ export default function Login() {
       <BrandBackground>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-            <Animated.View style={{ opacity: anim, transform: [{ translateY }] }}>
+            <Reveal delay={0}>
               <Text style={styles.wordmark} accessibilityRole="header">
                 Just<Text style={styles.wordmarkAccent}>Swap</Text>
               </Text>
+            </Reveal>
 
+            <Reveal delay={90}>
               <AuthCard>
                 <Text style={styles.title}>{t("auth.loginTitle")}</Text>
                 <Text style={styles.subtitle}>{t("auth.loginSubtitle")}</Text>
@@ -147,12 +137,14 @@ export default function Login() {
                   <Button label={t("auth.loginButton")} onPress={submit} loading={busy} pill fullWidth />
                 </View>
               </AuthCard>
+            </Reveal>
 
+            <Reveal delay={180}>
               <View style={styles.footer}>
                 <Text style={styles.muted}>{t("auth.noAccount")} </Text>
                 <Text style={styles.link} onPress={() => router.push(registerHref as never)}>{t("auth.createOne")}</Text>
               </View>
-            </Animated.View>
+            </Reveal>
           </ScrollView>
         </KeyboardAvoidingView>
       </BrandBackground>

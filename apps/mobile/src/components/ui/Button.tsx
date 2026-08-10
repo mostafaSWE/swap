@@ -1,6 +1,8 @@
-import type { ReactNode } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
+import { useRef, type ReactNode } from "react";
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import { colors, radii, spacing } from "../../theme";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 
@@ -30,20 +32,27 @@ export function Button({
 }) {
   const v = VARIANTS[variant];
   const isDisabled = disabled || loading;
+  // Smooth spring press-scale (user-driven direct-manipulation feedback — allowed
+  // under reduced-motion). Transform-only, native driver.
+  const scale = useRef(new Animated.Value(1)).current;
+  const press = (to: number, bounciness = 0) =>
+    Animated.spring(scale, { toValue: to, useNativeDriver: true, speed: 50, bounciness }).start();
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
       disabled={isDisabled}
+      onPressIn={() => !isDisabled && press(0.96)}
+      onPressOut={() => press(1, 6)}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: loading }}
-      style={({ pressed }) => [
+      style={[
         styles.base,
         v.container,
         pill && styles.pill,
         fullWidth && styles.fullWidth,
-        pressed && styles.pressed,
         isDisabled && styles.disabled,
         style,
+        { transform: [{ scale }] },
       ]}
     >
       {loading ? (
@@ -54,7 +63,7 @@ export function Button({
           <Text style={[styles.label, v.text]}>{label}</Text>
         </View>
       )}
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -82,7 +91,6 @@ const styles = StyleSheet.create({
   },
   pill: { borderRadius: radii.pill },
   fullWidth: { alignSelf: "stretch" },
-  pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },
   row: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   label: { fontSize: 15, fontWeight: "700" },
