@@ -1,4 +1,5 @@
-import { StyleSheet, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated, Easing, StyleSheet, View } from "react-native";
 import { Tabs, useRouter } from "expo-router";
 import { Home, MessageCircle, Plus, Search, UserRound } from "lucide-react-native";
 import type { LucideIcon } from "lucide-react-native";
@@ -6,6 +7,7 @@ import { colors, radii } from "../../src/theme";
 import { t } from "../../src/i18n";
 import { Icon } from "../../src/components/ui/Icon";
 import { HeaderBell } from "../../src/components/HeaderBell";
+import { useReduceMotion } from "../../src/components/motion";
 
 const ICONS: Record<string, LucideIcon> = {
   index: Home,
@@ -13,6 +15,41 @@ const ICONS: Record<string, LucideIcon> = {
   messages: MessageCircle,
   profile: UserRound,
 };
+
+/**
+ * The center Add action — a floating/docked FAB rendered inside the stock `tabBarIcon`
+ * slot (a custom `tabBar` native-crashes this Fabric build). A green disc sits in a
+ * `colors.background`-colored "socket" ring: the ring matches the scene canvas (so the
+ * disc reads as floating) but recesses against the lighter `surface` bar (so it reads as
+ * a notch carved out of the bar — the requested "cut its roundings out of the nav bar").
+ * A translucent inner highlight ring + an emerald glow give depth; a gentle breathing
+ * pulse (Reduce-Motion gated, transform-only/native-driver) draws the eye. `pointerEvents`
+ * is off so taps fall through to the real tab button (the `tabPress` listener opens Add).
+ */
+function AddFabIcon() {
+  const reduce = useReduceMotion();
+  const breathe = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (reduce) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(breathe, { toValue: 1, duration: 1700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(breathe, { toValue: 0, duration: 1700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [breathe, reduce]);
+  const scale = breathe.interpolate({ inputRange: [0, 1], outputRange: [1, 1.045] });
+  return (
+    <View style={styles.addFabSocket} pointerEvents="none">
+      <Animated.View style={[styles.addFab, { transform: [{ scale }] }]}>
+        <View style={styles.addFabInner} pointerEvents="none" />
+        <Plus size={28} color={colors.navy} strokeWidth={2.6} />
+      </Animated.View>
+    </View>
+  );
+}
 
 /**
  * Bottom navigation (M7 batch 2) — a native adaptation of the website's mobile nav:
@@ -38,7 +75,8 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={({ route }) => ({
-        headerStyle: { backgroundColor: colors.navy },
+        // Seamless header — same token as the screen body (no navy-on-near-black seam).
+        headerStyle: { backgroundColor: colors.background },
         headerTintColor: colors.white,
         headerTitleStyle: { fontWeight: "800", fontSize: 20 },
         headerShadowVisible: false,
@@ -65,14 +103,10 @@ export default function TabsLayout() {
           tabBarLabel: () => null,
           // Screen readers get the action name (the visible label is hidden).
           tabBarAccessibilityLabel: t("newListing.title"),
-          // A raised green disc in the stock tabBarIcon slot — reads as a FAB without
-          // a custom tab bar (which native-crashes this Fabric build). `focused` is
-          // ignored: the tabPress listener prevents default, so Add never selects.
-          tabBarIcon: ({ focused }) => (
-            <View style={[styles.addFab, focused && styles.addFabPressed]}>
-              <Icon icon={Plus} size={26} color={colors.navy} />
-            </View>
-          ),
+          // A floating/docked FAB in the stock tabBarIcon slot (a custom tab bar
+          // native-crashes this Fabric build). See AddFabIcon. `focused` is unused:
+          // the tabPress listener prevents default, so Add never selects.
+          tabBarIcon: () => <AddFabIcon />,
         }}
         listeners={() => ({
           tabPress: (e) => {
@@ -89,23 +123,30 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   headerRight: { marginEnd: 8 },
-  // Prominent green center action. Rendered inside the stock tabBarIcon slot (a plain
-  // View + Icon — the safe render path), so it reads as a raised FAB without a custom bar.
-  addFab: {
-    width: 46,
-    height: 46,
+  // Background-colored socket ring: matches the canvas (disc floats) but recesses against
+  // the lighter surface bar (reads as a notch). Lifted so most of the disc floats above it.
+  addFabSocket: {
+    width: 66,
+    height: 66,
     borderRadius: radii.pill,
-    marginTop: -8,
+    marginTop: -18,
+    backgroundColor: colors.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  addFab: {
+    width: 54,
+    height: 54,
+    borderRadius: radii.pill,
     backgroundColor: colors.green,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 3,
-    borderColor: colors.background,
     shadowColor: colors.green,
-    shadowOpacity: 0.4,
-    shadowRadius: 7,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 6,
+    shadowOpacity: 0.55,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 12,
   },
-  addFabPressed: { opacity: 0.85, transform: [{ scale: 0.94 }] },
+  // translucent inner highlight ring — a subtle glass rim for depth
+  addFabInner: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, margin: 3, borderRadius: radii.pill, borderWidth: 1.5, borderColor: "rgba(255,255,255,0.28)" },
 });

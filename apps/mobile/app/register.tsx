@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MailCheck } from "lucide-react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { COUNTRIES, COUNTRY_BY_ID, citiesByCountry } from "@swap/config";
@@ -31,6 +32,7 @@ const STRENGTH = ["", "strengthWeak", "strengthFair", "strengthGood", "strengthS
  *  DB `handle_new_user` trigger from the signUp metadata — the app must NOT insert it. */
 export default function Register() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { next } = useLocalSearchParams<{ next?: string }>();
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
@@ -135,7 +137,7 @@ export default function Register() {
       <Stack.Screen options={{ title: "" }} />
       <BrandBackground>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Reveal delay={0}>
               <Text style={styles.wordmark} accessibilityRole="header">
                 Just<Text style={styles.wordmarkAccent}>Swap</Text>
@@ -212,7 +214,7 @@ export default function Register() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  content: { padding: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing["3xl"] },
+  content: { padding: spacing.lg, paddingBottom: spacing["3xl"] },
   wordmark: { color: colors.white, fontSize: 28, fontWeight: "800", letterSpacing: 0.2, textAlign: "center", marginBottom: spacing.lg },
   wordmarkAccent: { color: colors.green },
   title: { color: colors.text, fontSize: 24, fontWeight: "700", letterSpacing: -0.2 },

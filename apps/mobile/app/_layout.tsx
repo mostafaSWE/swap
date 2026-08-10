@@ -26,6 +26,11 @@ void SplashScreen.preventAutoHideAsync();
 // expo-router the root anchor is "(tabs)".
 export const unstable_settings = { initialRouteName: "(tabs)" };
 
+// Branded auth routes float a transparent header so BrandBackground's glow/grid/motif
+// crown the screen under the (white) back chevron, instead of an opaque bar masking it.
+// (These screens set their own `title:""` in-component, which only merges the title.)
+const TRANSPARENT_HEADER = { title: "", headerTransparent: true, headerStyle: { backgroundColor: "transparent" } } as const;
+
 /**
  * Boot direction guard — enforces the hard invariant that a **mismatched layout
  * direction is never rendered** (Arabic ⇒ RTL, English ⇒ LTR).
@@ -97,9 +102,10 @@ export default function RootLayout() {
           <PushManager />
           <Stack
           screenOptions={{
-            headerStyle: { backgroundColor: colors.navy },
+            // Seamless header: same token as the screen body so the bar blends into the
+            // canvas — no navy-on-near-black seam (the branded auth routes go transparent below).
+            headerStyle: { backgroundColor: colors.background },
             headerTintColor: colors.white,
-            // Match the tabs' flat, bold navy bar (mirrors the web's single dark header).
             headerTitleStyle: { fontWeight: "800", fontSize: 20 },
             headerShadowVisible: false,
             contentStyle: { backgroundColor: colors.background },
@@ -121,12 +127,12 @@ export default function RootLayout() {
           <Stack.Screen name="terms" options={{ title: "" }} />
           <Stack.Screen name="privacy" options={{ title: "" }} />
           <Stack.Screen name="safety" options={{ title: "" }} />
-          <Stack.Screen name="login" options={{ title: "" }} />
-          <Stack.Screen name="register" options={{ title: "" }} />
-          <Stack.Screen name="forgot-password" options={{ title: "" }} />
-          <Stack.Screen name="reset-password" options={{ title: "" }} />
+          <Stack.Screen name="login" options={TRANSPARENT_HEADER} />
+          <Stack.Screen name="register" options={TRANSPARENT_HEADER} />
+          <Stack.Screen name="forgot-password" options={TRANSPARENT_HEADER} />
+          <Stack.Screen name="reset-password" options={TRANSPARENT_HEADER} />
           <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
-          <Stack.Screen name="onboarding" options={{ title: "" }} />
+          <Stack.Screen name="onboarding" options={TRANSPARENT_HEADER} />
           <Stack.Screen name="profile/edit" options={{ title: "" }} />
           <Stack.Screen name="new-listing" options={{ title: "" }} />
           <Stack.Screen name="messages/[id]" options={{ title: "" }} />

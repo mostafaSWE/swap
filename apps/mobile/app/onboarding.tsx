@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { CircleCheck } from "lucide-react-native";
 import { COUNTRIES, citiesByCountry } from "@swap/config";
@@ -20,6 +21,7 @@ import { Reveal } from "../src/components/motion";
  * branded shell so first-run matches the auth screens. */
 export default function Onboarding() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { confirmed } = useLocalSearchParams<{ confirmed?: string }>();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
   const [name, setName] = useState("");
@@ -115,7 +117,7 @@ export default function Onboarding() {
       <Stack.Screen options={{ title: "" }} />
       <BrandBackground>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Reveal delay={0}>
               <Text style={styles.wordmark} accessibilityRole="header">
                 Just<Text style={styles.wordmarkAccent}>Swap</Text>
@@ -165,7 +167,7 @@ export default function Onboarding() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  content: { padding: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing["3xl"] },
+  content: { padding: spacing.lg, paddingBottom: spacing["3xl"] },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.lg },
   wordmark: { color: colors.white, fontSize: 28, fontWeight: "800", letterSpacing: 0.2, textAlign: "center", marginBottom: spacing.lg },
   wordmarkAccent: { color: colors.green },
