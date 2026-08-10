@@ -240,7 +240,7 @@ export default function PublicProfileScreen() {
 
         {reviews && reviews.length > 0 ? (
           <>
-            <Text style={styles.section}>{t("profile.reviews")}</Text>
+            <Text style={styles.section}>{t("profile.reviewsTitle", { count: reviews.length })}</Text>
             {reviews.map((r) => (
               <ReviewRow key={r.id} rating={r} />
             ))}

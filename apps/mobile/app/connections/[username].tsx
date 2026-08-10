@@ -7,11 +7,13 @@ import type { PublicProfile, PublicProfileWithFollow } from "@swap/types";
 import { supabase } from "../../src/lib/supabase";
 import { t } from "../../src/i18n";
 import { colors, spacing } from "../../src/theme";
+import { Users } from "lucide-react-native";
 import { SegmentedControl } from "../../src/components/ui/SegmentedControl";
 import { FollowButton } from "../../src/components/FollowButton";
 import { UserRow } from "../../src/components/UserRow";
 import { EmptyState } from "../../src/components/EmptyState";
 import { ErrorState } from "../../src/components/ErrorState";
+import { SignInGate } from "../../src/components/SignInGate";
 
 const LIMIT = 30;
 
@@ -27,7 +29,7 @@ export default function ConnectionsScreen() {
   const { username, tab: tabParam } = useLocalSearchParams<{ username: string; tab?: string }>();
   const router = useRouter();
   const [profile, setProfile] = useState<PublicProfile | null | undefined>(undefined);
-  const [viewerId, setViewerId] = useState<string | null>(null);
+  const [viewerId, setViewerId] = useState<string | null | undefined>(undefined); // undefined = resolving
   const [tab, setTab] = useState<FollowDirection>(tabParam === "following" ? "following" : "followers");
   const [rows, setRows] = useState<PublicProfileWithFollow[] | null>(null);
   const [rowsError, setRowsError] = useState(false);
@@ -115,8 +117,12 @@ export default function ConnectionsScreen() {
     }
   }
 
-  if (profile === undefined) {
+  if (viewerId === undefined || profile === undefined) {
     return <View style={styles.center}><ActivityIndicator color={colors.green} /></View>;
+  }
+  // Followers/following are gated: a signed-out viewer gets the branded sign-in gate.
+  if (viewerId === null) {
+    return <SignInGate icon={Users} title={t("mobile.connections.signInTitle")} body={t("mobile.connections.signInBody")} next={`/connections/${username}`} />;
   }
   if (profile === null) {
     return (

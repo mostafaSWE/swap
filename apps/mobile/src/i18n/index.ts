@@ -62,6 +62,7 @@ const mobile = {
     detail: { save: "حفظ", saved: "محفوظ", views: "{count} مشاهدة", notFound: "لم يُعثر على الإعلان", conditions: { new: "جديد", used: "مستعمل" } },
     profile: { signInPrompt: "سجّل الدخول لعرض ملفك وإعلاناتك ومحفوظاتك", signInTitle: "سجّل الدخول إلى حسابك", signIn: "تسجيل الدخول", signOut: "تسجيل الخروج", saved: "المحفوظات", myListings: "إعلاناتي" },
     saved: { title: "المحفوظات", empty: "لم تحفظ أي شيء بعد", signInTitle: "سجّل الدخول لعرض المحفوظات", signInBody: "احفظ الإعلانات التي تعجبك واعثر عليها هنا في أي وقت." },
+    connections: { signInTitle: "سجّل الدخول لعرض المتابعين", signInBody: "سجّل الدخول لعرض المتابِعين والمتابَعين." },
     soon: {
       title: "قريبًا",
       browse: "التصفّح والبحث — المرحلة M2",
@@ -77,6 +78,7 @@ const mobile = {
     detail: { save: "Save", saved: "Saved", views: "{count} views", notFound: "Listing not found", conditions: { new: "New", used: "Used" } },
     profile: { signInPrompt: "Sign in to see your profile, listings, and saved items", signInTitle: "Sign in to your account", signIn: "Sign in", signOut: "Sign out", saved: "Saved", myListings: "My listings" },
     saved: { title: "Saved", empty: "You haven't saved anything yet", signInTitle: "Sign in to see saved items", signInBody: "Save listings you like and find them here anytime." },
+    connections: { signInTitle: "Sign in to see connections", signInBody: "Sign in to view followers and following." },
     soon: {
       title: "Coming soon",
       browse: "Browse & search — Phase M2",

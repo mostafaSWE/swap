@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ArrowRight, PackagePlus, Repeat2, UserRound } from "lucide-react-native";
+import { ArrowRight, Globe, PackagePlus, Repeat2, UserRound } from "lucide-react-native";
 import { colors, radii, spacing } from "../../theme";
 import { t } from "../../i18n";
 import { Icon } from "../ui/Icon";
 import { Button } from "../ui/Button";
 import { HeaderBell } from "../HeaderBell";
 import { BrandBackdrop } from "../BrandBackground";
+import { LanguageChooser } from "../LanguageChooser";
 import { Reveal } from "../motion";
 
 /**
@@ -23,11 +24,13 @@ export function HomeHero() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [heroH, setHeroH] = useState(460);
+  const [langOpen, setLangOpen] = useState(false);
 
   // /new-listing self-guards (signed-out → the shared sign-in gate), so route uniformly.
   const goAdd = () => router.push("/new-listing");
 
   return (
+    <>
     <View style={styles.wrap} onLayout={(e) => setHeroH(e.nativeEvent.layout.height)}>
       <BrandBackdrop height={heroH} motifSize={200} glowSize={480} />
 
@@ -37,6 +40,16 @@ export function HomeHero() {
             Just<Text style={styles.wordmarkAccent}>Swap</Text>
           </Text>
           <View style={styles.headerActions}>
+            {/* Language — reachable BEFORE login so a new signed-out user can switch. */}
+            <Pressable
+              onPress={() => setLangOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel={t("common.language")}
+              hitSlop={8}
+              style={({ pressed }) => [styles.accountBtn, pressed && styles.pressed]}
+            >
+              <Icon icon={Globe} size={20} color={colors.text} />
+            </Pressable>
             <HeaderBell color={colors.white} />
             <Pressable
               onPress={() => router.push("/profile")}
@@ -81,6 +94,8 @@ export function HomeHero() {
         </Reveal>
       </View>
     </View>
+    <LanguageChooser visible={langOpen} onClose={() => setLangOpen(false)} />
+    </>
   );
 }
 

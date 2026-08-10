@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { Ban, Check, ChevronRight, FileText, Fingerprint, Globe, LifeBuoy, Lock, ShieldAlert } from "lucide-react-native";
+import { Ban, ChevronRight, FileText, Fingerprint, Globe, LifeBuoy, Lock, ShieldAlert } from "lucide-react-native";
 import { isAppLockEnabled, isBiometricAvailable, setAppLockEnabled } from "../src/lib/biometrics";
-import { changeLanguage } from "../src/lib/change-language";
-import { locale, t, type Locale } from "../src/i18n";
+import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
 import { ListRow } from "../src/components/ui/ListRow";
-import { BottomSheet } from "../src/components/ui/BottomSheet";
+import { LanguageChooser } from "../src/components/LanguageChooser";
 import { Icon } from "../src/components/ui/Icon";
 import type { LucideIcon } from "lucide-react-native";
 
@@ -19,7 +18,6 @@ export default function SettingsScreen() {
   const [appLockOn, setAppLockOn] = useState(false);
   const [lockBusy, setLockBusy] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
-  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     isBiometricAvailable().then(setBiometricOk).catch(() => undefined);
@@ -33,17 +31,6 @@ export default function SettingsScreen() {
       setAppLockOn(await setAppLockEnabled(next)); // enabling requires a successful biometric auth
     } finally {
       setLockBusy(false);
-    }
-  }
-
-  async function pickLanguage(next: Locale) {
-    setLangOpen(false);
-    if (next === locale) return;
-    setSwitching(true); // full-screen "Switching language…" until the reload tears down JS
-    try {
-      await changeLanguage(next);
-    } catch {
-      setSwitching(false); // reload failed to even start — let the user retry
     }
   }
 
@@ -109,34 +96,9 @@ export default function SettingsScreen() {
         </View>
       </ScrollView>
 
-      {/* Language chooser */}
-      <BottomSheet visible={langOpen} onClose={() => setLangOpen(false)} title={t("settings.chooseLanguage")}>
-        <LanguageOption label={t("common.english")} active={locale === "en"} onPress={() => pickLanguage("en")} />
-        <LanguageOption label={t("common.arabic")} active={locale === "ar"} onPress={() => pickLanguage("ar")} />
-      </BottomSheet>
-
-      {/* Reload curtain — shown while the app flips direction + reloads. */}
-      {switching ? (
-        <View style={styles.curtain} pointerEvents="auto">
-          <ActivityIndicator color={colors.green} size="large" />
-          <Text style={styles.curtainText}>{t("settings.switching")}</Text>
-        </View>
-      ) : null}
+      {/* Shared in-app language chooser (bottom sheet + reload curtain). */}
+      <LanguageChooser visible={langOpen} onClose={() => setLangOpen(false)} />
     </>
-  );
-}
-
-function LanguageOption({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityState={{ selected: active }}
-      style={({ pressed }) => [styles.option, pressed && styles.optionPressed]}
-    >
-      <Text style={[styles.optionLabel, active && styles.optionActive]}>{label}</Text>
-      {active ? <Icon icon={Check} size={18} color={colors.green} /> : null}
-    </Pressable>
   );
 }
 
@@ -177,10 +139,4 @@ const styles = StyleSheet.create({
   },
   divider: { height: 1, backgroundColor: colors.border, marginStart: 52 },
   tile: { width: 36, height: 36, borderRadius: radii.sm, backgroundColor: colors.greenLight, alignItems: "center", justifyContent: "center" },
-  option: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 52, paddingVertical: spacing.md, paddingHorizontal: spacing.xs },
-  optionPressed: { opacity: 0.6 },
-  optionLabel: { color: colors.text, fontSize: 16, flex: 1 },
-  optionActive: { color: colors.green, fontWeight: "700" },
-  curtain: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: colors.background, alignItems: "center", justifyContent: "center", gap: spacing.md },
-  curtainText: { color: colors.textMuted, fontSize: 15, fontWeight: "600" },
 });
