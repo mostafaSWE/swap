@@ -24,23 +24,30 @@ export function BottomSheet({
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" statusBarTranslucent onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={closeLabel} />
-      <View style={[styles.sheet, { paddingBottom: insets.bottom + spacing.lg }]}>
-        <View style={styles.handle} />
-        <View style={styles.header}>
-          <Text style={styles.title} numberOfLines={1}>
-            {title ?? ""}
-          </Text>
-          <IconButton icon={X} onPress={onClose} size={22} color={colors.textMuted} accessibilityLabel={closeLabel} />
+      {/* Anchor the sheet to the bottom with the backdrop as an absolute fill BEHIND
+          it — not a flex:1 sibling. A flex sibling under-sizes the sheet so its last
+          child overflows below the touch box (visible but untappable, and often into
+          the gesture-nav zone). This layout sizes the sheet to its content exactly. */}
+      <View style={styles.container}>
+        <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={closeLabel} />
+        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.md) + spacing["2xl"] }]}>
+          <View style={styles.handle} />
+          <View style={styles.header}>
+            <Text style={styles.title} numberOfLines={1}>
+              {title ?? ""}
+            </Text>
+            <IconButton icon={X} onPress={onClose} size={22} color={colors.textMuted} accessibilityLabel={closeLabel} />
+          </View>
+          {children}
         </View>
-        {children}
       </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },
+  container: { flex: 1, justifyContent: "flex-end" },
+  backdrop: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)" },
   sheet: {
     backgroundColor: colors.surface,
     borderTopLeftRadius: radii.xl,

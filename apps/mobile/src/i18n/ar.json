@@ -23,6 +23,13 @@
     "primaryNav": "التنقل الرئيسي",
     "mobileNav": "تنقل الجوال"
   },
+  "settings": {
+    "prefs": "تفضيلات التطبيق",
+    "account": "الحساب والخصوصية",
+    "support": "الدعم والأحكام",
+    "chooseLanguage": "اختر اللغة",
+    "switching": "جارٍ تغيير اللغة…"
+  },
   "notifications": {
     "title": "الإشعارات",
     "empty": "لا توجد إشعارات بعد",

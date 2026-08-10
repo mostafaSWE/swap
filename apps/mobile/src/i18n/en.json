@@ -23,6 +23,13 @@
     "primaryNav": "Primary navigation",
     "mobileNav": "Mobile navigation"
   },
+  "settings": {
+    "prefs": "App preferences",
+    "account": "Account & privacy",
+    "support": "Support & legal",
+    "chooseLanguage": "Choose language",
+    "switching": "Switching language…"
+  },
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications yet",

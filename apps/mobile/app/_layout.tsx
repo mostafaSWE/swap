@@ -12,7 +12,8 @@ import * as SplashScreen from "expo-splash-screen";
 import * as Updates from "expo-updates";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { colors } from "../src/theme";
-import { isRTL, t } from "../src/i18n";
+import { applyLocaleOverride, isRTL, t } from "../src/i18n";
+import { getStoredLocale } from "../src/lib/locale-store";
 import { TermsProvider } from "../src/lib/terms";
 import { BiometricLock } from "../src/components/BiometricLock";
 import { PushManager } from "../src/components/PushManager";
@@ -48,6 +49,12 @@ export default function RootLayout() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // Apply a persisted in-app language override (Settings → Language) BEFORE the
+      // direction check, so `isRTL` below reflects the chosen language, not just the
+      // device locale. Nothing has rendered yet (still behind the splash).
+      const stored = await getStoredLocale();
+      if (stored) applyLocaleOverride(stored);
+
       if (I18nManager.isRTL !== isRTL) {
         I18nManager.allowRTL(true);
         I18nManager.forceRTL(isRTL);

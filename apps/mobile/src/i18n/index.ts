@@ -22,7 +22,12 @@ function detectLocale(): Locale {
   return getLocales()[0]?.languageCode?.toLowerCase() === "ar" ? "ar" : "en";
 }
 
-export const locale: Locale = detectLocale();
+// `locale`/`isRTL` are live `let` bindings, not `const`: the boot guard may
+// reassign them from a persisted in-app language override BEFORE the first screen
+// renders (see `applyLocaleOverride`). Every read across the app is a render-time
+// read of the live binding — no module-level code captures the boot value — so a
+// reassignment propagates everywhere. Screens never mutate these directly.
+export let locale: Locale = detectLocale();
 
 /**
  * The **required** layout direction for the active locale — the hard invariant:
@@ -31,7 +36,21 @@ export const locale: Locale = detectLocale();
  * **boot direction guard** in `app/_layout.tsx`, which reloads behind the splash
  * if the native flag disagrees so a mismatched direction is never rendered.
  */
-export const isRTL = locale === "ar";
+export let isRTL = locale === "ar";
+
+/**
+ * Apply a persisted in-app language choice at boot — called ONLY by the boot
+ * direction guard in `app/_layout.tsx`, before anything renders. Reassigns the
+ * live `locale`/`isRTL` bindings so `t()`/`tList()` and every render-time `locale`
+ * read resolve to the chosen language. Layout direction is reconciled separately
+ * by that same guard (`I18nManager.forceRTL` + reload); this function never
+ * touches `I18nManager`. Never call this from a screen — direction cannot change
+ * without a reload, so runtime mutation would desync text from layout direction.
+ */
+export function applyLocaleOverride(next: Locale): void {
+  locale = next;
+  isRTL = next === "ar";
+}
 
 // Mobile-only strings. The shared web catalog is ported verbatim in
 // ar.json / en.json; these are labels unique to the native app shell.
