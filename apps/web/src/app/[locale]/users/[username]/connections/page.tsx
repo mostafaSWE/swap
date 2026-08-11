@@ -4,6 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@swap/types";
 import { AppShell } from "@/components/AppShell";
 import { ConnectionsList } from "@/components/ConnectionsList";
+import { EmptyState } from "@/components/primitives";
+import { CTAButton } from "@/components/CTAButton";
 import { Link } from "@/i18n/navigation";
 import { fetchPublicProfile } from "@/lib/data";
 import { fetchFollowers, fetchFollowing } from "@/lib/social";
@@ -40,6 +42,19 @@ export default async function ConnectionsPage({
   const direction = normalizeTab(searchParams.tab);
   const t = await getTranslations("profile");
   const viewer = await getCurrentUser();
+
+  // Followers / Following are gated to signed-in viewers (parity with the mobile app,
+  // where connections/[username] shows the SignInGate to signed-out users).
+  if (!viewer) {
+    const tn = await getTranslations("nav");
+    return (
+      <AppShell>
+        <div className="px-4 py-10">
+          <EmptyState title={tn("login")} action={<CTAButton href="/login">{tn("login")}</CTAButton>} />
+        </div>
+      </AppShell>
+    );
+  }
 
   const initial =
     direction === "followers"
@@ -83,7 +98,7 @@ export default async function ConnectionsPage({
           targetId={profile.id}
           direction={direction}
           initial={initial}
-          viewerId={viewer?.id ?? null}
+          viewerId={viewer.id}
           pageSize={PAGE_SIZE}
         />
       </div>
