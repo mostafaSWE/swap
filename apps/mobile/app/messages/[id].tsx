@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { MoreVertical, Send } from "lucide-react-native";
+import { MoreVertical, SendHorizontal } from "lucide-react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import type { Message, PublicProfile, ReportTargetType, SwapProposalWithRelations } from "@swap/types";
 import { getMessages, getProposalByConversationId, sendMessage, subscribeToMessages, subscribeToProposal } from "@swap/api";
@@ -174,9 +174,6 @@ export default function Conversation() {
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
         style={styles.root}
       >
-        {proposal && uid ? (
-          <ProposalContextCard proposal={proposal} currentUserId={uid} onChange={setProposal} />
-        ) : null}
         {loading ? (
           <View style={styles.centerFill}><ActivityIndicator color={colors.green} /></View>
         ) : loadError ? (
@@ -199,7 +196,14 @@ export default function Conversation() {
               );
             }}
             contentContainerStyle={styles.list}
-            ListHeaderComponent={<View style={styles.disclaimerWrap}><SafetyDisclaimer text={t("chat.disclaimerBeforeChat")} /></View>}
+            // The proposal card scrolls WITH the thread (pinned at the very top) so it
+            // no longer eats the screen — the messages get the room, scroll up for context.
+            ListHeaderComponent={
+              <View>
+                {proposal && uid ? <ProposalContextCard proposal={proposal} currentUserId={uid} onChange={setProposal} /> : null}
+                <View style={styles.disclaimerWrap}><SafetyDisclaimer text={t("chat.disclaimerBeforeChat")} /></View>
+              </View>
+            }
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
             ItemSeparatorComponent={() => <View style={styles.gap} />}
             keyboardShouldPersistTaps="handled"
@@ -216,7 +220,7 @@ export default function Conversation() {
             multiline
           />
           <Pressable onPress={send} disabled={!canSend} style={[styles.send, !canSend && styles.sendDisabled]} accessibilityRole="button" accessibilityLabel={t("common.send")}>
-            {sending ? <ActivityIndicator color={colors.navy} size="small" /> : <Icon icon={Send} size={20} color={colors.navy} />}
+            {sending ? <ActivityIndicator color={colors.navy} size="small" /> : <Icon icon={SendHorizontal} size={20} color={colors.navy} mirror />}
           </Pressable>
         </View>
       </KeyboardAvoidingView>

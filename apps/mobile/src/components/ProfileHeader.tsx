@@ -96,9 +96,11 @@ const styles = StyleSheet.create({
   username: { color: colors.textMuted, fontSize: 14 },
   member: { color: colors.textFaint, fontSize: 12 },
   bio: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
-  stats: { flexDirection: "row", borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.md },
-  stat: { flex: 1 },
-  statPressable: { borderRadius: radii.sm, paddingVertical: spacing.xs },
+  stats: { flexDirection: "row", alignItems: "flex-start", borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.md },
+  // Same vertical padding on EVERY cell (plain + pressable) so the numbers line up —
+  // previously only the followers/following buttons had it, sitting them lower.
+  stat: { flex: 1, paddingVertical: spacing.xs },
+  statPressable: { borderRadius: radii.sm },
   statPressed: { backgroundColor: colors.elevated },
   action: { marginTop: spacing.xs },
 });

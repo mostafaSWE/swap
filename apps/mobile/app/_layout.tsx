@@ -17,6 +17,7 @@ import { getStoredLocale } from "../src/lib/locale-store";
 import { TermsProvider } from "../src/lib/terms";
 import { BiometricLock } from "../src/components/BiometricLock";
 import { PushManager } from "../src/components/PushManager";
+import { LoadingScreen } from "../src/components/LoadingScreen";
 
 // Keep the native splash up until the boot direction guard has confirmed the
 // native layout direction matches the locale — nothing renders before then.
@@ -74,14 +75,20 @@ export default function RootLayout() {
           if (__DEV__) console.warn("[rtl-guard] reloadAsync failed; revealing anyway:", e);
         }
       }
-      if (!cancelled) {
-        setReady(true);
-        await SplashScreen.hideAsync();
-      }
+      if (!cancelled) setReady(true);
     })();
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Hand off from the native splash to our branded <LoadingScreen/> as soon as RN
+  // mounts, so boot AND the language-switch reload show an animated branded loader
+  // instead of a blank/white flash. Safe: the LoadingScreen is direction-agnostic
+  // (centered logo), so it can show before the direction guard confirms/reloads;
+  // only real CONTENT waits for `ready`, and that is always correct-direction.
+  useEffect(() => {
+    void SplashScreen.hideAsync();
   }, []);
 
   // Dev-only build provenance — lets us confirm the running bundle matches a known
@@ -91,8 +98,9 @@ export default function RootLayout() {
     if (__DEV__) console.log("[boot] git HEAD:", process.env.EXPO_PUBLIC_GIT_SHA ?? "(unset)");
   }, []);
 
-  // Stay behind the native splash until the direction is confirmed correct.
-  if (!ready) return null;
+  // Branded animated loader until the direction is confirmed correct (reused by the
+  // language-switch reload via LanguageChooser).
+  if (!ready) return <LoadingScreen />;
 
   return (
     <SafeAreaProvider>

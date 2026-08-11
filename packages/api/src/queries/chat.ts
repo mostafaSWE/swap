@@ -50,6 +50,14 @@ export async function getOrCreateConversation(
   return data as Conversation;
 }
 
+// Per-subscription channel sequence: Supabase's `.channel(topic)` REUSES an
+// existing channel with the same topic, and calling `.on(...)` on an
+// already-subscribed channel throws ("cannot add postgres_changes callbacks
+// after subscribe()"). A React strict-mode remount (or navigating back into a
+// thread) re-subscribes before the async `removeChannel` finishes, so a fixed
+// topic hits the reused channel. A unique suffix guarantees a fresh channel.
+let messageChannelSequence = 0;
+
 /** Subscribe to new messages in a conversation via Supabase Realtime. */
 export function subscribeToMessages(
   supabase: SwapClient,
@@ -57,7 +65,7 @@ export function subscribeToMessages(
   onMessage: (message: Message) => void,
 ) {
   const channel = supabase
-    .channel(`messages:${conversationId}`)
+    .channel(`messages:${conversationId}:${++messageChannelSequence}`)
     .on(
       "postgres_changes",
       {

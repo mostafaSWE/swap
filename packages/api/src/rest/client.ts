@@ -82,6 +82,9 @@ export interface SwapApiOptions {
   baseUrl: string;
   /** Returns the current bearer token (Supabase access token), or null. */
   getToken?: () => Promise<string | null> | string | null;
+  /** Abort a request after this many ms (default 20000) so an unreachable/hung
+   *  API surfaces a clear, retryable error instead of loading the UI forever. */
+  timeoutMs?: number;
 }
 
 export class SwapApiClient {
@@ -104,11 +107,25 @@ export class SwapApiClient {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const res = await fetch(url.toString(), {
-      method,
-      headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+    // Bound every request: an unreachable or hung API must not spin forever.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.opts.timeoutMs ?? 20000);
+    let res: Response;
+    try {
+      res = await fetch(url.toString(), {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      });
+    } catch (err) {
+      if (controller.signal.aborted) {
+        throw new SwapApiError(0, "Request timed out — check your connection and try again.", null);
+      }
+      throw err; // network error (e.g. connection refused) — surface it to the caller
+    } finally {
+      clearTimeout(timer);
+    }
 
     if (!res.ok) {
       let parsed: unknown;

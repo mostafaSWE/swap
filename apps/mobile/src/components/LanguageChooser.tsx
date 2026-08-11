@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, StyleSheet, Text } from "react-native";
 import { Check } from "lucide-react-native";
 import { changeLanguage } from "../lib/change-language";
 import { locale, t, type Locale } from "../i18n";
 import { colors, spacing } from "../theme";
 import { BottomSheet } from "./ui/BottomSheet";
 import { Icon } from "./ui/Icon";
+import { LoadingScreen } from "./LoadingScreen";
 
 /**
  * The in-app language chooser — a bottom sheet of the two languages plus the
@@ -36,13 +37,10 @@ export function LanguageChooser({ visible, onClose }: { visible: boolean; onClos
         <Option label={t("common.arabic")} active={locale === "ar"} onPress={() => pick("ar")} />
       </BottomSheet>
 
-      {/* Full-screen reload curtain — a Modal so it covers the whole screen no
-          matter where this chooser is mounted (Settings screen or the home hero). */}
-      <Modal transparent visible={switching} statusBarTranslucent animationType="fade">
-        <View style={styles.curtain}>
-          <ActivityIndicator color={colors.green} size="large" />
-          <Text style={styles.curtainText}>{t("settings.switching")}</Text>
-        </View>
+      {/* Reload curtain — the SAME branded animated loader shown at app boot, so the
+          language switch reads as a smooth branded transition, not a white flash. */}
+      <Modal visible={switching} statusBarTranslucent animationType="fade">
+        <LoadingScreen />
       </Modal>
     </>
   );
@@ -67,6 +65,4 @@ const styles = StyleSheet.create({
   optionPressed: { opacity: 0.6 },
   optionLabel: { color: colors.text, fontSize: 16, flex: 1 },
   optionActive: { color: colors.green, fontWeight: "700" },
-  curtain: { flex: 1, backgroundColor: colors.background, alignItems: "center", justifyContent: "center", gap: spacing.md },
-  curtainText: { color: colors.textMuted, fontSize: 15, fontWeight: "600" },
 });

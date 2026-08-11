@@ -129,6 +129,10 @@ export async function getConfirmations(
   return signed.filter(Boolean) as SwapConfirmationView[];
 }
 
+// Unique per-subscription suffix so a remount never reuses an already-subscribed
+// channel (Supabase throws on `.on()` after `.subscribe()`). See chat.ts.
+let proposalChannelSequence = 0;
+
 /** Subscribe to status changes on a single proposal via Supabase Realtime. */
 export function subscribeToProposal(
   supabase: SwapClient,
@@ -136,7 +140,7 @@ export function subscribeToProposal(
   onChange: (proposal: SwapProposal) => void,
 ) {
   const channel = supabase
-    .channel(`proposal:${proposalId}`)
+    .channel(`proposal:${proposalId}:${++proposalChannelSequence}`)
     .on(
       "postgres_changes",
       {
