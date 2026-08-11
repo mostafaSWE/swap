@@ -216,7 +216,7 @@ export default function Conversation() {
             multiline
           />
           <Pressable onPress={send} disabled={!canSend} style={[styles.send, !canSend && styles.sendDisabled]} accessibilityRole="button" accessibilityLabel={t("common.send")}>
-            {sending ? <ActivityIndicator color={colors.navy} size="small" /> : <Icon icon={Send} size={20} color={colors.navy} mirror />}
+            {sending ? <ActivityIndicator color={colors.navy} size="small" /> : <Icon icon={Send} size={20} color={colors.navy} />}
           </Pressable>
         </View>
       </KeyboardAvoidingView>

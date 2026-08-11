@@ -5,7 +5,7 @@ import { CircleCheckBig } from "lucide-react-native";
 import { supabase } from "../src/lib/supabase";
 import { t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
-import { AuthCard, Button, FormAlert, Icon, PasswordInput, PasswordRequirements, StrengthMeter } from "../src/components/ui";
+import { AuthCard, Button, FormAlert, Icon, Logo, PasswordInput, PasswordRequirements, StrengthMeter } from "../src/components/ui";
 import { BrandBackground } from "../src/components/BrandBackground";
 import { Reveal } from "../src/components/motion";
 
@@ -65,9 +65,7 @@ export default function ResetPassword() {
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Reveal delay={0}>
-              <Text style={styles.wordmark} accessibilityRole="header">
-                Just<Text style={styles.wordmarkAccent}>Swap</Text>
-              </Text>
+              <Logo markSize={44} textSize={28} style={styles.wordmark} />
             </Reveal>
 
             <Reveal delay={90}>
@@ -117,8 +115,7 @@ export default function ResetPassword() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: spacing.lg, flexGrow: 1, justifyContent: "center", paddingBottom: spacing["2xl"] },
-  wordmark: { color: colors.white, fontSize: 30, fontWeight: "800", letterSpacing: 0.2, textAlign: "center", marginBottom: spacing.xl },
-  wordmarkAccent: { color: colors.green },
+  wordmark: { alignSelf: "center", marginBottom: spacing.xl },
   title: { color: colors.text, fontSize: 24, fontWeight: "700", letterSpacing: -0.2, textAlign: "center" },
   fields: { gap: spacing.md, marginTop: spacing.lg },
   strength: { marginTop: 6, gap: spacing.xs },

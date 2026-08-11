@@ -6,6 +6,7 @@ import { ArrowRight, Globe, PackagePlus, Repeat2, UserRound } from "lucide-react
 import { colors, radii, spacing } from "../../theme";
 import { t } from "../../i18n";
 import { Icon } from "../ui/Icon";
+import { Logo } from "../ui/Logo";
 import { Button } from "../ui/Button";
 import { HeaderBell } from "../HeaderBell";
 import { BrandBackdrop } from "../BrandBackground";
@@ -36,9 +37,7 @@ export function HomeHero() {
 
       <View style={[styles.content, { paddingTop: insets.top + spacing.md }]}>
         <View style={styles.topRow}>
-          <Text style={styles.wordmark} accessibilityRole="header">
-            Just<Text style={styles.wordmarkAccent}>Swap</Text>
-          </Text>
+          <Logo markSize={30} textSize={22} />
           <View style={styles.headerActions}>
             {/* Language — reachable BEFORE login so a new signed-out user can switch. */}
             <Pressable
@@ -104,8 +103,6 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl },
   topRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: spacing.md },
   headerActions: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
-  wordmark: { color: colors.white, fontSize: 22, fontWeight: "800", letterSpacing: 0.2 },
-  wordmarkAccent: { color: colors.green },
   accountBtn: {
     width: 40,
     height: 40,

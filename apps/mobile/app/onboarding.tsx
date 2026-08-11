@@ -12,7 +12,7 @@ import { acquireImages, uploadAvatar } from "../src/lib/upload";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
 import { AvatarUpload } from "../src/components/AvatarUpload";
-import { AuthCard, Button, FormSection, Icon, Input, Select } from "../src/components/ui";
+import { AuthCard, Button, FormSection, Icon, Input, Logo, Select } from "../src/components/ui";
 import { BrandBackground } from "../src/components/BrandBackground";
 import { Reveal } from "../src/components/motion";
 
@@ -119,9 +119,7 @@ export default function Onboarding() {
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
           <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Reveal delay={0}>
-              <Text style={styles.wordmark} accessibilityRole="header">
-                Just<Text style={styles.wordmarkAccent}>Swap</Text>
-              </Text>
+              <Logo markSize={42} textSize={26} style={styles.wordmark} />
             </Reveal>
 
             <Reveal delay={90}>
@@ -169,8 +167,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: spacing.lg, paddingBottom: spacing["3xl"] },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.lg },
-  wordmark: { color: colors.white, fontSize: 28, fontWeight: "800", letterSpacing: 0.2, textAlign: "center", marginBottom: spacing.lg },
-  wordmarkAccent: { color: colors.green },
+  wordmark: { alignSelf: "center", marginBottom: spacing.lg },
   title: { color: colors.text, fontSize: 24, fontWeight: "700", letterSpacing: -0.2, textAlign: "center" },
   subtitle: { color: colors.textMuted, fontSize: 14, textAlign: "center", marginTop: 6, marginBottom: spacing.lg, lineHeight: 20 },
   avatarWrap: { alignItems: "center", marginBottom: spacing.lg },

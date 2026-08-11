@@ -13,6 +13,7 @@ export { Chip } from "./Chip";
 export { Divider } from "./Divider";
 export { StatCell } from "./StatCell";
 export { Icon } from "./Icon";
+export { Logo } from "./Logo";
 export { IconButton } from "./IconButton";
 export { BottomSheet } from "./BottomSheet";
 export { Select, type SelectOption } from "./Select";
