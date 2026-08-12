@@ -267,7 +267,9 @@ export function ProposalContextCard({
 
       <View style={styles.exchange}>
         <ItemColumn label={t("proposal.youGive")} items={give} onItemPress={openItem} />
-        <Icon icon={ArrowLeftRight} size={18} color={colors.textMuted} mirror />
+        <View style={styles.swapBadge}>
+          <Icon icon={ArrowLeftRight} size={16} color={colors.green} mirror />
+        </View>
         <ItemColumn label={t("proposal.youGet")} items={get} accent onItemPress={openItem} />
       </View>
 
@@ -279,7 +281,9 @@ export function ProposalContextCard({
         otherName={otherName}
       />
 
-      <Text style={styles.banner}>{banner()}</Text>
+      {/* Completed swaps get the richer green "complete" panel below — the plain
+          status line would just repeat it, so skip it there to declutter. */}
+      {proposal.status !== "completed" ? <Text style={styles.banner}>{banner()}</Text> : null}
       {proposal.status === "disputed" ? <Text style={styles.muted}>{t("proposal.disputedNote")}</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -623,33 +627,58 @@ function CounterSheet({
 }
 
 const styles = StyleSheet.create({
+  // A self-contained rounded card — it sits inside the chat's scroll header (which
+  // already insets it by the list padding), so a full border + radius reads as a
+  // proper card instead of a full-bleed bottom-bordered slab.
   card: {
     backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.lg,
     padding: spacing.md,
-    gap: spacing.sm,
+    gap: spacing.md,
+    marginBottom: spacing.md,
   },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.sm },
-  title: { color: colors.text, fontSize: 14, fontWeight: "800" },
-  exchange: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
-  col: { flex: 1, gap: spacing.xs },
+  title: { color: colors.text, fontSize: 15, fontWeight: "800" },
+  // The give ⇄ get pair grouped on its own inset panel so it reads as one unit.
+  exchange: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    backgroundColor: colors.background,
+    borderRadius: radii.md,
+    padding: spacing.sm,
+  },
+  swapBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: radii.pill,
+    backgroundColor: colors.greenLight,
+    borderWidth: 1,
+    borderColor: colors.green,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  col: { flex: 1, gap: spacing.sm, alignItems: "center" },
   colLabel: { color: colors.textMuted, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.4 },
   colLabelAccent: { color: colors.green },
-  thumbs: { flexDirection: "row", flexWrap: "wrap", gap: spacing.xs },
-  thumbWrap: { width: 44 },
+  thumbs: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: spacing.xs },
+  thumbWrap: { width: 56 },
   thumbPressed: { opacity: 0.7 },
-  thumb: { width: 44, height: 44, borderRadius: radii.sm },
+  thumb: { width: 56, height: 56, borderRadius: radii.md },
   note: { color: colors.textMuted, fontSize: 13, fontStyle: "italic" },
   banner: { color: colors.text, fontSize: 13, fontWeight: "600" },
   muted: { color: colors.textMuted, fontSize: 12 },
   error: { color: colors.danger, fontSize: 13 },
   actions: { flexDirection: "row", gap: spacing.sm },
   flex: { flex: 1, paddingHorizontal: spacing.sm },
-  confirmations: { flexDirection: "row", gap: spacing.sm },
-  confirmation: { flex: 1, overflow: "hidden", borderRadius: radii.sm, borderWidth: 1, borderColor: colors.border },
-  confirmationImage: { width: "100%", aspectRatio: 1 },
-  confirmationCaption: { color: colors.textMuted, fontSize: 11, fontWeight: "700", padding: spacing.sm },
+  // Handover proof — small fixed thumbnails so they read as supporting evidence,
+  // not the hero. They used to be full-width squares that swallowed the card.
+  confirmations: { flexDirection: "row", gap: spacing.md },
+  confirmation: { alignItems: "center", gap: spacing.xs, width: 88 },
+  confirmationImage: { width: 88, height: 88, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background },
+  confirmationCaption: { color: colors.textMuted, fontSize: 11, fontWeight: "700", textAlign: "center" },
   complete: { backgroundColor: colors.greenLight, borderRadius: radii.md, padding: spacing.md, gap: spacing.xs },
   completeTitle: { color: colors.greenDark, fontSize: 14, fontWeight: "800" },
   completeBody: { color: colors.text, fontSize: 12, lineHeight: 18 },

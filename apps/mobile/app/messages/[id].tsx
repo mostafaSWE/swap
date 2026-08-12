@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Keyboard, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MoreVertical, SendHorizontal } from "lucide-react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -35,6 +35,8 @@ export default function Conversation() {
   const [error, setError] = useState<string | null>(null);
   // Which report sheet (if any) is open: a single message, or the whole thread.
   const [reportTarget, setReportTarget] = useState<{ type: ReportTargetType; id: string } | null>(null);
+  // Live keyboard height — see the effect below for why we track it manually.
+  const [kbHeight, setKbHeight] = useState(0);
   const listRef = useRef<FlatList<Message>>(null);
 
   function loadMessages() {
@@ -114,6 +116,25 @@ export default function Conversation() {
     }
   }
 
+  // Expo SDK 57 ships edge-to-edge on Android, where the window no longer resizes
+  // for the keyboard — so a KeyboardAvoidingView can't lift the composer and the
+  // input ends up hidden behind the keyboard (the reported bug). We track the
+  // keyboard height ourselves and reserve that space at the bottom instead.
+  useEffect(() => {
+    const showEvt = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvt = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const show = Keyboard.addListener(showEvt, (e) => {
+      setKbHeight(e.endCoordinates.height);
+      // Keep the latest message visible above the composer as the keyboard rises.
+      requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
+    });
+    const hide = Keyboard.addListener(hideEvt, () => setKbHeight(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
   function confirmBlock() {
     if (!other) return;
     Alert.alert(t("block.confirmTitle"), t("block.confirmBody"), [
@@ -169,11 +190,7 @@ export default function Conversation() {
           ),
         }}
       />
-      <KeyboardAvoidingView
-        behavior="padding"
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-        style={styles.root}
-      >
+      <View style={[styles.root, kbHeight > 0 ? { paddingBottom: kbHeight } : null]}>
         {loading ? (
           <View style={styles.centerFill}><ActivityIndicator color={colors.green} /></View>
         ) : loadError ? (
@@ -210,7 +227,7 @@ export default function Conversation() {
           />
         )}
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <View style={[styles.composer, { paddingBottom: (insets.bottom || spacing.md) }]}>
+        <View style={[styles.composer, { paddingBottom: kbHeight > 0 ? spacing.sm : (insets.bottom || spacing.md) }]}>
           <TextInput
             style={styles.chatInput}
             placeholder={t("chat.placeholder")}
@@ -223,7 +240,7 @@ export default function Conversation() {
             {sending ? <ActivityIndicator color={colors.navy} size="small" /> : <Icon icon={SendHorizontal} size={20} color={colors.navy} mirror />}
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
+      </View>
 
       {/* One report sheet drives both message (long-press) and conversation (menu). */}
       <ReportSheet
