@@ -19,6 +19,9 @@ web-build/
 apps/web/.env
 apps/web/.env.local
 !.env.example
+*.p8
+AuthKey_*.p8*
+AuthKey_GK3TF6Q3U2.p8.txt
 
 # Logs
 *.log

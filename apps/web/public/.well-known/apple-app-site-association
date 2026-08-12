@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appID": "REPLACE_WITH_APPLE_TEAM_ID.me.justswap.app",
+        "appID": "56RXJAK9AB.me.justswap.app",
         "paths": [
           "/en/listings/*",
           "/ar/listings/*",
