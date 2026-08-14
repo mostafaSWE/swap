@@ -186,7 +186,16 @@ async function cleanup() {
   console.log("\n  cleanup…");
   try {
     await admin.from("account_deletion_requests").delete().like("email", `%${stamp}%`);
-    await admin.from("account_deletion_requests").delete().eq("email", "deleted").is("user_id", null).eq("reason", null);
+    // delete_account() scrubs the matched row to email='deleted' with a null user_id,
+    // so it can no longer be found by the stamp — remove it by that signature.
+    // NOTE: `.is(col, null)`, never `.eq(col, null)` — PostgREST renders eq.null as a
+    // literal comparison that matches nothing, which silently left rows behind.
+    await admin
+      .from("account_deletion_requests")
+      .delete()
+      .eq("email", "deleted")
+      .is("user_id", null)
+      .is("reason", null);
     if (userId) {
       await admin.storage.from("listing-images").remove([`${userId}/${listingId}/0.png`]).catch(() => {});
       await admin.from("profiles").delete().eq("id", userId);
