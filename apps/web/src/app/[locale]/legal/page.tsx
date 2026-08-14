@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { CheckCircle2, FileWarning, Lock, ScrollText, ShieldCheck } from "lucide-react";
+import { Baby, CheckCircle2, FileWarning, Lock, ScrollText, ShieldCheck } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@swap/types";
 import { AppShell } from "@/components/AppShell";
@@ -11,19 +11,21 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   return { title: t("title"), description: t("subtitle") };
 }
 
-const DOC_ORDER = ["disclaimer", "privacy", "terms", "safety"] as const;
+const DOC_ORDER = ["disclaimer", "privacy", "terms", "safety", "childSafety"] as const;
 type DocKey = (typeof DOC_ORDER)[number];
 const DOC_HREFS: Record<DocKey, string> = {
   disclaimer: "/disclaimer",
   privacy: "/privacy",
   terms: "/terms",
   safety: "/safety",
+  childSafety: "/child-safety",
 };
 const DOC_ICONS: Record<DocKey, ReactNode> = {
   disclaimer: <FileWarning className="h-5 w-5" aria-hidden />,
   privacy: <Lock className="h-5 w-5" aria-hidden />,
   terms: <ScrollText className="h-5 w-5" aria-hidden />,
   safety: <ShieldCheck className="h-5 w-5" aria-hidden />,
+  childSafety: <Baby className="h-5 w-5" aria-hidden />,
 };
 
 export default async function LegalPage({ params: { locale } }: { params: { locale: Locale } }) {

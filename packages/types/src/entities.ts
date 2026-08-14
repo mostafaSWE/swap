@@ -8,6 +8,7 @@
  * signature). Keep them as `type`.
  */
 import type {
+  AccountDeletionRequestStatus,
   AppEnv,
   DevicePlatform,
   ListingCondition,
@@ -264,6 +265,26 @@ export type AdminAction = {
   /** Actor IP captured at action time (spec §4.1). */
   ip: string | null;
   created_at: string;
+};
+
+/**
+ * A deletion request filed from the PUBLIC /account/delete form by someone who can
+ * no longer sign in (migration 0022 — required by Google Play's User Data policy).
+ * Written by the API with the service role; readable by admins only, who work the
+ * queue at /admin/deletion-requests within the published 30-day window.
+ */
+export type AccountDeletionRequest = {
+  id: string;
+  email: string;
+  username: string | null;
+  reason: string | null;
+  /** The matched profile, when the address resolved to one at submission time. */
+  user_id: string | null;
+  status: AccountDeletionRequestStatus;
+  created_at: string;
+  handled_at: string | null;
+  handled_by: string | null;
+  notes: string | null;
 };
 
 /**

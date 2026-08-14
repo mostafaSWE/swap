@@ -12,6 +12,11 @@ export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number];
 export const REPORT_STATUSES = ["pending", "reviewed", "resolved", "rejected"] as const;
 export type ReportStatus = (typeof REPORT_STATUSES)[number];
 
+// Lifecycle of a public account-deletion request (migration 0022): filed from the
+// web form by someone who cannot sign in, then actioned by an admin.
+export const ACCOUNT_DELETION_REQUEST_STATUSES = ["pending", "completed", "rejected"] as const;
+export type AccountDeletionRequestStatus = (typeof ACCOUNT_DELETION_REQUEST_STATUSES)[number];
+
 export const LOCALES = ["ar", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
 

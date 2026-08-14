@@ -17,10 +17,13 @@ const staticPaths = [
   "/categories",
   "/legal",
   "/safety",
+  "/child-safety",
   "/disclaimer",
   "/privacy",
   "/terms",
   "/support",
+  // Play/Apple require the account-deletion route to be publicly discoverable.
+  "/account/delete",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -73,13 +76,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       /* keep what we have */
     }
 
-    // Public user profiles (skip banned / suspended accounts).
+    // Public user profiles (skip banned / suspended accounts, and the anonymised
+    // tombstones left behind by account deletion — those 404 on the profile page).
     try {
       const { data } = await supabase
         .from("profiles")
         .select("username, updated_at")
         .eq("is_banned", false)
         .eq("is_suspended", false)
+        .is("deleted_at", null)
         .order("updated_at", { ascending: false })
         .limit(5000);
       for (const row of data ?? []) {

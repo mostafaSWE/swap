@@ -19,6 +19,8 @@ export async function Footer() {
     { href: "/privacy", label: t("privacy") },
     { href: "/terms", label: t("terms") },
     { href: "/safety", label: t("safety") },
+    { href: "/child-safety", label: t("childSafety") },
+    { href: "/account/delete", label: t("deleteAccount") },
     { href: "/support", label: t("support") },
   ];
 

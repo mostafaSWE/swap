@@ -290,11 +290,11 @@
     "resetExpired": "This reset link is invalid or has expired.",
     "passwordMismatch": "Passwords don't match.",
     "passwordTooShort": "Use at least 6 characters.",
-    "termsAgreePrefix": "I agree to the",
+    "termsAgreePrefix": "I am 18 or older and I agree to the",
     "termsAgreeMiddle": "and",
     "termsLink": "Terms",
     "privacyLink": "Privacy Policy",
-    "termsRequired": "You must accept the Terms of Service and Privacy Policy to create an account.",
+    "termsRequired": "You must confirm you are 18 or older and accept the Terms of Service and Privacy Policy to create an account.",
     "confirmEmailTitle": "Confirm your email",
     "confirmEmailBody": "We've sent a confirmation link to your email. Tap it to activate your account.",
     "linkExpired": "That link is invalid or has expired. Please sign in or request a new one.",
@@ -814,7 +814,23 @@
       "pageOf": "Page {page} of {count}",
       "results": "{count} results"
     },
-    "apiOff": "API off"
+    "apiOff": "API off",
+    "deletionRequests": {
+      "nav": "Deletions",
+      "title": "Account deletion requests",
+      "hint": "Requests filed from the public web form by people who can no longer sign in. We publish a 30-day action window.",
+      "empty": "No deletion requests.",
+      "email": "Email",
+      "username": "Username",
+      "reason": "Reason",
+      "status": "Status",
+      "when": "Received",
+      "statuses": {
+        "pending": "Pending",
+        "completed": "Completed",
+        "rejected": "Rejected"
+      }
+    }
   },
   "empty": {
     "generic": "Nothing here yet"
@@ -848,6 +864,10 @@
       "safety": {
         "title": "Safety guide",
         "description": "Practical steps for meeting, inspecting items, and avoiding scams."
+      },
+      "childSafety": {
+        "title": "Child Safety Standards",
+        "description": "Our zero-tolerance stance on child sexual abuse and exploitation, and how to report it."
       }
     }
   },
@@ -859,6 +879,8 @@
     "privacy": "Privacy Policy",
     "terms": "Terms",
     "safety": "Safety",
+    "childSafety": "Child safety",
+    "deleteAccount": "Delete account",
     "support": "Contact support",
     "copyright": "© {year} JustSwap. All rights reserved.",
     "note": "No buying. No selling. Direct exchange only."
@@ -867,19 +889,24 @@
     "eyebrow": "Legal",
     "title": "Privacy Policy",
     "subtitle": "How JustSwap collects, uses, and protects your information — and the control you have over it.",
-    "updated": "Last updated 20 June 2026",
+    "updated": "Last updated 14 August 2026",
     "sections": [
       {
         "heading": "Information you provide",
         "body": [
-          "When you create an account we collect details such as your name, username, and email, and optionally a phone number, city, and profile photo.",
-          "As you use the marketplace you also provide listing content (titles, descriptions, photos, and what you want in exchange), messages to other users, swap proposals, ratings, and any reports you file."
+          "To create an account we require your name, a username, an email address, and a phone number. A phone number can only be linked to one account.",
+          "You may also add a profile photo, a short bio, and your country and city — chosen from a fixed list of places we operate in.",
+          "As you use the marketplace you provide listing content (titles, descriptions, photos, and what you want in exchange), messages to other users, swap proposals, handover confirmation photos, ratings, and any reports you file.",
+          "We record your language preference and the version of the Terms you accepted, with the date."
         ]
       },
       {
         "heading": "Information collected automatically",
         "body": [
-          "To keep the service running and secure, we process technical data such as your IP address, device and browser information, and basic usage activity — for example, which listings are viewed."
+          "We count how many times a listing is viewed, and we record which of your devices has registered for push notifications. A push registration stores a notification token and an identifier we generate for that installation — it is not an advertising identifier and not a device serial number.",
+          "We do not use any analytics, advertising, attribution, or crash-reporting service. There is no tracking software in our apps or website.",
+          "We never collect precise location. Location on JustSwap means a country and city you pick from a list; the app does not read GPS and does not ask for location permission.",
+          "Our hosting providers keep standard server logs (including IP addresses) for security and reliability, as any web service does."
         ]
       },
       {
@@ -898,14 +925,17 @@
       {
         "heading": "What other people can see",
         "body": [
-          "Your listings and public profile — name, username, photo, city, completed-swap count, and ratings — are visible to other users. Messages are visible to the people in that conversation.",
-          "Please don't put sensitive personal information, such as ID numbers or financial details, into public listings or chats."
+          "Your profile is public: your name, username, photo, bio, country and city, your join date, your listings, your rating and review count, and your follower and following counts. Your follower and following lists can also be viewed.",
+          "Your email address and phone number are never shown on your profile.",
+          "Messages are visible to the people in that conversation. Our moderators can also read message content when investigating a report or a safety issue — we do not read messages routinely, and messages are not end-to-end encrypted."
         ]
       },
       {
         "heading": "How we share information",
         "body": [
-          "We do not sell your personal data. We share it only with the service providers that operate the platform on our behalf (such as our hosting and database provider), and where required by law or to protect the safety of our users."
+          "We do not sell your personal information, and we do not share it for advertising.",
+          "We use a small number of providers to run the service: Supabase (accounts, database, file storage and realtime updates), Railway (hosting for our API), Expo (issues the push notification token for your installation), and Resend (delivers our account emails, such as verification and password resets).",
+          "We may disclose information where the law requires it, or where it is necessary to investigate abuse, fraud, or a threat to someone's safety."
         ]
       },
       {
@@ -915,15 +945,19 @@
         ]
       },
       {
-        "heading": "Data retention",
+        "heading": "Data retention and deleting your account",
         "body": [
-          "We keep your information for as long as your account is active and as needed to provide the service, comply with legal obligations, resolve disputes, and enforce our agreements."
+          "You can delete your account yourself at any time: in the app go to Settings → Delete account, or on the web visit justswap.me/account/delete. If you can no longer sign in, the same web page lets you send us a deletion request, which we action within 30 days.",
+          "Deleting is immediate and cannot be undone. We permanently remove your profile details (name, username, email, phone, photo, bio and location), take every listing off the marketplace, and delete your saved items, follows, blocks, notifications, registered devices, your profile photo and your listing photos.",
+          "A limited amount of activity is kept so that other people keep their own history and so we can still act on abuse reports: messages you already sent inside other people's conversations, records of swaps you took part in, ratings exchanged, handover confirmation photos the other person relies on as proof, and any safety reports you filed or that were filed about you. Your name is removed from these and you appear only as \"Deleted user\".",
+          "We keep this residual record because it protects the other people involved and prevents someone from erasing evidence of abuse by deleting their account. Backups may retain data for a short period before they rotate."
         ]
       },
       {
         "heading": "Your rights and choices",
         "body": [
-          "You can view and update most of your information from your profile and settings. You can also ask us to export or delete your data, or to close your account, by contacting support."
+          "You can view and update most of your information from your profile and settings, and you can delete your account yourself at any time (see the section above).",
+          "To request a copy of your data, or to ask a question about how we handle it, contact support@justswap.me."
         ]
       },
       {
@@ -935,7 +969,8 @@
       {
         "heading": "Children",
         "body": [
-          "JustSwap is not directed to children. You must meet the minimum age required in your country to create an account."
+          "JustSwap is for adults. You must be 18 or older to create an account, and the service is not directed to children.",
+          "We have zero tolerance for child sexual abuse or exploitation. Our Child Safety Standards explain what is prohibited, how to report it, and how we respond."
         ]
       },
       {
@@ -1033,6 +1068,198 @@
     "reportNote": "To flag something specific, use the report button on that listing or profile — it reaches our moderation team directly, and your report stays confidential.",
     "selfServeTitle": "Before you write",
     "selfServeNote": "A few quick answers may already be in our guides:"
+  },
+  "deleteAccount": {
+    "eyebrow": "Your data",
+    "title": "Delete your JustSwap account",
+    "subtitle": "Close your account and erase your personal data — from any browser, whether or not you have the app installed.",
+    "updated": "Last updated 14 August 2026",
+    "confirm": {
+      "title": "Delete this account permanently",
+      "body": "This erases the personal data we hold about you and takes every listing you posted off the marketplace. It happens straight away and it cannot be undone.",
+      "signedInAs": "Signed in as",
+      "reasonLabel": "Why are you leaving?",
+      "reasonHint": "Optional",
+      "reasonPlaceholder": "This helps us improve JustSwap — it won't change or delay the deletion.",
+      "acknowledge": "I understand that my account and personal data will be permanently deleted, that this cannot be undone, and that I will not be able to sign in again.",
+      "button": "Delete my account permanently",
+      "working": "Deleting your account…",
+      "doneTitle": "Your account has been deleted",
+      "doneBody": "Your personal data has been erased and your listings are off the marketplace. You've been signed out, and signing in with these details will no longer work.",
+      "doneCta": "Back to JustSwap",
+      "error": "We couldn't delete your account just now. Please try again, or email support@justswap.me and we'll do it for you.",
+      "unavailable": "Deletion isn't available from this browser right now. Please email support@justswap.me from the address on your account and we'll action it.",
+      "adminError": "Admin accounts cannot be deleted from here. Remove admin rights from the account first, then try again."
+    },
+    "request": {
+      "title": "Request deletion of your account",
+      "body": "Can't sign in any more? Send us the email address on the account and we'll delete it for you. We action every request within 30 days.",
+      "emailLabel": "Email address on the account",
+      "emailPlaceholder": "you@example.com",
+      "emailError": "Enter the email address you used on JustSwap.",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "e.g. ahmed",
+      "usernameError": "A username can be up to 30 characters.",
+      "optional": "Optional",
+      "reasonLabel": "Anything we should know?",
+      "reasonPlaceholder": "For example: I can no longer access this email address.",
+      "reasonError": "Please keep this under 1,000 characters.",
+      "button": "Send deletion request",
+      "working": "Sending…",
+      "privacyNote": "We use what you send here only to find and delete the account, and then to confirm it's done.",
+      "doneTitle": "We've received your request",
+      "doneBody": "If an account exists for that email address, we'll delete it and the personal data on it within 30 days.",
+      "doneNote": "To protect people's privacy we never confirm whether an email address is registered with JustSwap. There is nothing else you need to do.",
+      "error": "We couldn't send your request just now. Please try again, or email support@justswap.me.",
+      "unavailable": "Requests can't be sent from this browser right now. Please email support@justswap.me with the address on the account."
+    },
+    "signedInHint": {
+      "title": "Still able to sign in?",
+      "body": "Signing in is the fastest route — deleting from inside your account is immediate, with no 30-day wait.",
+      "cta": "Sign in to delete now"
+    },
+    "sections": [
+      {
+        "heading": "What is deleted",
+        "body": [
+          "Deleting your account permanently removes the personal information we hold about you:"
+        ],
+        "list": [
+          "Your profile details — name, username, email address, phone number, photo, bio, and location.",
+          "Every listing you posted is taken off the marketplace.",
+          "Your saved items, the people you follow and the people who follow you, and your blocked list.",
+          "Your notifications and any devices registered for push notifications.",
+          "Your profile photo and the photos on your listings."
+        ]
+      },
+      {
+        "heading": "What is kept, with your name removed",
+        "body": [
+          "A limited amount of activity has to stay so the other people involved keep their own history, and so we can still act on abuse reports. Your name is removed from it and you appear only as 'Deleted user':"
+        ],
+        "list": [
+          "Messages you already sent to other people, inside their conversations.",
+          "Records of the swaps and exchanges you took part in.",
+          "Ratings exchanged between you and other users.",
+          "Photos you uploaded to confirm a completed handover, which the other person relies on as proof.",
+          "Any safety reports you filed or that were filed about you."
+        ]
+      },
+      {
+        "heading": "How long it takes",
+        "body": [
+          "Deleting from inside your signed-in account is immediate: the data is removed as soon as you confirm, and sign-in stops working straight away.",
+          "If you send us a request by email instead — because you can no longer sign in — we action it within 30 days of receiving it."
+        ]
+      },
+      {
+        "heading": "This cannot be undone",
+        "body": [
+          "There is no recovery, no grace period, and no way to restore an account once it has been deleted. If you want to use JustSwap again later you'll need to create a new account from scratch — your old username, ratings, and completed-swap count will not come back."
+        ]
+      },
+      {
+        "heading": "Before you delete",
+        "list": [
+          "Finish or cancel any swap you've already agreed, so the other person isn't left waiting.",
+          "Save anything you still need from your conversations — you won't be able to open them afterwards.",
+          "If you only want a break, you can pause or remove individual listings instead and keep the account."
+        ]
+      },
+      {
+        "heading": "Deleting from the app",
+        "body": [
+          "If you have the JustSwap app installed, you can also delete your account from its settings — it does exactly the same thing as this page."
+        ]
+      },
+      {
+        "heading": "Questions or help",
+        "body": [
+          "If anything here isn't clear, or you need help with a deletion request, email support@justswap.me and we'll walk you through it."
+        ]
+      }
+    ]
+  },
+  "childSafety": {
+    "eyebrow": "Child safety",
+    "title": "Child Safety Standards",
+    "subtitle": "JustSwap has zero tolerance for child sexual abuse and exploitation. Here is what we prohibit, how to report it, and what we do when it is reported.",
+    "updated": "Last updated 14 August 2026",
+    "sections": [
+      {
+        "heading": "Zero tolerance",
+        "body": [
+          "JustSwap does not tolerate child sexual abuse and exploitation (CSAE) in any form, anywhere on the platform. Child sexual abuse material (CSAM) is absolutely prohibited — there is no context, no wording, and no excuse that makes it acceptable here.",
+          "This standard applies to everything a user can create or send: listings, photos, profile details, usernames, messages, and conversations. It applies to every user, in every country where we operate."
+        ]
+      },
+      {
+        "heading": "What is prohibited",
+        "body": [
+          "The following are banned outright and lead to immediate, permanent removal from JustSwap:"
+        ],
+        "list": [
+          "Child sexual abuse material (CSAM) — any image, video, or file that sexually depicts a minor, including drawn, edited, or AI-generated material.",
+          "Sexualising a minor in any way, including in text, listing titles and descriptions, usernames, or messages.",
+          "Grooming, or any attempt to contact, befriend, or sexually solicit a minor.",
+          "Sextortion — threatening to share sexual content of a minor in order to extort money, items, or further content.",
+          "Trafficking a minor, or offering, requesting, or advertising a minor for any purpose.",
+          "Sharing links, contact details, or instructions that lead to any of the above, on JustSwap or anywhere else."
+        ]
+      },
+      {
+        "heading": "JustSwap is a service for adults",
+        "body": [
+          "JustSwap is an 18+ service. It is not designed for, marketed to, or directed at children, and it has no features intended for a child audience.",
+          "You must be 18 or older to create an account and use the marketplace. Where we have reason to believe an account belongs to someone under 18, we remove the account and delete its content."
+        ]
+      },
+      {
+        "heading": "How to report child sexual abuse or exploitation",
+        "body": [
+          "Report it the moment you see it. You don't need to be certain, and you will never be penalised for reporting in good faith."
+        ],
+        "list": [
+          "In the app, use the report button on the listing, the profile, the message, or the conversation. On the web, use the report button on the listing or the profile. Reports go straight to our moderation team and stay confidential.",
+          "Or email support@justswap.me with 'Child safety' in the subject line, along with a link to the listing, profile, or conversation.",
+          "If a child is in immediate danger, contact your local emergency services or child-protection authority first — then tell us, so we can preserve the evidence."
+        ]
+      },
+      {
+        "heading": "How we respond",
+        "body": [
+          "Every report involving a child is treated as our highest priority and moves to the front of the moderation queue."
+        ],
+        "list": [
+          "We review it within 24 hours of receiving it — a report involving a child is never left waiting behind other queues.",
+          "We remove the content immediately and take down any listings connected to it.",
+          "We permanently ban the account and the person behind it. There is no warning, no way back, and no replacement account.",
+          "We take down the rest of that account's content wherever it puts a child at risk."
+        ]
+      },
+      {
+        "heading": "Evidence and reporting to the authorities",
+        "body": [
+          "When we find CSAE content, or receive a credible report of it, we preserve the content, the account details, and the related records so that investigators can use them, and so they cannot be destroyed.",
+          "We report confirmed child sexual abuse material to the competent authorities in the countries where we operate and to the relevant national reporting body, and we cooperate fully with lawful requests from law enforcement.",
+          "This evidence is retained even if the account is later deleted, so an investigation can still be completed — which is exactly why our account-deletion policy keeps safety reports."
+        ]
+      },
+      {
+        "heading": "Child safety point of contact",
+        "body": [
+          "We maintain a designated point of contact for child-safety matters, including requests from law enforcement, child-protection agencies, and app stores.",
+          "Child Safety Officer, JustSwap Trust & Safety — support@justswap.me. Please put 'Child safety' in the subject line so your message is routed to the priority queue."
+        ]
+      },
+      {
+        "heading": "Keeping this standard current",
+        "body": [
+          "We review these standards regularly and update them as our product, our obligations, and best practice change. They are published to meet Google Play's Child Safety Standards policy, and they sit alongside our Terms of Service, Safety guide, and Privacy Policy.",
+          "Questions about this standard can go to support@justswap.me."
+        ]
+      }
+    ]
   },
   "legalCommon": {
     "onThisPage": "On this page",

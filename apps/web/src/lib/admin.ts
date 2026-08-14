@@ -4,10 +4,11 @@
  * numbers are returned only when NEXT_PUBLIC_USE_DEMO_DATA=true.
  *
  * Analytics live in ./admin-analytics. This module covers the moderation
- * surfaces: the users / listings / reports queues, the audit log, the per-user
- * detail aggregate, and the catalog tables.
+ * surfaces: the users / listings / reports queues, the account-deletion queue,
+ * the audit log, the per-user detail aggregate, and the catalog tables.
  */
 import type {
+  AccountDeletionRequest,
   AdminAction,
   Category,
   City,
@@ -452,6 +453,45 @@ export async function fetchAdminReports(query: AdminReportsQuery = {}): Promise<
   } catch (e) {
     console.error("[admin] fetchAdminReports failed:", e);
     return emptyPage<EnrichedReport>(page);
+  }
+}
+
+/* ──────────────────── Account deletion requests queue ──────────────────── */
+
+export interface AdminDeletionRequestsQuery {
+  page?: number;
+}
+
+/**
+ * The public /account/delete form's queue (migration 0022). Written by the API with
+ * the service role; read here as the signed-in admin — the "deletion requests admin
+ * read" RLS policy is what authorises it, so no service key is needed on the web side.
+ * Newest first: we publish a 30-day action window, so age is the thing to see.
+ */
+export async function fetchAdminDeletionRequests(
+  query: AdminDeletionRequestsQuery = {},
+): Promise<Paged<AccountDeletionRequest>> {
+  const page = Math.max(1, query.page ?? 1);
+  if (isDemoMode()) return emptyPage<AccountDeletionRequest>(page);
+  try {
+    const { from, to } = pageBounds(page, PAGE_SIZE);
+    const { data, count: total, error } = await createClient()
+      .from("account_deletion_requests")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    if (error) throw error;
+    const t = total ?? 0;
+    return {
+      rows: (data ?? []) as AccountDeletionRequest[],
+      total: t,
+      page,
+      pageSize: PAGE_SIZE,
+      pageCount: Math.ceil(t / PAGE_SIZE),
+    };
+  } catch (e) {
+    console.error("[admin] fetchAdminDeletionRequests failed:", e);
+    return emptyPage<AccountDeletionRequest>(page);
   }
 }
 

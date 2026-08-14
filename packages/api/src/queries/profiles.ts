@@ -27,6 +27,9 @@ export async function getPublicProfileByUsername(
     .eq("username", username)
     // Admins are back-office only — they never appear as a public marketplace user.
     .eq("is_admin", false)
+    // Deleted accounts survive only as anonymised tombstones (migration 0022) so
+    // other users' messages/ratings keep a valid FK target — never public.
+    .is("deleted_at", null)
     .maybeSingle<PublicProfile>();
   if (error) throw error;
   return data;

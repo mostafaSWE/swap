@@ -8,6 +8,7 @@ import {
   Package,
   ScrollText,
   Tags,
+  Trash2,
   Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -23,6 +24,9 @@ type AdminNavKey =
   | "users"
   | "listings"
   | "reports"
+  // `admin.deletionRequests` is a namespace (the page's own strings live under it),
+  // so the nav label sits one level in.
+  | "deletionRequests.nav"
   | "audit"
   | "categories"
   | "countries"
@@ -35,6 +39,7 @@ const ITEMS: AdminNavItem[] = [
   { href: "/admin/users", key: "users", icon: Users },
   { href: "/admin/listings", key: "listings", icon: Package },
   { href: "/admin/reports", key: "reports", icon: Flag },
+  { href: "/admin/deletion-requests", key: "deletionRequests.nav", icon: Trash2 },
   { href: "/admin/audit", key: "audit", icon: ScrollText },
   { href: "/admin/categories", key: "categories", icon: Tags },
   { href: "/admin/countries", key: "countries", icon: ListTree },

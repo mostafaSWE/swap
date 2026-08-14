@@ -6,6 +6,7 @@
  * `supabase gen types typescript` output (see docs/setup-guide.md).
  */
 import type {
+  AccountDeletionRequest,
   AdminAction,
   Block,
   Category,
@@ -65,6 +66,7 @@ export interface Database {
       admin_actions: Table<AdminAction>;
       device_tokens: Table<DeviceToken>;
       push_outbox: Table<PushOutbox>;
+      account_deletion_requests: Table<AccountDeletionRequest>;
     };
     Views: Record<string, never>;
     Functions: {
