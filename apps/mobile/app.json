@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "me.justswap.app",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "icon": "./assets/icon-ios.png",
       "associatedDomains": [
         "applinks:justswap.me"
@@ -55,7 +55,7 @@
     },
     "android": {
       "package": "me.justswap.app",
-      "versionCode": 4,
+      "versionCode": 5,
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW"
       ],
