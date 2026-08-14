@@ -1,7 +1,9 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { isModerated } from "@swap/types";
 import type { ListingWithRelations, Profile, PublicProfile } from "@swap/types";
 import type { UpdateProfileInput } from "@swap/validation";
 import { TERMS_VERSION } from "@swap/config";
+
 import { SupabaseService } from "../../common/supabase/supabase.service";
 import { LISTING_SELECT, PUBLIC_PROFILE_COLUMNS } from "../../common/db.constants";
 import { assertNotBlocked } from "../../common/blocks.util";
@@ -107,7 +109,12 @@ export class ProfileService {
     if (error) throw error;
     return (data ?? [])
       .map((row) => (row as unknown as { listing: ListingWithRelations | null }).listing)
-      .filter((l): l is ListingWithRelations => Boolean(l));
+      .filter((l): l is ListingWithRelations => Boolean(l))
+      // This runs on the SERVICE-ROLE client, so the embedded join is never nulled by
+      // RLS — without this, a listing a moderator hid stays in the user's Saved list in
+      // full. Mirrors the same filter in the shared RLS query (queries/social.ts); the
+      // saved_listings row is kept so the bookmark returns if it is re-activated.
+      .filter((l) => !isModerated(l.status));
   }
 
   async follow(followerId: string, followingId: string): Promise<void> {

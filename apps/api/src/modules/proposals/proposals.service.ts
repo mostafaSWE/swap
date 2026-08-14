@@ -22,6 +22,8 @@ import type {
   ListProposalsQuery,
 } from "@swap/validation";
 import { STORAGE_BUCKETS } from "@swap/config";
+import { isModerated } from "@swap/types";
+
 import { SupabaseService } from "../../common/supabase/supabase.service";
 import { PROPOSAL_SELECT } from "../../common/db.constants";
 import { assertNotBlocked } from "../../common/blocks.util";
@@ -489,5 +491,17 @@ export class ProposalsService {
 
 function flattenProposal(row: ProposalRow): SwapProposalWithRelations {
   const { offered_items, ...rest } = row;
-  return { ...rest, offered_items: (offered_items ?? []).map((i) => i.listing) };
+  // These embeds come back on the SERVICE-ROLE client, so RLS never nulls them. Drop
+  // any listing a moderator has taken down: otherwise the counterparty — an ordinary
+  // user who is neither the owner nor an admin — keeps seeing its title and photos on
+  // the proposal card, and the card refetches on every Realtime tick.
+  // `completed` is deliberately kept: that is normal post-swap history, not moderation.
+  const visible = (offered_items ?? [])
+    .map((i) => i.listing)
+    .filter((l) => l && !isModerated(l.status));
+  return {
+    ...rest,
+    listing: rest.listing && isModerated(rest.listing.status) ? null : rest.listing,
+    offered_items: visible,
+  } as SwapProposalWithRelations;
 }

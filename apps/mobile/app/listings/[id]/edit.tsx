@@ -42,12 +42,16 @@ export default function EditListing() {
       try {
         // Owner surface: resolve the user first so getListingById's ownership gate
         // lets a paused listing through (the check below re-asserts ownership anyway).
-        const { data } = await supabase.auth.getUser();
-        const loaded = await getListingById(supabase, id, data.user?.id ?? null);
+        const { data } = await supabase.auth.getSession();
+        const loaded = await getListingById(supabase, id, data.session?.user.id ?? null);
         if (!active) return;
         // Owner-only, and only active/paused listings are editable — never let a
         // completed (swapped)/deleted listing be re-activated via Save.
-        if (!loaded || loaded.owner_id !== data.user?.id || (loaded.status !== "active" && loaded.status !== "hidden")) {
+        if (
+          !loaded ||
+          loaded.owner_id !== data.session?.user.id ||
+          (loaded.status !== "active" && loaded.status !== "hidden")
+        ) {
           setListing(null);
           return;
         }

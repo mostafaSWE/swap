@@ -335,7 +335,10 @@
     "strengthWeak": "Weak",
     "strengthFair": "Fair",
     "strengthGood": "Good",
-    "strengthStrong": "Strong"
+    "strengthStrong": "Strong",
+    "rememberMe": "Remember me",
+    "orDivider": "or",
+    "biometricSignIn": "Sign in as {name}"
   },
   "onboarding": {
     "title": "Welcome to JustSwap",
@@ -1099,7 +1102,13 @@
     "on": "On",
     "off": "Off",
     "unavailable": "Biometric lock isn't available on this device.",
-    "enableFailed": "We couldn't turn on the app lock. Try again, or check your device biometric settings."
+    "enableFailed": "We couldn't turn on the app lock. Try again, or check your device biometric settings.",
+    "signInLabel": "Biometric sign-in",
+    "signInOn": "You can sign back in with biometrics",
+    "signInOff": "Sign back in without your password",
+    "enableSignInPrompt": "Confirm to enable biometric sign-in",
+    "signInPrompt": "Sign in to JustSwap",
+    "signInExpired": "Biometric sign-in is no longer valid. Please sign in with your password."
   },
   "deleteAccount": {
     "title": "Delete account",

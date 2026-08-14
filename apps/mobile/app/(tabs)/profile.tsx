@@ -6,6 +6,7 @@ import type { LucideIcon } from "lucide-react-native";
 import type { ListingWithRelations, Profile } from "@swap/types";
 import { getListings, getProfileById, OWNER_VISIBLE_STATUSES } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
+import { signOutRespectingBiometric } from "../../src/lib/sign-out";
 import { locale, t } from "../../src/i18n";
 import { monthYear } from "../../src/lib/format";
 import { colors, radii, spacing } from "../../src/theme";
@@ -49,7 +50,7 @@ export default function ProfileTab() {
     if (signingOut) return;
     setSigningOut(true);
     try {
-      await supabase.auth.signOut();
+      await signOutRespectingBiometric();
     } catch {
       Alert.alert(t("common.error"));
     } finally {

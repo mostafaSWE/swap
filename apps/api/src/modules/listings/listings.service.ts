@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { isModerated } from "@swap/types";
 import type { Conversation, Listing, ListingImage, ListingWithRelations } from "@swap/types";
 import { FREE_PLAN_MAX_IMAGES, STORAGE_BUCKETS } from "@swap/config";
 import type {
@@ -12,6 +13,7 @@ import type {
   ListingFiltersInput,
   UpdateListingInput,
 } from "@swap/validation";
+
 import { SupabaseService } from "../../common/supabase/supabase.service";
 import { LISTING_SELECT } from "../../common/db.constants";
 import { assertNotBlocked } from "../../common/blocks.util";
@@ -60,6 +62,18 @@ export class ListingsService {
     return data ?? [];
   }
 
+  /**
+   * Public listing read. `GET /listings/:id` has NO auth guard and this service uses the
+   * SERVICE-ROLE client, so RLS does not apply here at all — without an explicit status
+   * check, anyone holding a UUID could fetch a listing a moderator had hidden or
+   * removed, with its images, owner profile and location. (The same leak was fixed in
+   * the shared RLS query layer; this is the second, unauthenticated door to it.)
+   *
+   * Gated strictly: a moderated listing is 404 for everybody on this endpoint. Owner
+   * surfaces never come through here — the apps read their own paused listings via the
+   * RLS path (`getListingById`, which allows the owner), and admin moderation uses the
+   * admin module.
+   */
   async get(id: string): Promise<ListingWithRelations> {
     const { data, error } = await this.db
       .from("listings")
@@ -67,7 +81,9 @@ export class ListingsService {
       .eq("id", id)
       .maybeSingle<ListingWithRelations>();
     if (error) throw error;
-    if (!data) throw new NotFoundException("Listing not found");
+    // Same 404 for "no such listing" and "taken down" — never confirm that a hidden
+    // listing exists.
+    if (!data || isModerated(data.status)) throw new NotFoundException("Listing not found");
     return data;
   }
 

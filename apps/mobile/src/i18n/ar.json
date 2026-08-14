@@ -335,7 +335,10 @@
     "strengthWeak": "ضعيفة",
     "strengthFair": "مقبولة",
     "strengthGood": "جيدة",
-    "strengthStrong": "قوية"
+    "strengthStrong": "قوية",
+    "rememberMe": "تذكّرني",
+    "orDivider": "أو",
+    "biometricSignIn": "تسجيل الدخول كـ {name}"
   },
   "onboarding": {
     "title": "أهلًا بك في JustSwap",
@@ -1099,7 +1102,13 @@
     "on": "مفعّل",
     "off": "معطّل",
     "unavailable": "قفل السمات الحيوية غير متاح على هذا الجهاز.",
-    "enableFailed": "تعذّر تفعيل قفل التطبيق. حاول مرة أخرى أو تحقّق من إعدادات المصادقة الحيوية في جهازك."
+    "enableFailed": "تعذّر تفعيل قفل التطبيق. حاول مرة أخرى أو تحقّق من إعدادات المصادقة الحيوية في جهازك.",
+    "signInLabel": "تسجيل الدخول بالبصمة",
+    "signInOn": "يمكنك تسجيل الدخول بالبصمة",
+    "signInOff": "سجّل الدخول دون كلمة المرور",
+    "enableSignInPrompt": "أكّد لتفعيل تسجيل الدخول بالبصمة",
+    "signInPrompt": "تسجيل الدخول إلى JustSwap",
+    "signInExpired": "لم يعد تسجيل الدخول بالبصمة صالحاً. الرجاء تسجيل الدخول بكلمة المرور."
   },
   "deleteAccount": {
     "title": "حذف الحساب",

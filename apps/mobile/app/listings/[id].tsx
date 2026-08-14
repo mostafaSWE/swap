@@ -50,8 +50,8 @@ export default function ListingDetail() {
     // Resolve the viewer FIRST: getListingById gates non-active listings on ownership,
     // so it needs to know who is asking. Without the id, an owner opening their own
     // paused listing would get the not-found state.
-    supabase.auth.getUser().then(({ data }) => {
-      const uid = data.user?.id ?? null;
+    supabase.auth.getSession().then(({ data }) => {
+      const uid = data.session?.user.id ?? null;
       if (active) setMyId(uid);
       getListingById(supabase, id, uid)
         .then((l) => active && setListing(l))
@@ -71,9 +71,9 @@ export default function ListingDetail() {
       if (!id) return;
       let active = true;
       supabase.auth
-        .getUser()
+        .getSession()
         .then(({ data }) =>
-          getListingById(supabase, id, data.user?.id ?? null).then((l) => active && setListing(l)),
+          getListingById(supabase, id, data.session?.user.id ?? null).then((l) => active && setListing(l)),
         )
         .catch(() => undefined);
       return () => {

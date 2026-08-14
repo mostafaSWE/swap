@@ -6,6 +6,22 @@ export type ListingCondition = (typeof LISTING_CONDITIONS)[number];
 export const LISTING_STATUSES = ["active", "hidden", "removed", "completed"] as const;
 export type ListingStatus = (typeof LISTING_STATUSES)[number];
 
+/**
+ * Statuses meaning "taken off the marketplace" — hidden by a moderator or the owner,
+ * or soft-deleted. Consumer surfaces must not render these for anyone but the owner.
+ *
+ * Lives here, next to the enum, because BOTH the RLS query layer (@swap/api) and the
+ * service-role NestJS API need the same answer, and the service-role client bypasses
+ * RLS entirely — a second definition would be a drift risk on a rule that decides
+ * whether moderated content is visible.
+ *
+ * `completed` is deliberately NOT moderated: a finished swap is legitimate history,
+ * still linked from both parties' proposal cards.
+ */
+export function isModerated(status: string): boolean {
+  return status === "hidden" || status === "removed";
+}
+
 export const REPORT_TARGET_TYPES = ["listing", "user", "message", "conversation"] as const;
 export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number];
 

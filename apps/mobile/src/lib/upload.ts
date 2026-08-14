@@ -7,6 +7,7 @@ import { updateProfile } from "@swap/api";
 import { supabase } from "./supabase";
 import { api } from "./api";
 import { t } from "../i18n";
+import { beginTrustedNativeFlow, endTrustedNativeFlow } from "./biometrics";
 
 export type PickedImage = {
   uri: string;
@@ -68,7 +69,16 @@ export async function captureImage(): Promise<PickedImage[]> {
  * `limit`. Feeds the SAME `PickedImage` → upload pipeline (no alternate path).
  */
 export function acquireImages(limit: number): Promise<PickedImage[]> {
-  return new Promise((resolve) => {
+  // The camera/library pickers pause our Activity, and Android's AppState reports that
+  // as `background` — indistinguishable from the user leaving. Without this the app
+  // lock would engage and greet the user with a biometric prompt the moment they came
+  // back from choosing a photo. Marked as a trusted in-app excursion for its duration.
+  beginTrustedNativeFlow();
+  const done = (imgs: PickedImage[]): PickedImage[] => {
+    endTrustedNativeFlow();
+    return imgs;
+  };
+  return new Promise<PickedImage[]>((resolve) => {
     Alert.alert(
       t("imagePicker.title"),
       undefined,
@@ -81,6 +91,9 @@ export function acquireImages(limit: number): Promise<PickedImage[]> {
       // onPress — resolve [] so the awaiting caller never hangs.
       { cancelable: true, onDismiss: () => resolve([]) },
     );
+  }).then(done, (e) => {
+    endTrustedNativeFlow();
+    throw e;
   });
 }
 

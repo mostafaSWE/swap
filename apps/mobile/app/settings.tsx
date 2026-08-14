@@ -1,8 +1,18 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
-import { Stack, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { Ban, ChevronRight, FileText, Fingerprint, Globe, LifeBuoy, Lock, ShieldAlert, Trash2 } from "lucide-react-native";
-import { disableAppLock, enableAppLock, isAppLockEnabled, isBiometricAvailable } from "../src/lib/biometrics";
+import {
+  disableAppLock,
+  disableBiometricSignIn,
+  enableAppLockFor,
+  enableBiometricSignIn,
+  hasBiometricSignIn,
+  isAppLockEnabledFor,
+  isBiometricAvailable,
+} from "../src/lib/biometrics";
+import { supabase } from "../src/lib/supabase";
+import { clearBiometricSignInAccount, setBiometricSignInAccount } from "../src/lib/remember-me";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
 import { ListRow } from "../src/components/ui/ListRow";
@@ -17,15 +27,38 @@ export default function SettingsScreen() {
   const [biometricOk, setBiometricOk] = useState(false);
   const [appLockOn, setAppLockOn] = useState(false);
   const [lockBusy, setLockBusy] = useState(false);
+  const [uid, setUid] = useState<string | null>(null);
+  const [bioSignInOn, setBioSignInOn] = useState(false);
+  const [bioBusy, setBioBusy] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
 
-  useEffect(() => {
-    isBiometricAvailable().then(setBiometricOk).catch(() => undefined);
-    isAppLockEnabled().then(setAppLockOn).catch(() => undefined);
-  }, []);
+  // Re-checked on focus, not just on mount: the user may have enrolled a fingerprint
+  // in OS settings while this screen was still in the back stack.
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      void (async () => {
+        const [available, { data }] = await Promise.all([
+          isBiometricAvailable().catch(() => false),
+          supabase.auth.getSession(),
+        ]);
+        const id = data.session?.user.id ?? null;
+        if (!active) return;
+        setBiometricOk(available);
+        setUid(id);
+        if (id) {
+          setAppLockOn(await isAppLockEnabledFor(id).catch(() => false));
+          setBioSignInOn(await hasBiometricSignIn(id).catch(() => false));
+        }
+      })();
+      return () => {
+        active = false;
+      };
+    }, []),
+  );
 
   async function toggleAppLock(next: boolean) {
-    if (lockBusy) return;
+    if (lockBusy || !uid) return;
     setLockBusy(true);
     try {
       if (!next) {
@@ -33,9 +66,8 @@ export default function SettingsScreen() {
         setAppLockOn(false);
         return;
       }
-      // Turning it ON requires one successful biometric / device-credential check.
-      const result = await enableAppLock();
-      setAppLockOn(result === "enabled");
+      const result = await enableAppLockFor(uid);
+      setAppLockOn(result === "ok");
       // Silence here was the old behaviour: the switch just snapped back with no
       // explanation. Cancelling is a deliberate user action, so stay quiet for that
       // one; anything else gets a reason.
@@ -43,6 +75,44 @@ export default function SettingsScreen() {
       else if (result === "failed") Alert.alert(t("biometric.settingLabel"), t("biometric.enableFailed"));
     } finally {
       setLockBusy(false);
+    }
+  }
+
+  /**
+   * Biometric sign-in seals the CURRENT session's refresh token in the device keychain
+   * so this account can be restored after sign-out with a fingerprint / Face ID instead
+   * of a password. The password itself is never stored.
+   */
+  async function toggleBioSignIn(next: boolean) {
+    if (bioBusy || !uid) return;
+    setBioBusy(true);
+    try {
+      if (!next) {
+        await disableBiometricSignIn(uid);
+        await clearBiometricSignInAccount();
+        setBioSignInOn(false);
+        return;
+      }
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.refresh_token;
+      if (!token) {
+        Alert.alert(t("biometric.signInLabel"), t("biometric.enableFailed"));
+        return;
+      }
+      const result = await enableBiometricSignIn(uid, token);
+      setBioSignInOn(result === "ok");
+      if (result === "ok") {
+        // Pointer the Sign In screen reads to know whose session it may restore.
+        const u = data.session?.user;
+        await setBiometricSignInAccount({
+          uid,
+          label: (u?.user_metadata?.username as string) || u?.email || "",
+        });
+      }
+      if (result === "unavailable") Alert.alert(t("biometric.signInLabel"), t("biometric.unavailable"));
+      else if (result === "failed") Alert.alert(t("biometric.signInLabel"), t("biometric.enableFailed"));
+    } finally {
+      setBioBusy(false);
     }
   }
 
@@ -75,6 +145,23 @@ export default function SettingsScreen() {
                       value={appLockOn}
                       onValueChange={toggleAppLock}
                       disabled={lockBusy}
+                      trackColor={{ true: colors.green, false: colors.border }}
+                      thumbColor={colors.white}
+                    />
+                  }
+                />
+                <Divider />
+                {/* Distinct from App Lock: this one re-establishes a SESSION after
+                    sign-out, rather than covering an existing one. */}
+                <ListRow
+                  leading={<IconTile icon={Fingerprint} />}
+                  title={t("biometric.signInLabel")}
+                  subtitle={bioSignInOn ? t("biometric.signInOn") : t("biometric.signInOff")}
+                  trailing={
+                    <Switch
+                      value={bioSignInOn}
+                      onValueChange={toggleBioSignIn}
+                      disabled={bioBusy}
                       trackColor={{ true: colors.green, false: colors.border }}
                       thumbColor={colors.white}
                     />

@@ -1,3 +1,4 @@
+import { isModerated } from "@swap/types";
 import type { ListingCondition, ListingStatus, ListingWithRelations, SortOption } from "@swap/types";
 import type { SwapClient } from "../client";
 
@@ -160,9 +161,10 @@ export async function getListingById(
     .maybeSingle<ListingWithRelations>();
   if (error) throw error;
   if (!data) return null;
-  if (data.status !== "active" && data.owner_id !== viewerId) return null;
+  if (isModerated(data.status) && data.owner_id !== viewerId) return null;
   return withSortedImages(data);
 }
+
 
 /** Best-effort view counter. Errors are swallowed — a view is not critical. */
 export async function incrementListingView(

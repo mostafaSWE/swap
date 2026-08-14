@@ -23,8 +23,8 @@ export function ListingImageManager({ listingId, initialImages }: { listingId: s
   async function refresh() {
     // Owner-only surface (rendered inside the edit screen): pass the viewer so a
     // paused listing's images still reload after an add/remove/reorder.
-    const { data } = await supabase.auth.getUser();
-    const listing = await getListingById(supabase, listingId, data.user?.id ?? null);
+    const { data } = await supabase.auth.getSession();
+    const listing = await getListingById(supabase, listingId, data.session?.user.id ?? null);
     if (listing) setImages([...listing.images].sort((a, b) => a.sort_order - b.sort_order));
   }
 

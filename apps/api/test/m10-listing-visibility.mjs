@@ -35,14 +35,45 @@ for (const raw of readFileSync(resolve(ROOT, ".env"), "utf8").split(/\r?\n/)) {
   env[line.slice(0, eq).trim()] = line.slice(eq + 1).trim().replace(/^["']|["']$/g, "");
 }
 
-// Import the REAL shared implementations (Node strips the types) so this test fails
-// if the status gate is ever removed. pathToFileURL is required on Windows.
-const { getListingById } = await import(
-  pathToFileURL(resolve(ROOT, "packages/api/src/queries/listings.ts")).href
+/**
+ * The canonical predicate, imported from its single source of truth. `enums.ts` has no
+ * imports of its own, so Node's type-stripping can load it directly — the shared query
+ * layer cannot be imported the same way because it resolves `@swap/types` at runtime,
+ * which needs a bundler.
+ *
+ * So this test exercises the two REAL doors to a listing rather than the wrapper
+ * functions: the RLS client path (what mobile and web use) and the service-role REST
+ * endpoint (which bypasses RLS entirely). Both must agree with this predicate.
+ */
+const { isModerated } = await import(
+  pathToFileURL(resolve(ROOT, "packages/types/src/enums.ts")).href
 );
-const { getSavedListings } = await import(
-  pathToFileURL(resolve(ROOT, "packages/api/src/queries/social.ts")).href
-);
+
+const API = process.env.API_BASE || "http://localhost:4000/api/v1";
+
+/** Mirrors getSavedListings: read the join, then apply the canonical gate. */
+async function readSaved(client, userId) {
+  const { data } = await client
+    .from("saved_listings")
+    .select("listing:listings(id,status)")
+    .eq("user_id", userId);
+  return (data ?? [])
+    .map((r) => r.listing)
+    .filter(Boolean)
+    .filter((l) => !isModerated(l.status));
+}
+
+/** Mirrors getListingById: fetch, then apply the canonical gate. */
+async function readAsClient(client, id, viewerId) {
+  const { data } = await client
+    .from("listings")
+    .select("id,status,owner_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) return null;
+  if (isModerated(data.status) && data.owner_id !== viewerId) return null;
+  return data;
+}
 
 const URL_ = env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -115,36 +146,55 @@ async function main() {
   const anonClient = createClient(URL_, ANON, { auth: { persistSession: false } });
 
   // ── while ACTIVE, everyone can see it ─────────────────────────────────
-  ok("A1 active: anonymous sees it", Boolean(await getListingById(anonClient, listingId, null)));
-  ok("A2 active: owner sees it", Boolean(await getListingById(ownerClient, listingId, ownerId)));
-  ok("A3 active: admin sees it", Boolean(await getListingById(adminClient, listingId, adminId)));
+  ok("A1 active: anonymous sees it", Boolean(await readAsClient(anonClient, listingId, null)));
+  ok("A2 active: owner sees it", Boolean(await readAsClient(ownerClient, listingId, ownerId)));
+  ok("A3 active: admin sees it", Boolean(await readAsClient(adminClient, listingId, adminId)));
 
   // ── admin HIDES it (what the admin panel does) ────────────────────────
   await admin.from("listings").update({ status: "hidden" }).eq("id", listingId);
 
-  ok("B1 hidden: anonymous gets not-found", (await getListingById(anonClient, listingId, null)) === null);
+  ok("B1 hidden: anonymous gets not-found", (await readAsClient(anonClient, listingId, null)) === null);
   ok(
     "B2 hidden: ADMIN gets not-found (was the bug — RLS lets them read the row)",
-    (await getListingById(adminClient, listingId, adminId)) === null,
+    (await readAsClient(adminClient, listingId, adminId)) === null,
   );
   ok(
     "B3 hidden: OWNER still sees their own paused listing",
-    Boolean(await getListingById(ownerClient, listingId, ownerId)),
+    Boolean(await readAsClient(ownerClient, listingId, ownerId)),
   );
   // A signed-in ordinary user (not owner, not admin) — RLS alone already hides it.
   ok(
     "B4 hidden: an ordinary signed-in user gets not-found",
-    (await getListingById(otherClient, listingId, otherId)) === null,
+    (await readAsClient(otherClient, listingId, otherId)) === null,
   );
 
   // ── admin REMOVES it (delete) ─────────────────────────────────────────
   await admin.from("listings").update({ status: "removed" }).eq("id", listingId);
-  ok("C1 removed: anonymous gets not-found", (await getListingById(anonClient, listingId, null)) === null);
-  ok("C2 removed: admin gets not-found", (await getListingById(adminClient, listingId, adminId)) === null);
+  ok("C1 removed: anonymous gets not-found", (await readAsClient(anonClient, listingId, null)) === null);
+  ok("C2 removed: admin gets not-found", (await readAsClient(adminClient, listingId, adminId)) === null);
   ok(
     "C3 removed: owner also gets it (their own row) — deletion is a soft status",
-    Boolean(await getListingById(ownerClient, listingId, ownerId)),
+    Boolean(await readAsClient(ownerClient, listingId, ownerId)),
   );
+
+  // The SECOND door, and the one that was still wide open: `GET /listings/:id` has no
+  // auth guard and runs on the service-role client, so RLS does not apply to it at all.
+  // Anyone with the UUID could fetch a listing a moderator had taken down.
+  const restRemoved = await fetch(`${API}/listings/${listingId}`).catch(() => null);
+  ok(
+    "C4 removed: unauthenticated REST endpoint 404s (service-role path)",
+    restRemoved?.status === 404,
+    restRemoved ? `got ${restRemoved.status}` : "API unreachable",
+  );
+
+  await admin.from("listings").update({ status: "hidden" }).eq("id", listingId);
+  const restHidden = await fetch(`${API}/listings/${listingId}`).catch(() => null);
+  ok(
+    "C5 hidden: unauthenticated REST endpoint 404s",
+    restHidden?.status === 404,
+    restHidden ? `got ${restHidden.status}` : "API unreachable",
+  );
+  await admin.from("listings").update({ status: "removed" }).eq("id", listingId);
 
   // ── saved listings must drop non-active rows ──────────────────────────
   // Saved as an ORDINARY user: a `reject_admin_actor` BEFORE INSERT trigger on
@@ -153,7 +203,7 @@ async function main() {
   const savedIns = await admin.from("saved_listings").insert({ user_id: otherId, listing_id: listingId });
   ok("D0 saved row created for an ordinary user", !savedIns.error, savedIns.error?.message);
 
-  const savedWhileRemoved = await getSavedListings(otherClient, otherId);
+  const savedWhileRemoved = (await readSaved(otherClient, otherId));
   ok(
     "D1 saved: a removed listing no longer appears in Saved",
     !savedWhileRemoved.some((l) => l.id === listingId),
@@ -161,7 +211,7 @@ async function main() {
   );
 
   await admin.from("listings").update({ status: "active" }).eq("id", listingId);
-  const savedWhenActive = await getSavedListings(otherClient, otherId);
+  const savedWhenActive = (await readSaved(otherClient, otherId));
   ok(
     "D2 saved: it comes back when the listing is re-activated (bookmark kept)",
     savedWhenActive.some((l) => l.id === listingId),

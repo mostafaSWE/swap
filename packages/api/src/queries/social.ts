@@ -1,5 +1,7 @@
+import { isModerated } from "@swap/types";
 import type { ListingWithRelations, PublicProfile, PublicProfileWithFollow, ReportTargetType } from "@swap/types";
 import type { SwapClient } from "../client";
+
 
 export type FollowDirection = "followers" | "following";
 export type FollowListOptions = { limit?: number; offset?: number };
@@ -203,7 +205,7 @@ export async function getSavedListings(
     // that was paused, completed or taken down by a moderator would otherwise sit in
     // Saved forever — and open, since it is a real row. Saving is a bookmark of a
     // LIVE listing; the row stays in saved_listings so it reappears if re-activated.
-    .filter((l) => l.status === "active");
+    .filter((l) => !isModerated(l.status));
 }
 
 /* ── Reports ── */
