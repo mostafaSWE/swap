@@ -131,6 +131,7 @@ export default function RootLayout() {
           <Stack.Screen name="notifications" options={{ title: t("notifications.title") }} />
           <Stack.Screen name="saved" options={{ title: "" }} />
           <Stack.Screen name="blocked" options={{ title: "" }} />
+          <Stack.Screen name="delete-account" options={{ title: "" }} />
           <Stack.Screen name="support" options={{ title: "" }} />
           <Stack.Screen name="terms" options={{ title: "" }} />
           <Stack.Screen name="privacy" options={{ title: "" }} />

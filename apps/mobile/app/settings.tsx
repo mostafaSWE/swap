@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { Ban, ChevronRight, FileText, Fingerprint, Globe, LifeBuoy, Lock, ShieldAlert } from "lucide-react-native";
+import { Ban, ChevronRight, FileText, Fingerprint, Globe, LifeBuoy, Lock, ShieldAlert, Trash2 } from "lucide-react-native";
 import { isAppLockEnabled, isBiometricAvailable, setAppLockEnabled } from "../src/lib/biometrics";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
@@ -78,6 +78,9 @@ export default function SettingsScreen() {
           <Text style={styles.sectionLabel}>{t("settings.account")}</Text>
           <View style={styles.group}>
             <Row icon={Ban} label={t("block.blockedTitle")} onPress={() => router.push("/blocked")} />
+            <Divider />
+            {/* Irreversible — styled destructive so it never reads as an ordinary setting. */}
+            <DangerRow icon={Trash2} label={t("deleteAccount.title")} onPress={() => router.push("/delete-account")} />
           </View>
         </View>
 
@@ -113,6 +116,25 @@ function Row({ icon, label, onPress }: { icon: LucideIcon; label: string; onPres
   );
 }
 
+/** Destructive variant of `Row` — same metrics as `ListRow`, danger-tinted tile and
+ *  label. Row is `flexDirection:"row"`, so it flips under RTL like every other row. */
+function DangerRow({ icon, label, onPress }: { icon: LucideIcon; label: string; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => [styles.dangerRow, pressed && styles.pressed]}
+    >
+      <View style={styles.dangerTile}>
+        <Icon icon={icon} size={18} color={colors.danger} />
+      </View>
+      <Text style={styles.dangerLabel} numberOfLines={1}>{label}</Text>
+      <Icon icon={ChevronRight} size={18} color={colors.danger} mirror />
+    </Pressable>
+  );
+}
+
 function IconTile({ icon }: { icon: LucideIcon }) {
   return (
     <View style={styles.tile}>
@@ -139,4 +161,8 @@ const styles = StyleSheet.create({
   },
   divider: { height: 1, backgroundColor: colors.border, marginStart: 52 },
   tile: { width: 36, height: 36, borderRadius: radii.sm, backgroundColor: colors.greenLight, alignItems: "center", justifyContent: "center" },
+  dangerRow: { flexDirection: "row", alignItems: "center", gap: spacing.md, paddingVertical: spacing.sm, minHeight: 52 },
+  pressed: { opacity: 0.6 },
+  dangerTile: { width: 36, height: 36, borderRadius: radii.sm, backgroundColor: "rgba(239,68,68,0.12)", alignItems: "center", justifyContent: "center" },
+  dangerLabel: { flex: 1, color: colors.danger, fontSize: 15, fontWeight: "600" },
 });

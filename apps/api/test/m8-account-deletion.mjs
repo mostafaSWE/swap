@@ -68,6 +68,7 @@ let listingId = null;
 let convId = null;
 let msgId = null;
 let reportId = null;
+let deletionRequestId = null;
 
 async function main() {
   console.log("M8 — account deletion\n");
@@ -156,6 +157,16 @@ async function main() {
     .single();
   reportId = report.id;
 
+  // A pending web deletion request for this same address — 0024 must close it out
+  // and strip the identifiers, otherwise an email -> tombstone mapping survives and
+  // the "de-identified" retained activity is trivially re-identifiable.
+  const { data: req } = await admin
+    .from("account_deletion_requests")
+    .insert({ email: EMAIL, username: `deltest_${stamp}`, reason: "test", user_id: userId })
+    .select("id")
+    .single();
+  deletionRequestId = req.id;
+
   // ── ACT ────────────────────────────────────────────────────────────────
   const { error: rpcErr } = await admin.rpc("delete_account", { p_user_id: userId });
   ok("delete_account RPC succeeds", !rpcErr);
@@ -216,6 +227,18 @@ async function main() {
   ok("F1 counterparty rating aggregate unchanged", khalidAfter.rating === khalidBefore.rating);
   ok("F2 counterparty ratings_count unchanged", khalidAfter.ratings_count === khalidBefore.ratings_count);
 
+  // ── K. the web deletion request is closed out and de-identified (0024) ──
+  const { data: reqAfter } = await admin
+    .from("account_deletion_requests")
+    .select("status, email, username, reason, user_id, handled_at")
+    .eq("id", deletionRequestId)
+    .single();
+  ok("K1 request marked completed", reqAfter?.status === "completed");
+  ok("K2 requester email scrubbed", reqAfter?.email === "deleted");
+  ok("K3 request no longer links to the profile", reqAfter?.user_id === null);
+  ok("K4 request username/reason cleared", reqAfter?.username === null && reqAfter?.reason === null);
+  ok("K5 handled_at stamped", Boolean(reqAfter?.handled_at));
+
   // ── G. idempotent ──────────────────────────────────────────────────────
   const { data: again, error: againErr } = await admin.rpc("delete_account", { p_user_id: userId });
   ok("G1 second call is a no-op success", !againErr && again?.already_deleted === true);
@@ -265,6 +288,8 @@ async function cleanup() {
   console.log("\n  cleanup…");
   try {
     // Deleting the tombstone cascades away the retained rows we created.
+    if (deletionRequestId)
+      await admin.from("account_deletion_requests").delete().eq("id", deletionRequestId);
     if (userId) await admin.from("profiles").delete().eq("id", userId);
     if (convId) await admin.from("conversations").delete().eq("id", convId);
     if (userId) await admin.auth.admin.deleteUser(userId).catch(() => {});
