@@ -1113,14 +1113,15 @@
       "All of your listings are taken off the marketplace",
       "Your saved items, follows, and blocks",
       "Your notifications and push devices",
-      "Every photo you uploaded"
+      "Your profile photo and the photos on your listings"
     ],
-    "keptTitle": "Kept, but no longer linked to you",
+    "keptTitle": "Kept, with your name removed",
     "keptIntro": "These stay on JustSwap and appear as “Deleted user”:",
     "kept": [
       "Messages you already sent to other people",
       "Swap and exchange records",
       "Ratings exchanged between you and other members",
+      "Handover confirmation photos the other person relies on as proof",
       "Any safety reports involving your account"
     ],
     "keptWhy": "We keep these so the other person keeps their own history, and so we can still act on abuse reports.",
