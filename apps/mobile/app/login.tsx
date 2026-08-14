@@ -108,6 +108,30 @@ export default function Login() {
     }
   }
 
+  /**
+   * If a DIFFERENT account signs in on this device, drop the previous account's
+   * biometric enrolment.
+   *
+   * Device biometrics are device-level, not person-level: any enrolled fingerprint
+   * unlocks the keychain. So on a shared phone, whoever holds it could otherwise tap
+   * "Sign in as <previous user>" and get into an account that is not theirs. Handing
+   * the device to someone who then signs in with their own credentials is the clearest
+   * signal that the previous enrolment should not survive.
+   */
+  async function revokeOtherBiometricEnrolment() {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const current = data.session?.user.id;
+      const enrolled = await getBiometricSignInAccount();
+      if (!current || !enrolled || enrolled.uid === current) return;
+      await disableBiometricSignIn(enrolled.uid);
+      await clearBiometricSignInAccount();
+      setBioAccount(null);
+    } catch {
+      // Never block a successful sign-in on this cleanup.
+    }
+  }
+
   /** Where to land after a successful sign-in. */
   function goNext() {
     if (typeof next === "string" && next.startsWith("/")) return router.replace(next as never);
@@ -149,6 +173,7 @@ export default function Login() {
       // Honour the Remember me choice now that we know the credentials were good.
       if (remember) await setRememberedIdentifier(identifier.trim());
       else await clearRememberedIdentifier();
+      await revokeOtherBiometricEnrolment();
       goNext(); // session set → onAuthStateChange updates the app
     } catch {
       setError(t("auth.errorGeneric"));
