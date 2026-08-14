@@ -85,8 +85,11 @@ export function ProposalContextCard({
   const otherName = (isProposer ? proposal.recipient : proposal.proposer)?.full_name ?? "";
 
   // Give/get flips by role; the recipient's target listing is proposal.listing.
-  const give: Item[] = (isProposer ? proposal.offered_items : [proposal.listing]).filter(Boolean);
-  const get: Item[] = (isProposer ? [proposal.listing] : proposal.offered_items).filter(Boolean);
+  // `listing` is null when a moderator took it down, so drop nulls with a real type
+  // guard — `.filter(Boolean)` does not narrow the union, it only looks like it does.
+  const present = (item: Item | null | undefined): item is Item => Boolean(item);
+  const give: Item[] = (isProposer ? proposal.offered_items : [proposal.listing]).filter(present);
+  const get: Item[] = (isProposer ? [proposal.listing] : proposal.offered_items).filter(present);
   const showWithdraw = (isOpen && !isMyTurn) || (!isOpen && CANCELLABLE.includes(proposal.status));
 
   const openItem = (id: string) => router.push({ pathname: "/listings/[id]", params: { id } });

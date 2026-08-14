@@ -387,8 +387,15 @@ export type ConversationPreview = Conversation & {
 };
 
 export type SwapProposalWithRelations = SwapProposal & {
-  /** The target listing (the recipient's item being requested). */
-  listing: ListingWithRelations;
+  /**
+   * The target listing (the recipient's item being requested).
+   *
+   * NULL when a moderator has hidden or removed it: the API strips moderated embeds so
+   * the counterparty stops seeing a taken-down listing's title and photos on the
+   * proposal card. Both cards already drop it via `.filter(Boolean)` — the type says so
+   * explicitly rather than leaving a runtime null behind a non-nullable annotation.
+   */
+  listing: ListingWithRelations | null;
   /** The proposer's offered listings (1..n — bundle support). */
   offered_items: ListingWithImages[];
   proposer: PublicProfile;
