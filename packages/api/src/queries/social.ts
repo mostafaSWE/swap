@@ -197,7 +197,13 @@ export async function getSavedListings(
   if (error) throw error;
   return (data ?? [])
     .map((row) => (row as unknown as { listing: ListingWithRelations | null }).listing)
-    .filter((l): l is ListingWithRelations => Boolean(l));
+    .filter((l): l is ListingWithRelations => Boolean(l))
+    // Drop anything no longer on the marketplace. The embedded join is not status
+    // filtered, and RLS lets the owner and admins read non-active rows, so a listing
+    // that was paused, completed or taken down by a moderator would otherwise sit in
+    // Saved forever — and open, since it is a real row. Saving is a bookmark of a
+    // LIVE listing; the row stays in saved_listings so it reappears if re-activated.
+    .filter((l) => l.status === "active");
 }
 
 /* ── Reports ── */

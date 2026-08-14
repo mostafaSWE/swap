@@ -29,20 +29,56 @@ export async function isAppLockEnabled(): Promise<boolean> {
   return (await SecureStore.getItemAsync(LOCK_KEY).catch(() => null)) === "1";
 }
 
-/** Enable requires a successful auth; disable clears the flag. Returns the new state. */
-export async function setAppLockEnabled(enable: boolean): Promise<boolean> {
-  if (!enable) {
-    await SecureStore.deleteItemAsync(LOCK_KEY).catch(() => undefined);
-    return false;
+/**
+ * Clear the opt-in. Called on sign-out: the flag lives in the device keychain under a
+ * single app-wide key, so without this the NEXT person to sign in on the same device
+ * inherits the previous user's lock — and is prompted for a biometric that protects an
+ * account that is no longer signed in.
+ */
+export async function clearAppLock(): Promise<void> {
+  await SecureStore.deleteItemAsync(LOCK_KEY).catch(() => undefined);
+}
+
+/**
+ * Why enabling failed — so Settings can say something useful instead of silently
+ * snapping the switch back.
+ *   unavailable = no hardware, or nothing enrolled
+ *   cancelled   = the user dismissed the prompt
+ *   failed      = biometry rejected / lockout / unexpected error
+ */
+export type AppLockEnableResult = "enabled" | "unavailable" | "cancelled" | "failed";
+
+/** Turn the lock OFF. Always succeeds — never trap a user behind a lock they want gone. */
+export async function disableAppLock(): Promise<void> {
+  await clearAppLock();
+}
+
+/**
+ * Turn the lock ON. Requires one successful biometric / device-credential check so the
+ * user proves the device secret works BEFORE we start gating the app with it.
+ * Returns why it failed so Settings can explain.
+ */
+export async function enableAppLock(): Promise<AppLockEnableResult> {
+  if (!(await isBiometricAvailable())) return "unavailable";
+  try {
+    const res = await LocalAuthentication.authenticateAsync({
+      promptMessage: t("biometric.enablePrompt"),
+      // Device credential (PIN/pattern/passcode) stays available: biometry can be
+      // temporarily locked out after failed attempts, and we must never make the app
+      // unopenable because of that.
+      disableDeviceFallback: false,
+    });
+    if (!res.success) {
+      const err = (res as { error?: string }).error;
+      return err === "user_cancel" || err === "system_cancel" || err === "app_cancel"
+        ? "cancelled"
+        : "failed";
+    }
+    await SecureStore.setItemAsync(LOCK_KEY, "1").catch(() => undefined);
+    return "enabled";
+  } catch {
+    return "failed";
   }
-  if (!(await isBiometricAvailable())) return false;
-  const res = await LocalAuthentication.authenticateAsync({
-    promptMessage: t("biometric.enablePrompt"),
-    disableDeviceFallback: false,
-  });
-  if (!res.success) return false;
-  await SecureStore.setItemAsync(LOCK_KEY, "1").catch(() => undefined);
-  return true;
 }
 
 /** Prompt to unlock. Device-credential fallback is allowed (avoids lockouts). */

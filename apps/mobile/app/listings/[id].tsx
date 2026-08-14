@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Bookmark, PackageX, Repeat2, Search, Share2, Star } from "lucide-react-native";
 import { localizedName } from "@swap/ui";
@@ -18,7 +18,7 @@ import {
 } from "@swap/api";
 import { supabase } from "../../src/lib/supabase";
 import { locale, t } from "../../src/i18n";
-import { monthYear } from "../../src/lib/format";
+import { fullDate, monthYear } from "../../src/lib/format";
 import { colors, radii, spacing } from "../../src/theme";
 import { Badge, Button, Divider, Icon } from "../../src/components/ui";
 import { WantedCard } from "../../src/components/WantedCard";
@@ -47,19 +47,40 @@ export default function ListingDetail() {
   useEffect(() => {
     if (!id) return;
     let active = true;
-    getListingById(supabase, id)
-      .then((l) => active && setListing(l))
-      .catch(() => active && setListing(null));
-    // Best-effort view tracking + saved-state, once we know who's signed in.
+    // Resolve the viewer FIRST: getListingById gates non-active listings on ownership,
+    // so it needs to know who is asking. Without the id, an owner opening their own
+    // paused listing would get the not-found state.
     supabase.auth.getUser().then(({ data }) => {
-      if (active) setMyId(data.user?.id ?? null);
-      incrementListingView(supabase, id, data.user?.id ?? null).catch(() => undefined);
-      if (data.user) isListingSaved(supabase, data.user.id, id).then((s) => active && setSaved(s)).catch(() => undefined);
+      const uid = data.user?.id ?? null;
+      if (active) setMyId(uid);
+      getListingById(supabase, id, uid)
+        .then((l) => active && setListing(l))
+        .catch(() => active && setListing(null));
+      incrementListingView(supabase, id, uid).catch(() => undefined);
+      if (uid) isListingSaved(supabase, uid, id).then((s) => active && setSaved(s)).catch(() => undefined);
     });
     return () => {
       active = false;
     };
   }, [id]);
+
+  // Re-check on focus so a listing taken down while the screen sat in the back stack
+  // resolves to not-found instead of rendering stale content indefinitely.
+  useFocusEffect(
+    useCallback(() => {
+      if (!id) return;
+      let active = true;
+      supabase.auth
+        .getUser()
+        .then(({ data }) =>
+          getListingById(supabase, id, data.user?.id ?? null).then((l) => active && setListing(l)),
+        )
+        .catch(() => undefined);
+      return () => {
+        active = false;
+      };
+    }, [id]),
+  );
 
   useEffect(() => {
     const ownerId = listing?.owner?.id;
@@ -203,7 +224,16 @@ export default function ListingDetail() {
             {listing.condition ? <Badge label={t(`mobile.detail.conditions.${listing.condition}`)} tone="neutral" /> : null}
             <Text style={styles.city} numberOfLines={1}>{localizedName(listing.city, locale)}</Text>
           </View>
-          <Text style={styles.views}>{t("mobile.detail.views", { count: listing.view_count ?? 0 })}</Text>
+          {/* Views + posted date, mirroring the web header meta row (which shows
+              category · condition · city · views · "Posted {date}"). */}
+          <View style={styles.subMetaRow}>
+            <Text style={styles.views}>{t("mobile.detail.views", { count: listing.view_count ?? 0 })}</Text>
+            {listing.created_at ? (
+              <Text style={styles.views}>
+                {t("listing.postedOn", { date: fullDate(listing.created_at, locale) })}
+              </Text>
+            ) : null}
+          </View>
 
           <WantedCard wanted={listing.wanted_exchange ?? ""} categoryIcon={listing.category?.icon ?? "other"} />
 
@@ -332,6 +362,7 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: spacing.sm },
   city: { color: colors.textMuted, fontSize: 13, flex: 1 },
   views: { color: colors.textFaint, fontSize: 12 },
+  subMetaRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: spacing.md },
   descBlock: { gap: spacing.xs },
   descHeading: { color: colors.text, fontSize: 16, fontWeight: "800" },
   desc: { color: colors.text, fontSize: 15, lineHeight: 22 },

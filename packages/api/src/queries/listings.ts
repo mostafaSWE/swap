@@ -129,9 +129,29 @@ export async function getFeaturedListings(
   return (data ?? []).map(withSortedImages);
 }
 
+/**
+ * Fetch one listing for a CONSUMER surface (detail page).
+ *
+ * Status gating lives here, not only in RLS. The read policy is
+ *   (status = 'active' AND NOT blocked) OR owner_id = auth.uid() OR is_admin(auth.uid())
+ * so an ADMIN — and the owner — can read rows an admin has hidden or removed. Without
+ * this check, a moderator browsing the app as a normal user still opened listings they
+ * had just taken down (reported from a device: two admin-hidden listings were gone from
+ * every feed but still reachable on the detail screen, via a deep link, a saved item,
+ * or a conversation).
+ *
+ * `viewerId` is the signed-in user, or null/undefined for anonymous. Only the OWNER
+ * keeps access to their own non-active listing — that is what makes "Paused" listings
+ * openable from their own profile. Everyone else, admins included, gets null and the
+ * caller's not-found state.
+ *
+ * Admin moderation tooling must NOT use this function — it goes through the
+ * service-role admin API, which intentionally bypasses this.
+ */
 export async function getListingById(
   supabase: SwapClient,
   id: string,
+  viewerId?: string | null,
 ): Promise<ListingWithRelations | null> {
   const { data, error } = await supabase
     .from("listings")
@@ -139,7 +159,9 @@ export async function getListingById(
     .eq("id", id)
     .maybeSingle<ListingWithRelations>();
   if (error) throw error;
-  return data ? withSortedImages(data) : null;
+  if (!data) return null;
+  if (data.status !== "active" && data.owner_id !== viewerId) return null;
+  return withSortedImages(data);
 }
 
 /** Best-effort view counter. Errors are swallowed — a view is not critical. */

@@ -1098,7 +1098,8 @@
     "unlock": "Unlock",
     "on": "On",
     "off": "Off",
-    "unavailable": "Biometric lock isn't available on this device."
+    "unavailable": "Biometric lock isn't available on this device.",
+    "enableFailed": "We couldn't turn on the app lock. Try again, or check your device biometric settings."
   },
   "deleteAccount": {
     "title": "Delete account",

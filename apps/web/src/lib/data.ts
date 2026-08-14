@@ -82,7 +82,15 @@ export async function fetchListing(id: string): Promise<ListingWithRelations | n
   if (isDemoMode()) return DEMO_LISTINGS.find((l) => l.id === id) ?? null;
   if (!isUuid(id)) return null;
   try {
-    return await getListingById(createClient(), id);
+    const supabase = createClient();
+    // Pass the viewer so getListingById can gate non-active listings on ownership:
+    // RLS lets the owner AND admins read hidden/removed rows, so without this an
+    // admin (or anyone with the link, once RLS allows it) could still open a
+    // listing that had been taken down.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return await getListingById(supabase, id, user?.id ?? null);
   } catch (e) {
     console.error("[data] fetchListing failed:", e);
     return null;

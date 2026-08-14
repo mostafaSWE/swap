@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { Ban, ChevronRight, FileText, Fingerprint, Globe, LifeBuoy, Lock, ShieldAlert, Trash2 } from "lucide-react-native";
-import { isAppLockEnabled, isBiometricAvailable, setAppLockEnabled } from "../src/lib/biometrics";
+import { disableAppLock, enableAppLock, isAppLockEnabled, isBiometricAvailable } from "../src/lib/biometrics";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
 import { ListRow } from "../src/components/ui/ListRow";
@@ -28,7 +28,19 @@ export default function SettingsScreen() {
     if (lockBusy) return;
     setLockBusy(true);
     try {
-      setAppLockOn(await setAppLockEnabled(next)); // enabling requires a successful biometric auth
+      if (!next) {
+        await disableAppLock(); // turning it OFF must always succeed
+        setAppLockOn(false);
+        return;
+      }
+      // Turning it ON requires one successful biometric / device-credential check.
+      const result = await enableAppLock();
+      setAppLockOn(result === "enabled");
+      // Silence here was the old behaviour: the switch just snapped back with no
+      // explanation. Cancelling is a deliberate user action, so stay quiet for that
+      // one; anything else gets a reason.
+      if (result === "unavailable") Alert.alert(t("biometric.settingLabel"), t("biometric.unavailable"));
+      else if (result === "failed") Alert.alert(t("biometric.settingLabel"), t("biometric.enableFailed"));
     } finally {
       setLockBusy(false);
     }

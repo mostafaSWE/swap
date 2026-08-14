@@ -14,6 +14,27 @@ export function monthYear(iso: string | null | undefined, locale: Locale): strin
   return `${MONTHS[locale][d.getMonth()]} ${d.getFullYear()}`;
 }
 
+/**
+ * Day-precision date — the mobile counterpart of web's `formatDate` (@swap/ui),
+ * which is `Intl.DateTimeFormat(locale, {year:"numeric",month:"short",day:"numeric"})`.
+ *
+ * Reimplemented Intl-free for the same reason as `monthYear` above: Hermes'
+ * `Intl.DateTimeFormat` is unreliable on-device. Digits stay Latin in both locales,
+ * matching `monthYear` (and therefore "member since" on profiles) rather than web's
+ * Arabic-Indic output — an intentional, consistent deviation inside the app.
+ *
+ *   en → "Jan 5, 2026"      ar → "5 يناير 2026"
+ */
+export function fullDate(iso: string | null | undefined, locale: Locale): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const month = MONTHS[locale][d.getMonth()];
+  return locale === "ar"
+    ? `${d.getDate()} ${month} ${d.getFullYear()}`
+    : `${month} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
 /** Compact relative time for chat/lists ("now", "5m", "2h", "3d", else the month).
  *  Intl-free. */
 export function timeAgo(iso: string | null | undefined, locale: Locale): string {

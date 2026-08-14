@@ -40,7 +40,10 @@ export default function EditListing() {
     let active = true;
     async function load() {
       try {
-        const [loaded, { data }] = await Promise.all([getListingById(supabase, id), supabase.auth.getUser()]);
+        // Owner surface: resolve the user first so getListingById's ownership gate
+        // lets a paused listing through (the check below re-asserts ownership anyway).
+        const { data } = await supabase.auth.getUser();
+        const loaded = await getListingById(supabase, id, data.user?.id ?? null);
         if (!active) return;
         // Owner-only, and only active/paused listings are editable — never let a
         // completed (swapped)/deleted listing be re-activated via Save.
