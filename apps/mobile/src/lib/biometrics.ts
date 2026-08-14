@@ -25,8 +25,24 @@ export async function isBiometricAvailable(): Promise<boolean> {
   }
 }
 
+/**
+ * Last known value of the opt-in, kept in module scope so the lock overlay can decide
+ * to cover the app SYNCHRONOUSLY the moment it is backgrounded — SecureStore is async,
+ * and awaiting it there would leave a window in which the OS snapshots real content
+ * into the app switcher. Every read/write below keeps this in step, so it cannot go
+ * stale when the user flips the toggle in Settings.
+ */
+let cachedEnabled = false;
+
+/** Synchronous view of the opt-in. Only meaningful after one async read has happened. */
+export function isAppLockEnabledSync(): boolean {
+  return cachedEnabled;
+}
+
 export async function isAppLockEnabled(): Promise<boolean> {
-  return (await SecureStore.getItemAsync(LOCK_KEY).catch(() => null)) === "1";
+  const enabled = (await SecureStore.getItemAsync(LOCK_KEY).catch(() => null)) === "1";
+  cachedEnabled = enabled;
+  return enabled;
 }
 
 /**
@@ -36,6 +52,7 @@ export async function isAppLockEnabled(): Promise<boolean> {
  * account that is no longer signed in.
  */
 export async function clearAppLock(): Promise<void> {
+  cachedEnabled = false; // synchronously, before the await
   await SecureStore.deleteItemAsync(LOCK_KEY).catch(() => undefined);
 }
 
@@ -75,6 +92,7 @@ export async function enableAppLock(): Promise<AppLockEnableResult> {
         : "failed";
     }
     await SecureStore.setItemAsync(LOCK_KEY, "1").catch(() => undefined);
+    cachedEnabled = true;
     return "enabled";
   } catch {
     return "failed";

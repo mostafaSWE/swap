@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { AppState, StyleSheet, Text, View, type AppStateStatus } from "react-native";
 import { Lock } from "lucide-react-native";
 import { supabase } from "../lib/supabase";
-import { authenticate, clearAppLock, isAppLockEnabled } from "../lib/biometrics";
+import { authenticate, clearAppLock, isAppLockEnabled, isAppLockEnabledSync } from "../lib/biometrics";
 import { t } from "../i18n";
 import { colors, spacing } from "../theme";
 import { Button } from "./ui/Button";
@@ -40,8 +40,16 @@ import { Icon } from "./ui/Icon";
 export function BiometricLock({ children }: { children: ReactNode }) {
   const [locked, setLocked] = useState(false);
 
-  /** Cached "a session exists AND the lock is on" — read synchronously when backgrounding. */
-  const armed = useRef(false);
+  /**
+   * Whether a session exists. Combined with the module-level opt-in cache in
+   * `biometrics.ts` this gives a SYNCHRONOUS "should we lock" answer at background
+   * time. Deriving the opt-in from that shared cache (rather than a local copy) is
+   * what makes enabling the lock in Settings take effect immediately: a local ref
+   * would still say "off" until the next foreground, leaving the first background
+   * after enabling unprotected.
+   */
+  const hasSession = useRef(false);
+  const armed = useCallback(() => hasSession.current && isAppLockEnabledSync(), []);
   /** True from the moment we ask for biometrics until shortly after the prompt closes. */
   const authing = useRef(false);
   const lastAuthAt = useRef(0);
@@ -50,9 +58,10 @@ export function BiometricLock({ children }: { children: ReactNode }) {
   const generation = useRef(0);
 
   const refreshArmed = useCallback(async (): Promise<boolean> => {
+    // isAppLockEnabled() also refreshes the module-level cache that `armed()` reads.
     const [{ data }, enabled] = await Promise.all([supabase.auth.getSession(), isAppLockEnabled()]);
-    armed.current = Boolean(data.session) && enabled;
-    return armed.current;
+    hasSession.current = Boolean(data.session);
+    return hasSession.current && enabled;
   }, []);
 
   const unlock = useCallback(async () => {
@@ -86,7 +95,7 @@ export function BiometricLock({ children }: { children: ReactNode }) {
 
       if (next === "background") {
         // Synchronous: no await between "user left" and the overlay going up.
-        if (armed.current) setLocked(true);
+        if (armed()) setLocked(true);
         return;
       }
 
@@ -104,10 +113,10 @@ export function BiometricLock({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
-        armed.current = false;
+        hasSession.current = false;
         generation.current += 1;
         setLocked(false);
-        void clearAppLock();
+        void clearAppLock(); // also clears the shared opt-in cache, synchronously
       } else if (event === "SIGNED_IN") {
         void refreshArmed();
       }
@@ -140,7 +149,7 @@ export function BiometricLock({ children }: { children: ReactNode }) {
               onPress={() => {
                 // Escape hatch: works even if biometry is broken or locked out.
                 generation.current += 1;
-                armed.current = false;
+                hasSession.current = false;
                 setLocked(false);
                 void supabase.auth.signOut();
               }}
