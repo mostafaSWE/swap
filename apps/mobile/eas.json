@@ -22,6 +22,9 @@
       "android": {
         "buildType": "app-bundle",
         "autoIncrement": "versionCode"
+      },
+      "ios": {
+        "autoIncrement": "buildNumber"
       }
     }
   },
