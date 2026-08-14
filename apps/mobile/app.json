@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "me.justswap.app",
-      "buildNumber": "1",
+      "buildNumber": "3",
       "icon": "./assets/icon-ios.png",
       "associatedDomains": [
         "applinks:justswap.me"
@@ -20,7 +20,8 @@
           "ar",
           "en"
         ],
-        "CFBundleDevelopmentRegion": "en"
+        "CFBundleDevelopmentRegion": "en",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
@@ -54,7 +55,7 @@
     },
     "android": {
       "package": "me.justswap.app",
-      "versionCode": 2,
+      "versionCode": 4,
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW"
       ],
