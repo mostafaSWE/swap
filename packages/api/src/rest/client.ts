@@ -26,11 +26,13 @@ import type {
   SwapProposalWithRelations,
 } from "@swap/types";
 import type {
+  AccountDeletionRequestInput,
   AdminMessageInput,
   AdminUpdateListingInput,
   AdminUpdateUserInput,
   AdminUserNoteInput,
   ConfirmSwapInput,
+  DeleteAccountInput,
   CounterProposalInput,
   CreateListingInput,
   CreateProposalInput,
@@ -149,6 +151,15 @@ export class SwapApiClient {
   updateMe = (input: UpdateProfileInput) => this.request<Profile>("PATCH", "/me", input);
   /** Record acceptance of the current Terms/EULA version (server-stamps the version). */
   acceptTerms = () => this.request<Profile>("POST", "/me/terms");
+  /**
+   * Permanently delete the signed-in account (Google Play User Data policy / Apple
+   * 5.1.1(v)). Irreversible: purges personal data, removes every listing from sale,
+   * and deletes the login. `confirm: true` is an explicit-intent guard.
+   */
+  deleteAccount = (input: DeleteAccountInput) => this.request<void>("DELETE", "/me", input);
+  /** Public deletion request for people who can no longer sign in (no auth needed). */
+  requestAccountDeletion = (input: AccountDeletionRequestInput) =>
+    this.request<{ received: true }>("POST", "/account/deletion-requests", input);
 
   /* ── Push devices (M5) ── */
   /** Register / rotate this installation's push token after login. */

@@ -155,6 +155,24 @@ export type CreateReportInput = z.infer<typeof createReportSchema>;
 export const updateReportSchema = z.object({ status: z.enum(REPORT_STATUSES) });
 export type UpdateReportInput = z.infer<typeof updateReportSchema>;
 
+/* ── Account deletion (Google Play User Data policy / Apple 5.1.1(v)) ── */
+/** Body for `DELETE /me`. `confirm: true` is a deliberate guard so a stray or
+ *  replayed DELETE can never erase an account without an explicit intent flag. */
+export const deleteAccountSchema = z.object({
+  confirm: z.literal(true),
+  reason: z.string().max(500).optional(),
+});
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
+
+/** Public web deletion request — for people who can no longer sign in. Play
+ *  requires a deletion path reachable WITHOUT installing the app. */
+export const accountDeletionRequestSchema = z.object({
+  email: z.string().email().max(255),
+  username: z.string().max(30).optional(),
+  reason: z.string().max(1000).optional(),
+});
+export type AccountDeletionRequestInput = z.infer<typeof accountDeletionRequestSchema>;
+
 /* ── Push notifications (M5) ── */
 export const registerDeviceSchema = z.object({
   installation_id: z.string().min(1).max(200),

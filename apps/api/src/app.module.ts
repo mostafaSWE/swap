@@ -6,6 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { SupabaseModule } from "./common/supabase/supabase.module";
 import { HealthModule } from "./health/health.module";
 import { ProfileModule } from "./modules/profile/profile.module";
+import { AccountModule } from "./modules/account/account.module";
 import { ListingsModule } from "./modules/listings/listings.module";
 import { CatalogModule } from "./modules/catalog/catalog.module";
 import { ConversationsModule } from "./modules/conversations/conversations.module";
@@ -29,6 +30,7 @@ import { PushModule } from "./modules/push/push.module";
     ModerationModule, // provider-agnostic content-moderation boundary (D-2 seam)
     HealthModule,
     ProfileModule,
+    AccountModule, // self-service account deletion (Play User Data policy / Apple 5.1.1(v))
     ListingsModule,
     CatalogModule,
     ConversationsModule,

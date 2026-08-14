@@ -40,6 +40,13 @@ export class AuthGuard implements CanActivate {
 
     if (!profile) throw new UnauthorizedException("Profile not found");
     const p = profile as Profile;
+    // A deleted account leaves an anonymised tombstone row behind (migration 0022).
+    // Deleting the auth user invalidates new token lookups, but an already-issued
+    // access token stays cryptographically valid until it expires — reject it here
+    // so a just-deleted session cannot keep writing.
+    if (p.deleted_at) {
+      throw new UnauthorizedException("Account deleted");
+    }
     if (p.is_banned) {
       throw new ForbiddenException("Account banned");
     }

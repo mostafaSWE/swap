@@ -86,6 +86,13 @@ export type Profile = {
   terms_accepted_version: number | null;
   /** When the user accepted the current Terms version (0018). NULL = never. */
   terms_accepted_at: string | null;
+  /**
+   * Set when the user deleted their account (0022). The row is then an anonymised
+   * tombstone retained ONLY so the counterparty's messages/ratings/proposals and our
+   * moderation reports keep a valid FK target. NULL for every live account. Tombstones
+   * are rejected by the AuthGuard and excluded from public profile/social-graph reads.
+   */
+  deleted_at: string | null;
   followers_count: number;
   following_count: number;
   listings_count: number;

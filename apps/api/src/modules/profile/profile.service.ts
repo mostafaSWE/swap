@@ -88,6 +88,9 @@ export class ProfileService {
       .eq("username", username)
       // Admins are back-office only — never surfaced as a public marketplace user.
       .eq("is_admin", false)
+      // Deleted accounts leave an anonymised tombstone (0022) that must never be
+      // reachable as a public profile.
+      .is("deleted_at", null)
       .maybeSingle<PublicProfile>();
     if (error) throw error;
     if (!data) throw new NotFoundException("User not found");
