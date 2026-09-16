@@ -40,6 +40,8 @@ export default function Browse() {
   const [end, setEnd] = useState(false);
   const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  /** A query is in flight over results that are already on screen. */
+  const [updating, setUpdating] = useState(false);
 
   // Apply a category passed from Home's category tiles (only when present, so
   // switching to the Browse tab directly never clears an in-place filter).
@@ -73,18 +75,24 @@ export default function Browse() {
   const advancedCount = [countryId, cityId, condition].filter(Boolean).length + (featuredOnly ? 1 : 0);
   const filtersActive = filtersOpen || advancedCount > 0;
 
+  // Note this deliberately does NOT clear `items` first. Blanking the list to
+  // skeletons on every debounced keystroke / chip tap made the screen flash and
+  // jump; the previous results stay put while the new query runs, with `updating`
+  // driving a small inline spinner so the load is still visible. Skeletons are
+  // now only what a genuinely empty screen shows.
   const loadFirst = useCallback(() => {
     let cancelled = false;
-    setItems(null);
     setEnd(false);
     setError(false);
+    setUpdating(true);
     getListings(supabase, { ...query, limit: PAGE, offset: 0 })
       .then((rows) => {
         if (cancelled) return;
         setItems(rows);
         setEnd(rows.length < PAGE);
       })
-      .catch(() => !cancelled && setError(true));
+      .catch(() => !cancelled && setError(true))
+      .finally(() => !cancelled && setUpdating(false));
     return () => {
       cancelled = true;
     };
@@ -139,7 +147,14 @@ export default function Browse() {
   return (
     <View style={styles.root}>
       <View style={styles.controls}>
-        <Input placeholder={t("mobile.browse.search")} value={search} onChangeText={setSearch} returnKeyType="search" />
+        <Input
+          placeholder={t("mobile.browse.search")}
+          value={search}
+          onChangeText={setSearch}
+          returnKeyType="search"
+          onClear={() => setSearch("")}
+          clearAccessibilityLabel={t("mobile.browse.clearSearch")}
+        />
 
         {/* Category chips — the website's top scroller. */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} keyboardShouldPersistTaps="handled">
@@ -250,7 +265,17 @@ export default function Browse() {
           renderItem={({ item }) => (
             <ListingCard listing={item} onPress={() => router.push({ pathname: "/listings/[id]", params: { id: item.id } })} />
           )}
-          ListHeaderComponent={<Text style={styles.count}>{t("listings.resultsCount", { count: items.length })}</Text>}
+          ListHeaderComponent={
+            <View style={styles.countRow}>
+              <Text style={styles.count}>{t("listings.resultsCount", { count: items.length })}</Text>
+              {updating ? (
+                <>
+                  <ActivityIndicator color={colors.textMuted} size="small" />
+                  <Text style={styles.updating}>{t("mobile.browse.updating")}</Text>
+                </>
+              ) : null}
+            </View>
+          }
           contentContainerStyle={styles.list}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
@@ -302,6 +327,8 @@ const styles = StyleSheet.create({
   },
   filterFooter: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", flexWrap: "wrap", gap: spacing.sm },
   list: { padding: spacing.lg, gap: spacing.lg },
-  count: { color: colors.textMuted, fontSize: 13, fontWeight: "600", marginBottom: spacing.xs },
+  countRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.xs },
+  count: { color: colors.textMuted, fontSize: 13, fontWeight: "600" },
+  updating: { color: colors.textFaint, fontSize: 12 },
   endText: { color: colors.textFaint, fontSize: 13, textAlign: "center", marginVertical: spacing.lg },
 });
