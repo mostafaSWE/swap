@@ -44,3 +44,4 @@ supabase/.temp/
 
 # Local scratch / throwaway scripts — never commit (may hold keys/credentials)
 scratch/
+docs/app-store/screenshots/
