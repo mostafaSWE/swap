@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
+import { ActivityIndicator, FlatList, I18nManager, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Bookmark, PackageX, Repeat2, Search, Share2, Star } from "lucide-react-native";
@@ -135,9 +135,19 @@ export default function ListingDetail() {
     }
   }
 
+  /**
+   * Which gallery page is showing, for the "n/N" pill and the dots.
+   *
+   * A horizontal FlatList is mirrored under RTL, so `contentOffset.x === 0` is the
+   * **last** page, not the first. Measured on Android with a 2-image gallery:
+   * image 1 reports `offsetX == width`, image 2 reports `offsetX == 0`. Without the
+   * flip the counter stayed pinned to "1/2" in Arabic however far you swiped.
+   */
   function onGalleryScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
-    const page = Math.round(e.nativeEvent.contentOffset.x / width);
-    setActiveImg(Math.max(0, Math.min(page, (listing?.images?.length ?? 1) - 1)));
+    const count = listing?.images?.length ?? 1;
+    const offsetPage = Math.round(e.nativeEvent.contentOffset.x / width);
+    const page = I18nManager.isRTL ? count - 1 - offsetPage : offsetPage;
+    setActiveImg(Math.max(0, Math.min(page, count - 1)));
   }
 
   if (listing === undefined) {
@@ -192,7 +202,16 @@ export default function ListingDetail() {
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               onMomentumScrollEnd={onGalleryScroll}
-              renderItem={({ item }) => <Image source={{ uri: item.image_url }} style={{ width, height: mediaH }} resizeMode="cover" />}
+              // ItemArtwork (not a bare Image) so a broken or expired photo URL
+              // falls back to the branded category tile instead of a blank page.
+              renderItem={({ item }) => (
+                <ItemArtwork
+                  imageUrl={item.image_url}
+                  title={listing.title}
+                  categoryIcon={listing.category?.icon}
+                  style={{ width, height: mediaH }}
+                />
+              )}
             />
             {images.length > 1 ? (
               <>

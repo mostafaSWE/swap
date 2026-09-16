@@ -119,7 +119,9 @@ const styles = StyleSheet.create({
   check: {
     position: "absolute",
     top: spacing.xs,
-    right: spacing.xs,
+    // Logical `end`, like every other artwork overlay here — a physical `right`
+    // left the selected-tick on the same corner under RTL instead of mirroring.
+    end: spacing.xs,
     width: 22,
     height: 22,
     borderRadius: 11,
