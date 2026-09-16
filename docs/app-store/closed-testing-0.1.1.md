@@ -1,7 +1,7 @@
 # JustSwap closed-testing quality update — 0.1.1
 
-Prepared 2026-09-16. Nothing has been built, uploaded or submitted; this documents the
-change set that is ready to build.
+Prepared 2026-09-16. The Android production AAB **has been built and verified**. **Nothing has
+been uploaded or submitted to Google Play or App Store Connect.**
 
 ---
 
@@ -139,15 +139,30 @@ demo account. Screenshots were taken for each step.
 | Android versionCode | 7 (build `ef3a0cfd`, commit `a9cc61f`) | **8** |
 | iOS buildNumber | 6 (build `46bb6559`) | **7** |
 
-`apps/mobile/app.json` still reads `versionCode: 7` / `buildNumber: "6"` by design:
-`eas.json` sets `production.android.autoIncrement = "versionCode"` and
-`production.ios.autoIncrement = "buildNumber"`, so EAS increments and writes the value back
-to `app.json` at build time — the repo convention recorded in the Session 39 notes. **Commit
-the rewritten `app.json` after the build.**
+### How the version number is resolved (verified, not assumed)
 
-> If the Android build is produced locally with Gradle instead of EAS, `autoIncrement` does
-> not run and the binary would carry versionCode 7, which Play rejects as a duplicate. Set
-> `android.versionCode` to 8 by hand in that case.
+`eas.json` has `cli.appVersionSource: "local"`, so EAS does **not** track versions on its
+servers — `eas build:version:get` refuses outright ("This project is not configured for using
+remote version source"). `app.json` is the sole source of truth.
+
+`autoIncrement` is set **per platform**, not on the profile: `production.android.autoIncrement
+= "versionCode"` and `production.ios.autoIncrement = "buildNumber"`. There is no
+`build.production.autoIncrement` key. `production.android.buildType` is `"app-bundle"`.
+
+Because `apps/mobile/android/` is gitignored, eas-cli's `resolveWorkflowAsync` classifies this
+as the **MANAGED** workflow, which takes the `bumpVersionInAppJsonAsync` branch: it rewrites
+`expo.android.versionCode` in `app.json` **on disk** and never touches the local `build.gradle`.
+Confirmed against eas-cli 24.6.0 source and then observed in the build output:
+
+```
+Bumping expo.android.versionCode from 7 to 8
+```
+
+`apps/mobile/app.json` on disk therefore now reads `versionCode: 8` and **must be committed**.
+`ios.buildNumber` was not touched, because this was an Android-only build.
+
+> If an Android build is ever produced locally with Gradle instead of EAS, `autoIncrement`
+> does not run at all and the binary would carry whatever `app.json` says. Check it by hand.
 
 Package/bundle identifier unchanged: `me.justswap.app` on both platforms.
 
@@ -177,6 +192,49 @@ apps/mobile/app/{onboarding,forgot-password,reset-password,delete-account,
 docs/app-store/play-store-icon-512.png               new — Play listing icon
 scripts/build-app-icons.py                           new — reproducible icon build
 ```
+
+## The Android build
+
+| | |
+|---|---|
+| EAS build id | `d9ecbc58-d97d-4751-a1f3-73b587f169ea` |
+| Status | **FINISHED** |
+| Profile / distribution | `production` / STORE |
+| versionName | **0.1.1** |
+| versionCode | **8** (previous highest build: 7) |
+| Package | `me.justswap.app` |
+| Git commit | `2a4f9d6a0e7ea759b9d9988b5530206dbb71c032` |
+| Artifact | https://expo.dev/artifacts/eas/I6-9JAADEiGsOt4m_tSe6vrkw8lqvQO9mh66uTxhpBg.aab |
+| Format | `.aab` (App Bundle), 78,492,408 bytes |
+| sha256 | `214fc3e8f45810c9384e4017ddc6b89ada5bfa2b22db8a1890db691b787acd7d` |
+| Built | 2026-09-16 12:29 → 13:00 UTC |
+
+EAS warnings: none beyond the informational `expo` patch-update notice.
+
+### Artifact verification (the AAB was inspected, not trusted)
+
+- Structure: `BundleConfig.pb`, `base/{manifest,resources.pb,dex,lib,res,root,assets}`, 1454 entries.
+- Manifest: `package="me.justswap.app"`, `versionCode="8"`, `versionName="0.1.1"`,
+  minSdk 24 / targetSdk 36 / compileSdk 36, `supportsRtl="true"`.
+- Permissions: INTERNET, ACCESS_NETWORK_STATE, CAMERA, POST_NOTIFICATIONS, READ_APP_BADGE,
+  READ/WRITE_EXTERNAL_STORAGE (`maxSdkVersion=32`), RECEIVE_BOOT_COMPLETED, USE_BIOMETRIC,
+  USE_FINGERPRINT, VIBRATE, WAKE_LOCK. **`SYSTEM_ALERT_WINDOW` absent** — `blockedPermissions`
+  still works. No new sensitive permissions versus versionCode 1.
+- Bundle config (the repo's standing recipe, probing ASCII *and* UTF-16 because the release
+  bundle is Hermes bytecode): `supabase true / api true / localhost false` → **PASS**. The
+  `10.0.2.2` emulator fallback is also absent.
+- Signing: `jar verified`, SHA256withRSA 2048-bit, valid to 2053-12-10, certificate SHA-256
+  `7A:F9:FC:29:95:FA:66:AB:66:FE:23:DE:B0:3B:0A:85:FA:75:15:71:76:D7:3D:7B:55:C5:DC:EA:3A:E8:39:E7`
+  — **identical to the key used for versionCode 1–7 and to the fingerprint in the live
+  `assetlinks.json`**, so App Links keep working and Play will accept the upload.
+- **Icons extracted from inside the AAB** and colour-analysed: adaptive foreground, legacy
+  `ic_launcher`, `ic_launcher_round` and `splashscreen_logo` all show green J + white S with
+  **0.0% navy/blue ink**. Shipped adaptive foreground ink radius 115px against a 132px 66dp
+  safe budget → nothing clipped.
+- **Installed on the emulator** (universal APK via bundletool, debug-signed for install only):
+  reports `versionCode=8 / versionName=0.1.1 / targetSdk=36`, the launcher shows the corrected
+  green-J/white-S icon under the Pixel circular mask, the branded splash renders, the app
+  boots without crashing and Browse loads 20 live listings from production.
 
 ## Remaining risks
 
