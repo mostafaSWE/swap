@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { ArrowLeftRight, Check, ChevronLeft, ChevronRight, ImagePlus, PackagePlus, Repeat2, X } from "lucide-react-native";
 import type { ListingCondition } from "@swap/types";
@@ -11,6 +11,7 @@ import { acquireImages, uploadListingImage, type PickedImage } from "../src/lib/
 import { useTerms } from "../src/lib/terms";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
+import { KeyboardAvoider } from "../src/components/KeyboardAvoider";
 import { Button, Checkbox, FormAlert, Icon, Input, SegmentedControl, Select, Textarea } from "../src/components/ui";
 import { ItemArtwork } from "../src/components/ItemArtwork";
 import { SafetyDisclaimer } from "../src/components/SafetyDisclaimer";
@@ -52,6 +53,11 @@ export default function NewListing() {
  * first) → route into the new listing. Images upload via the shared
  * sign→uploadToSignedUrl→addListingImage pipeline (see src/lib/upload).
  */
+/** Reorder arrows live in a 24pt strip at the foot of a 96pt thumbnail. This grows
+ *  the target upward into the tile (40×36 instead of 16×16) — it cannot reach a
+ *  full 44pt without the two arrows overlapping each other. */
+const MOVE_HIT_SLOP = { top: 20, bottom: 4, left: 10, right: 10 } as const;
+
 function NewListingForm() {
   const router = useRouter();
   const { ensureAccepted } = useTerms();
@@ -69,6 +75,15 @@ function NewListingForm() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [titleError, setTitleError] = useState<string | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+
+  // Each step is a different form, but they share one ScrollView — without this,
+  // stepping forward keeps the previous step's scroll offset (so step 2 opens
+  // half-way down), and a failed submit that jumps back to step 1 can leave the
+  // field error it is reporting off-screen.
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  }, [step]);
 
   const categoryOptions = useMemo(
     () => TOP_LEVEL_CATEGORIES.map((c) => ({ value: c.id, label: localizedName(c, locale) })),
@@ -152,13 +167,22 @@ function NewListingForm() {
         wanted_exchange: openToAny ? "__any__" : wanted.trim(),
       });
       // Best-effort per image, in array order (index → sort_order → cover first).
+      // A failed upload never blocks the listing, but it must not be silent either:
+      // publishing with photos missing and no explanation reads as a lost listing.
+      let failed = 0;
       for (let i = 0; i < images.length; i++) {
         setStatus(`${t("newListing.images")} ${i + 1}/${images.length}`);
         try {
           await uploadListingImage(listing.id, images[i]);
         } catch {
-          /* skip a failed image — the listing still exists */
+          failed += 1;
         }
+      }
+      if (failed > 0) {
+        Alert.alert(
+          t("mobile.newListing.publishedTitle"),
+          t("mobile.newListing.imagesFailed", { failed, total: images.length }),
+        );
       }
       router.replace({ pathname: "/listings/[id]", params: { id: listing.id } });
     } catch {
@@ -172,8 +196,8 @@ function NewListingForm() {
   return (
     <>
       <Stack.Screen options={{ title: t("newListing.title") }} />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAvoider style={styles.root}>
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.heading}>
             <Text style={styles.pageTitle}>{t("newListing.title")}</Text>
             <Text style={styles.hint}>{t("newListing.step", { current: step, total: 3 })}</Text>
@@ -192,15 +216,15 @@ function NewListingForm() {
                     <View key={img.uri} style={styles.thumbBox}>
                       <Image source={{ uri: img.uri }} style={styles.thumb} />
                       {i === 0 ? <View style={styles.coverTag}><Text style={styles.coverText}>{t("newListing.cover")}</Text></View> : null}
-                      <Pressable onPress={() => setImages((prev) => prev.filter((_, j) => j !== i))} style={styles.removeBtn} accessibilityRole="button" accessibilityLabel={t("newListing.removeImage")}>
-                        <Icon icon={X} size={14} color={colors.white} />
+                      <Pressable onPress={() => setImages((prev) => prev.filter((_, j) => j !== i))} hitSlop={8} style={styles.removeBtn} accessibilityRole="button" accessibilityLabel={t("newListing.removeImage")}>
+                        <Icon icon={X} size={16} color={colors.white} />
                       </Pressable>
                       {images.length > 1 ? (
                         <View style={styles.moveRow}>
-                          <Pressable onPress={() => movePhoto(i, -1)} disabled={i === 0} hitSlop={4} accessibilityRole="button" accessibilityLabel={t("newListing.moveBack")}>
+                          <Pressable onPress={() => movePhoto(i, -1)} disabled={i === 0} hitSlop={MOVE_HIT_SLOP} accessibilityRole="button" accessibilityLabel={t("newListing.moveBack")}>
                             <Icon icon={ChevronLeft} size={16} color={i === 0 ? colors.textFaint : colors.white} mirror />
                           </Pressable>
-                          <Pressable onPress={() => movePhoto(i, 1)} disabled={i === images.length - 1} hitSlop={4} accessibilityRole="button" accessibilityLabel={t("newListing.moveForward")}>
+                          <Pressable onPress={() => movePhoto(i, 1)} disabled={i === images.length - 1} hitSlop={MOVE_HIT_SLOP} accessibilityRole="button" accessibilityLabel={t("newListing.moveForward")}>
                             <Icon icon={ChevronRight} size={16} color={i === images.length - 1 ? colors.textFaint : colors.white} mirror />
                           </Pressable>
                         </View>
@@ -250,7 +274,7 @@ function NewListingForm() {
           </View>
           {busy && status ? <Text style={styles.status}>{status}</Text> : null}
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAvoider>
     </>
   );
 }
@@ -294,21 +318,25 @@ const styles = StyleSheet.create({
   thumb: { width: 96, height: 96, borderRadius: radii.md, backgroundColor: colors.elevated },
   coverTag: {
     position: "absolute",
-    top: spacing.xs,
-    start: spacing.xs,
+    top: spacing.sm,
+    start: spacing.sm,
     backgroundColor: colors.green,
     borderRadius: radii.sm,
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
   coverText: { color: colors.navy, fontSize: 10, fontWeight: "800" },
+  // Inside the tile, not hanging off its corner: a control that overhangs its
+  // parent is only partly tappable on Android (touches outside the parent's
+  // bounds are dropped) while it works fully on iOS. 28pt + 8pt hitSlop = 44pt,
+  // and the whole target stays within the 96pt thumbnail on both platforms.
   removeBtn: {
     position: "absolute",
-    top: -6,
-    end: -6,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    top: spacing.sm,
+    end: spacing.sm,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: "rgba(0,0,0,0.75)",
     alignItems: "center",
     justifyContent: "center",
