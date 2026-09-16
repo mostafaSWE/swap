@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import type { LucideIcon } from "lucide-react-native";
 import { Archive, Trash2, TriangleAlert } from "lucide-react-native";
@@ -8,6 +8,7 @@ import { supabase } from "../src/lib/supabase";
 import { useAuth } from "../src/lib/useAuth";
 import { t, tList } from "../src/i18n";
 import { colors, spacing } from "../src/theme";
+import { KeyboardAvoider } from "../src/components/KeyboardAvoider";
 import { Button, Card, Checkbox, FormAlert, Icon, Textarea } from "../src/components/ui";
 import { SignInGate } from "../src/components/SignInGate";
 
@@ -132,7 +133,7 @@ function DeleteAccountForm({ onDeleted }: { onDeleted: () => void }) {
   }
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}>
+    <KeyboardAvoider style={styles.root}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Card style={styles.card}>
           <SectionHead icon={TriangleAlert} tone={colors.danger} title={t("deleteAccount.heading")} />
@@ -176,7 +177,7 @@ function DeleteAccountForm({ onDeleted }: { onDeleted: () => void }) {
           fullWidth
         />
       </ScrollView>
-    </KeyboardAvoidingView>
+    </KeyboardAvoider>
   );
 }
 

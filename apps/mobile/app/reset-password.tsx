@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { CircleCheckBig } from "lucide-react-native";
 import { supabase } from "../src/lib/supabase";
 import { t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
+import { KeyboardAvoider } from "../src/components/KeyboardAvoider";
 import { AuthCard, Button, FormAlert, Icon, Logo, PasswordInput, PasswordRequirements, StrengthMeter } from "../src/components/ui";
 import { BrandBackground } from "../src/components/BrandBackground";
 import { Reveal } from "../src/components/motion";
@@ -62,7 +63,7 @@ export default function ResetPassword() {
     <>
       <Stack.Screen options={{ title: "" }} />
       <BrandBackground>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+        <KeyboardAvoider style={styles.flex}>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Reveal delay={0}>
               <Logo markSize={44} textSize={28} style={styles.wordmark} />
@@ -106,7 +107,7 @@ export default function ResetPassword() {
               </AuthCard>
             </Reveal>
           </ScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAvoider>
       </BrandBackground>
     </>
   );

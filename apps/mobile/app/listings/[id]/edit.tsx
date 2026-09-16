@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { COUNTRIES, TOP_LEVEL_CATEGORIES, citiesByCountry } from "@swap/config";
 import { localizedName } from "@swap/ui";
@@ -11,6 +11,7 @@ import { useTerms } from "../../../src/lib/terms";
 import { locale, t } from "../../../src/i18n";
 import { colors, spacing } from "../../../src/theme";
 import { Eye, EyeOff, Trash2 } from "lucide-react-native";
+import { KeyboardAvoider } from "../../../src/components/KeyboardAvoider";
 import { ListingImageManager } from "../../../src/components/ListingImageManager";
 import { Badge, Button, Checkbox, FormAlert, Icon, Input, SegmentedControl, Select, Textarea } from "../../../src/components/ui";
 
@@ -114,7 +115,7 @@ export default function EditListing() {
   return (
     <>
       <Stack.Screen options={{ title: t("editListing.title") }} />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.root}>
+      <KeyboardAvoider style={styles.root}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View><Text style={styles.label}>{t("newListing.images")}</Text><ListingImageManager listingId={listing.id} initialImages={listing.images} /></View>
           <Input label={t("newListing.fieldTitle")} value={title} error={titleError ?? undefined} onChangeText={(v) => { setTitle(v); if (titleError) setTitleError(null); }} />
@@ -144,7 +145,7 @@ export default function EditListing() {
             <View style={styles.deleteActions}><View style={styles.flex}><Button label={t("editListing.deleteYes")} variant="danger" onPress={remove} loading={deleting} fullWidth /></View><View style={styles.flex}><Button label={t("common.cancel")} variant="secondary" onPress={() => setConfirmDelete(false)} disabled={deleting} fullWidth /></View></View>
           </View> : <Button label={t("editListing.delete")} variant="ghost" onPress={() => setConfirmDelete(true)} disabled={busy || deleting} leftIcon={<Icon icon={Trash2} size={16} color={colors.danger} />} fullWidth />}
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAvoider>
     </>
   );
 }

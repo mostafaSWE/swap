@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { CircleCheck } from "lucide-react-native";
@@ -11,6 +11,7 @@ import { supabase } from "../src/lib/supabase";
 import { acquireImages, uploadAvatar } from "../src/lib/upload";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
+import { KeyboardAvoider } from "../src/components/KeyboardAvoider";
 import { AvatarUpload } from "../src/components/AvatarUpload";
 import { AuthCard, Button, FormSection, Icon, Input, Logo, Select } from "../src/components/ui";
 import { BrandBackground } from "../src/components/BrandBackground";
@@ -116,7 +117,7 @@ export default function Onboarding() {
     <>
       <Stack.Screen options={{ title: "" }} />
       <BrandBackground>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+        <KeyboardAvoider style={styles.flex}>
           <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Reveal delay={0}>
               <Logo markSize={42} textSize={26} style={styles.wordmark} />
@@ -157,7 +158,7 @@ export default function Onboarding() {
               </AuthCard>
             </Reveal>
           </ScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAvoider>
       </BrandBackground>
     </>
   );

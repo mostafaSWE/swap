@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { COUNTRIES, LIMITS, citiesByCountry } from "@swap/config";
 import { localizedName } from "@swap/ui";
@@ -11,6 +11,7 @@ import { useTerms } from "../../src/lib/terms";
 import { locale, t } from "../../src/i18n";
 import { colors, radii, spacing } from "../../src/theme";
 import { Check } from "lucide-react-native";
+import { KeyboardAvoider } from "../../src/components/KeyboardAvoider";
 import { AvatarUpload } from "../../src/components/AvatarUpload";
 import { AuthCard, Button, FormAlert, FormSection, Icon, Input, Select, Textarea } from "../../src/components/ui";
 import { BrandBackground } from "../../src/components/BrandBackground";
@@ -114,7 +115,7 @@ export default function EditProfile() {
     <>
       <Stack.Screen options={{ title: t("profile.edit") }} />
       <BrandBackground>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+        <KeyboardAvoider style={styles.flex}>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Reveal delay={0}>
               <AuthCard>
@@ -150,7 +151,7 @@ export default function EditProfile() {
               </AuthCard>
             </Reveal>
           </ScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAvoider>
       </BrandBackground>
     </>
   );
