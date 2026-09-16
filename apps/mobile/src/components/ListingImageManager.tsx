@@ -88,12 +88,12 @@ export function ListingImageManager({ listingId, initialImages }: { listingId: s
           <View key={image.id} style={styles.tile}>
             <Image source={{ uri: image.image_url }} style={styles.image} />
             {index === 0 ? <View style={styles.cover}><Text style={styles.coverText}>{t("newListing.cover")}</Text></View> : null}
-            <Pressable onPress={() => remove(image.id)} disabled={busy} style={styles.remove} accessibilityRole="button" accessibilityLabel={t("newListing.removeImage")}>
+            <Pressable onPress={() => remove(image.id)} disabled={busy} hitSlop={8} style={styles.remove} accessibilityRole="button" accessibilityLabel={t("newListing.removeImage")}>
               <Icon icon={X} size={14} color={colors.white} />
             </Pressable>
             {images.length > 1 ? <View style={styles.order}>
-              <Pressable onPress={() => move(index, -1)} disabled={busy || index === 0} accessibilityRole="button" accessibilityLabel={t("newListing.moveBack")}><Icon icon={ChevronLeft} size={16} color={colors.white} mirror /></Pressable>
-              <Pressable onPress={() => move(index, 1)} disabled={busy || index === images.length - 1} accessibilityRole="button" accessibilityLabel={t("newListing.moveForward")}><Icon icon={ChevronRight} size={16} color={colors.white} mirror /></Pressable>
+              <Pressable onPress={() => move(index, -1)} disabled={busy || index === 0} hitSlop={ORDER_HIT_SLOP} accessibilityRole="button" accessibilityLabel={t("newListing.moveBack")}><Icon icon={ChevronLeft} size={16} color={index === 0 ? colors.textFaint : colors.white} mirror /></Pressable>
+              <Pressable onPress={() => move(index, 1)} disabled={busy || index === images.length - 1} hitSlop={ORDER_HIT_SLOP} accessibilityRole="button" accessibilityLabel={t("newListing.moveForward")}><Icon icon={ChevronRight} size={16} color={index === images.length - 1 ? colors.textFaint : colors.white} mirror /></Pressable>
             </View> : null}
           </View>
         ))}
@@ -105,6 +105,11 @@ export function ListingImageManager({ listingId, initialImages }: { listingId: s
     </View>
   );
 }
+
+/** Grow the reorder arrows upward into the thumbnail. The tile clips its own
+ *  children, so the target can only expand inward — this takes the arrows from
+ *  16pt to ~32×35pt, which is as far as a quarter-width tile allows. */
+const ORDER_HIT_SLOP = { top: 16, bottom: 3, left: 8, right: 8 } as const;
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.sm },

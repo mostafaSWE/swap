@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../src/lib/supabase";
 import {
@@ -19,6 +19,7 @@ import {
 import { authCallbackUrl } from "../src/lib/auth-redirect";
 import { t } from "../src/i18n";
 import { colors, spacing } from "../src/theme";
+import { KeyboardAvoider } from "../src/components/KeyboardAvoider";
 import { AuthCard, Button, Checkbox, FormAlert, Icon, Input, Logo, PasswordInput } from "../src/components/ui";
 import { Fingerprint } from "lucide-react-native";
 import { BrandBackground } from "../src/components/BrandBackground";
@@ -196,7 +197,7 @@ export default function Login() {
     <>
       <Stack.Screen options={{ title: "" }} />
       <BrandBackground>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+        <KeyboardAvoider style={styles.flex}>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Reveal delay={0}>
               <Logo markSize={44} textSize={28} style={styles.wordmark} />
@@ -241,7 +242,7 @@ export default function Login() {
                     label={t("auth.rememberMe")}
                   />
 
-                  <Pressable onPress={() => router.push("/forgot-password")} hitSlop={8} style={styles.forgotWrap}>
+                  <Pressable onPress={() => router.push("/forgot-password")} hitSlop={12} style={styles.forgotWrap}>
                     <Text style={styles.forgot}>{t("auth.forgotTitle")}</Text>
                   </Pressable>
 
@@ -279,11 +280,15 @@ export default function Login() {
             <Reveal delay={180}>
               <View style={styles.footer}>
                 <Text style={styles.muted}>{t("auth.noAccount")} </Text>
-                <Text style={styles.link} onPress={() => router.push(registerHref as never)}>{t("auth.createOne")}</Text>
+                {/* A bare <Text onPress> is a ~18pt tap target; the Pressable wrapper
+                    gives the sign-up link a real 42pt one and announces it as a link. */}
+                <Pressable onPress={() => router.push(registerHref as never)} hitSlop={12} accessibilityRole="link">
+                  <Text style={styles.link}>{t("auth.createOne")}</Text>
+                </Pressable>
               </View>
             </Reveal>
           </ScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAvoider>
       </BrandBackground>
     </>
   );

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MailCheck } from "lucide-react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -11,6 +11,7 @@ import { buildPhone } from "../src/lib/phone";
 import { authCallbackUrl } from "../src/lib/auth-redirect";
 import { locale, t } from "../src/i18n";
 import { colors, radii, spacing } from "../src/theme";
+import { KeyboardAvoider } from "../src/components/KeyboardAvoider";
 import { AuthCard, Button, Checkbox, FormAlert, FormSection, Icon, Input, Logo, PasswordInput, PasswordRequirements, Select, StrengthMeter } from "../src/components/ui";
 import { BrandBackground } from "../src/components/BrandBackground";
 import { Reveal } from "../src/components/motion";
@@ -136,7 +137,7 @@ export default function Register() {
     <>
       <Stack.Screen options={{ title: "" }} />
       <BrandBackground>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+        <KeyboardAvoider style={styles.flex}>
           <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Reveal delay={0}>
               <Logo markSize={42} textSize={26} style={styles.wordmark} />
@@ -200,11 +201,14 @@ export default function Register() {
             <Reveal delay={180}>
               <View style={styles.footer}>
                 <Text style={styles.muted}>{t("auth.haveAccount")} </Text>
-                <Text style={styles.link} onPress={() => router.replace(loginHref as never)}>{t("auth.loginInstead")}</Text>
+                {/* Matches login: a real tap target + a link role, not a bare <Text onPress>. */}
+                <Pressable onPress={() => router.replace(loginHref as never)} hitSlop={12} accessibilityRole="link">
+                  <Text style={styles.link}>{t("auth.loginInstead")}</Text>
+                </Pressable>
               </View>
             </Reveal>
           </ScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAvoider>
       </BrandBackground>
     </>
   );

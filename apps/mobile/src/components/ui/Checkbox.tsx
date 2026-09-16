@@ -25,6 +25,9 @@ export function Checkbox({
         onPress={() => onChange(!checked)}
         accessibilityRole="checkbox"
         accessibilityState={{ checked }}
+        // A 22pt box with a single-line label is a ~22pt tap target; pad it out to
+        // 46pt so consent/"remember me" checkboxes are not a pixel hunt.
+        hitSlop={{ top: 12, bottom: 12, left: 4, right: 4 }}
         style={styles.row}
       >
         <View style={[styles.box, checked && styles.boxChecked]}>
